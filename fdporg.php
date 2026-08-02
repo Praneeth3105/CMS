@@ -36,5 +36,5 @@ if (isset($_POST['submit'])) {
         die("SQL ERROR: " . mysqli_error($conn));
     }
 
-    echo "<script>alert('Data Uploaded Successfully');window.location='add_record.php';</script>";
+    echo "<script>alert('Data Uploaded Successfully');window.location='facultyadd.php';</script>";
 }
