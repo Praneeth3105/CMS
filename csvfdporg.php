@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>FDP Organized CSV Upload | Certificate Management System</title>
+    <link rel="icon" type="image/x-icon" href="icon2.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap');
+
+        :root {
+            --dark: #1a120b;
+            --dark-2: #2b1d13;
+            --gold: #d4af37;
+            --gold-soft: #c9a227;
+            --gold-pale: #f0e2b8;
+            --cream: #f5efe6;
+            --cream-card: #fffdf8;
+            --rust: #b5502e;
+            --radius: 18px;
+            --radius-sm: 10px;
+            --shadow: 0 10px 30px rgba(26, 18, 11, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            width: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--cream);
+            color: var(--dark);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .n {
+            text-decoration: none;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 32px;
+            background: linear-gradient(120deg, var(--dark) 0%, var(--dark-2) 100%);
+        }
+
+        .brand {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--cream);
+            letter-spacing: 0.3px;
+            margin: 0;
+        }
+
+        .brand span {
+            color: var(--gold);
+        }
+
+        .btn,
+        #btn1 {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 26px;
+            background: var(--dark-2);
+            color: var(--gold-pale) !important;
+            border: 1px solid var(--gold-soft);
+            border-radius: 999px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 0.85rem;
+            letter-spacing: 0.4px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-transform: uppercase;
+            float: none !important;
+            width: auto !important;
+        }
+
+        .btn:hover,
+        #btn1:hover {
+            background: var(--gold);
+            color: var(--dark) !important;
+            border-color: var(--gold);
+            transform: translateY(-1px);
+        }
+
+        .page-hero {
+            text-align: center;
+            padding: 48px 24px 32px;
+        }
+
+        .page-hero .eyebrow {
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-size: 0.75rem;
+            color: var(--rust);
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .page-hero h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.1rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin: 0 0 8px;
+        }
+
+        .page-hero h2 .accent {
+            color: var(--gold-soft);
+        }
+
+        .page-hero p {
+            color: #6b6153;
+            max-width: 520px;
+            margin: 0 auto;
+            font-size: 0.95rem;
+        }
+
+        .upload-card {
+            max-width: 560px;
+            margin: 0 auto 48px;
+            background: var(--cream-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 40px 36px;
+            text-align: center;
+            border: 1px solid rgba(212, 175, 55, 0.25);
+        }
+
+        .upload-card label {
+            display: block;
+            font-weight: 600;
+            color: var(--dark-2);
+            margin-bottom: 14px;
+            font-size: 0.95rem;
+        }
+
+        .upload-card input[type="file"] {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            border: 2px dashed var(--gold-soft);
+            border-radius: var(--radius-sm);
+            background: #fbf7ee;
+            color: var(--dark-2);
+            font-family: 'Poppins', sans-serif;
+            margin-bottom: 22px;
+            cursor: pointer;
+        }
+
+        .upload-card input[type="submit"] {
+            padding: 13px 34px;
+            background: var(--dark);
+            color: var(--gold-pale);
+            border: 1px solid var(--gold-soft);
+            border-radius: 999px;
+            font-weight: 600;
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .upload-card input[type="submit"]:hover {
+            background: var(--gold);
+            color: var(--dark);
+        }
+
+        .preview-wrap {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto 40px;
+            padding: 0 32px;
+        }
+
+        .preview-wrap h3 {
+            font-family: 'Playfair Display', serif;
+            color: var(--dark-2);
+            font-size: 1.3rem;
+            margin-bottom: 14px;
+            text-align: center;
+        }
+
+        .table-scroll {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            width: 100%;
+            min-width: 900px;
+            border-collapse: collapse;
+            background: var(--cream-card);
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        th {
+            background: var(--dark);
+            color: var(--gold-pale);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+            padding: 14px 16px;
+            text-align: left;
+            border: none;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 13px 16px;
+            border-bottom: 1px solid #ece3d1;
+            font-size: 0.88rem;
+            color: #4a4030;
+            vertical-align: top;
+            word-break: break-word;
+            max-width: 260px;
+        }
+
+        tr:nth-child(even) td {
+            background: #faf6ec;
+        }
+
+        tr:hover td {
+            background: var(--gold-pale);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        td.bad-date {
+            background: #fbeae4 !important;
+            color: var(--rust);
+            font-weight: 600;
+        }
+
+        .status-success {
+            color: #2e7d32;
+            font-weight: 600;
+            background: #eaf6ea;
+            border: 1px solid #b7dfb9;
+            padding: 12px 20px;
+            border-radius: 10px;
+            width: fit-content;
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        .status-error {
+            color: var(--rust);
+            font-weight: 600;
+            background: #fbeae4;
+            border: 1px solid #eec4b4;
+            padding: 12px 20px;
+            border-radius: 10px;
+            width: fit-content;
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        .status-warning {
+            color: #8a5a00;
+            font-weight: 600;
+            background: #fff6e0;
+            border: 1px solid #f0d68a;
+            padding: 14px 18px;
+            border-radius: var(--radius-sm);
+            display: block;
+            margin-top: 14px;
+            text-align: left;
+        }
+
+        .status-warning ul {
+            margin: 8px 0 0;
+            padding-left: 20px;
+            font-weight: 500;
+        }
+
+        @media (max-width: 600px) {
+            .preview-wrap {
+                padding: 0 14px;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="topbar">
+        <a href="csvdataupload.php" class="n"><button type="button" class="btn" id="btn1">Back</button></a>
+        <a href="logout.php" class="n"><button type="button" class="btn">Logout</button></a>
+    </div>
+
+    <div class="page-hero">
+        <div class="eyebrow">Faculty Records</div>
+        <h2>FDP Organized <span class="accent">CSV</span></h2>
+        <p>Upload a CSV file to bulk-import FDP (Faculty Development Programme) records.</p>
+    </div>
+
+    <div class="upload-card">
+        <form action="" method="post" enctype="multipart/form-data">
+            <label for="csvFile"><i class="fa fa-file-csv"></i> Choose CSV File</label>
+            <input type="file" name="csvFile" id="csvFile" accept=".csv" required>
+            <input type="submit" value="Upload CSV">
+        </form>
+    </div>
+    <?php
+    include "db_conn.php";
+
+    /**
+     * Parse a single date string in many possible formats into 'Y-m-d'.
+     * Returns null if it cannot be understood.
+     * Assumes day-first (DD/MM/YYYY) for ambiguous numeric dates.
+     */
+    function parseFlexibleDate($dateStr)
+    {
+        $dateStr = trim((string) $dateStr);
+
+        if ($dateStr === '') {
+            return null;
+        }
+
+        // Remove ordinal suffixes: "10th" -> "10"
+        $dateStr = preg_replace('/(\d+)(st|nd|rd|th)\b/i', '$1', $dateStr);
+
+        // Normalize spaced-out dashes: "19 -Dec-23" -> "19-Dec-23"
+        $dateStr = preg_replace('/\s*-\s*/', '-', $dateStr);
+
+        // Trim stray leading/trailing dashes, spaces
+        $dateStr = trim($dateStr, "- \t\n\r\0\x0B");
+        $dateStr = preg_replace('/\s+/', ' ', $dateStr);
+
+        if ($dateStr === '') {
+            return null;
+        }
+
+        $formats = [
+            'Y-m-d',
+            'Y/m/d',
+            'd/m/Y',
+            'd-m-Y',
+            'd/m/y',
+            'd-m-y',
+            'd-M-y',
+            'd-M-Y',
+            'd M Y',
+            'd M y',
+            'M-d-Y',
+            'M d Y',
+            'M d, Y',
+            'j F Y',
+            'd F Y',
+        ];
+
+        foreach ($formats as $fmt) {
+            $d = DateTime::createFromFormat($fmt, $dateStr);
+            if ($d !== false) {
+                $errors = DateTime::getLastErrors();
+                if ($errors === false || ($errors['warning_count'] === 0 && $errors['error_count'] === 0)) {
+                    return $d->format('Y-m-d');
+                }
+            }
+        }
+
+        // "Month Year" only, e.g. "June 2025" -> 1st of that month
+        if (preg_match('/^[A-Za-z]+ \d{4}$/', $dateStr)) {
+            $d = DateTime::createFromFormat('F Y', $dateStr);
+            if ($d !== false) {
+                return $d->format('Y-m-01');
+            }
+        }
+
+        // Last resort: PHP's own guesser
+        $timestamp = strtotime($dateStr);
+        if ($timestamp !== false) {
+            return date('Y-m-d', $timestamp);
+        }
+
+        return null;
+    }
+
+    /**
+     * Parse a "Date(s)" field that might be:
+     *  - a single date:            "20/06/2025"
+     *  - a range with " to "/"–":  "20/06/2025 to 22/06/2025", "20 Jun 2025 – 22 Jun 2025"
+     *  - a compact day range:      "20-22 Jan 2026"
+     * Returns [start_date, end_date] each as 'Y-m-d' or null.
+     */
+    function parseDateOrRange($raw)
+    {
+        $raw = trim((string) $raw);
+        if ($raw === '') {
+            return [null, null];
+        }
+
+        // Compact day-range: "20-22 Jan 2026" or "20-22 January 2026"
+        if (preg_match('/^(\d{1,2})-(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})$/', $raw, $m)) {
+            $start = parseFlexibleDate($m[1] . ' ' . $m[3] . ' ' . $m[4]);
+            $end = parseFlexibleDate($m[2] . ' ' . $m[3] . ' ' . $m[4]);
+            if ($start !== null && $end !== null) {
+                return [$start, $end];
+            }
+        }
+
+        // Range separated by "to", en dash, em dash, or a spaced hyphen
+        // (spaced hyphen only — a tight hyphen like 08-06-2026 is a single date, not a range)
+        $parts = preg_split('/\s+(?:to|–|—)\s+|\s+-\s+/i', $raw);
+        if (count($parts) === 2) {
+            $start = parseFlexibleDate($parts[0]);
+            $end = parseFlexibleDate($parts[1]);
+            if ($start !== null && $end !== null) {
+                return [$start, $end];
+            }
+        }
+
+        // Otherwise treat as a single date, used for both start and end
+        $single = parseFlexibleDate($raw);
+        return [$single, $single];
+    }
+
+    // Check if a file is uploaded
+    if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
+        $file = $_FILES['csvFile']['tmp_name'];
+        $handle = fopen($file, "r");
+        $columns = fgetcsv($handle, 1000, ",");
+
+        echo '<div class="preview-wrap">';
+        echo '<h3>CSV Preview</h3>';
+        echo '<div class="table-scroll">';
+        echo '<table>';
+        echo '<tr>';
+        foreach ($columns as $column) {
+            echo '<th>' . htmlspecialchars($column) . '</th>';
+        }
+        echo '</tr>';
+
+        // CSV column order:
+        // 0 Academic Year | 1 Name of the Faculty | 2 Name of the FDP |
+        // 3 In Association with | 4 Mode | 5 Date(s) | 6 Duration | 7 Certificate Link
+        $stmt = $conn->prepare(
+            "INSERT INTO fdporg
+                (academic_year, faculty_name, fdp_name, association, mode,
+                 start_date, end_date, dates_raw, duration, certificate_link)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        );
+        $stmt->bind_param(
+            "ssssssssss",
+            $academic_year,
+            $faculty_name,
+            $fdp_name,
+            $association,
+            $mode,
+            $start_date,
+            $end_date,
+            $dates_raw,
+            $duration,
+            $certificate_link
+        );
+
+        $rowCount = 0;
+        $rowNum = 1; // header is row 1
+        $unparsedDates = [];
+
+        while (($data = fgetcsv($handle, 1000, ",")) !== false) {
+            $rowNum++;
+
+            $academic_year    = isset($data[0]) ? trim($data[0]) : '';
+            $faculty_name     = isset($data[1]) ? trim($data[1]) : '';
+            $fdp_name         = isset($data[2]) ? trim($data[2]) : '';
+            $association      = isset($data[3]) ? trim($data[3]) : '';
+            $mode             = isset($data[4]) ? trim($data[4]) : '';
+            $dates_raw        = isset($data[5]) ? trim($data[5]) : '';
+            $duration         = isset($data[6]) ? trim($data[6]) : '';
+            $certificate_link = isset($data[7]) ? trim($data[7]) : '';
+
+            // Skip fully blank rows
+            if ($academic_year === '' && $faculty_name === '' && $fdp_name === '') {
+                continue;
+            }
+
+            [$start_date, $end_date] = parseDateOrRange($dates_raw);
+
+            $rowHasBadDate = false;
+            if ($dates_raw !== '' && $start_date === null) {
+                $unparsedDates[] = "Row $rowNum, Date(s): \"$dates_raw\"";
+                $rowHasBadDate = true;
+            }
+
+            echo '<tr>';
+            foreach ($data as $colIndex => $value) {
+                $cellClass = '';
+                if ($rowHasBadDate && $colIndex === 5) {
+                    $cellClass = ' class="bad-date"';
+                }
+                echo '<td' . $cellClass . '>' . htmlspecialchars($value) . '</td>';
+            }
+            echo '</tr>';
+
+            $stmt->execute();
+            $rowCount++;
+        }
+
+        $stmt->close();
+        fclose($handle);
+
+        echo '</table>';
+        echo '</div>';
+
+        if ($rowCount > 0) {
+            echo '<p class="status-success"><i class="fa fa-check-circle"></i> CSV Data Uploaded Successfully.</p>';
+        } else {
+            echo '<p class="status-error"><i class="fa fa-times-circle"></i> No valid rows found in the CSV.</p>';
+        }
+
+        if (!empty($unparsedDates)) {
+            echo '<div class="status-warning"><i class="fa fa-exclamation-triangle"></i> ';
+            echo count($unparsedDates) . ' Date(s) value(s) could not be understood and were saved as empty (highlighted above). The original text is still kept in dates_raw in the database, so nothing is lost — you can fix these manually:';
+            echo '<ul>';
+            foreach ($unparsedDates as $issue) {
+                echo '<li>' . htmlspecialchars($issue) . '</li>';
+            }
+            echo '</ul></div>';
+        }
+
+        echo '</div>';
+    } elseif (isset($_FILES['csvFile'])) {
+        echo '<div class="preview-wrap"><p class="status-error"><i class="fa fa-times-circle"></i> Error uploading the CSV file.</p></div>';
+    }
+
+    $conn->close();
+    ?>
+
+</body>
+
+</html>
