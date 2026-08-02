@@ -1,3 +1,12 @@
+<?php
+// ============================================================
+// This is an admin bulk-upload page (no logged-in faculty session
+// involved). faculty_id now comes straight from a column in the CSV
+// itself — see the $faculty_id line inside the row-parsing loop below.
+// Everything else — the CSV parsing, date handling, preview table,
+// styling — is untouched.
+// ============================================================
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -32,7 +41,6 @@
         body {
             width: 100%;
             overflow-x: hidden;
-            /* stops the whole page from scrolling sideways */
         }
 
         body {
@@ -182,14 +190,10 @@
             color: var(--dark);
         }
 
-        /* ============ PREVIEW / TABLE SECTION — FIXED ============ */
-
         .preview-wrap {
             width: 100%;
             max-width: 1200px;
-            /* centers the whole block on the page */
             margin: 0 auto 60px;
-            /* real breathing room from left/right edges of the viewport */
             padding: 0 32px;
         }
 
@@ -201,9 +205,6 @@
             text-align: center;
         }
 
-        /* The table itself can get wide (9 columns), so instead of letting it
-           blow out the page layout, we give it its own scroll container.
-           The page never scrolls sideways; only this box does, if needed. */
         .table-scroll {
             width: 100%;
             overflow-x: auto;
@@ -216,7 +217,6 @@
         table {
             width: 100%;
             min-width: 900px;
-            /* keeps columns from being crushed; scrolls instead */
             border-collapse: collapse;
             background: var(--cream-card);
             border-radius: var(--radius);
@@ -389,6 +389,17 @@
 
                 $certificatelink = mysqli_real_escape_string($conn, trim($data[8] ?? ""));
 
+                // NEW: faculty_id now comes straight from the CSV row itself
+                // (this is the new column you're adding to the CSV).
+                // Index 9 = 10th column — change this number if you put the
+                // faculty_id column somewhere else in your sheet.
+                //
+                // NOTE: this must contain the same value the rest of the system
+                // uses as faculty_id — check with whoever built the login/search
+                // pages whether that's rollno or username, they are NOT the same
+                // column in your `login` table.
+                $faculty_id = mysqli_real_escape_string($conn, isset($data[9]) ? trim($data[9]) : "");
+
                 $sql = "INSERT INTO fdp
         (
             name,
@@ -399,7 +410,8 @@
             duration,
             startdate,
             enddate,
-            certificate_link
+            certificate_link,
+            faculty_id
         )
 
         VALUES
@@ -412,7 +424,8 @@
             '$duration',
             '$startdate',
             '$enddate',
-            '$certificatelink'
+            '$certificatelink',
+            '$faculty_id'
         )";
 
                 if (mysqli_query($conn, $sql)) {

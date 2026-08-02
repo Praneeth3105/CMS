@@ -396,13 +396,16 @@ $rollno = $_SESSION['username'];
     <div id="demo">
 
       <!-- ════════════ WORKSHOP ════════════ -->
+      <!-- ════════════ WORKSHOP ════════════ -->
       <div id="sec_workshop" class="section-card" style="display:none;">
         <h1>Workshops</h1>
         <p class="section-sub">All workshops you've added to your collection</p>
+
         <div class="search-wrap">
           <i class="fa fa-search"></i>
           <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search by Workshop Name..." title="Type in a name">
         </div>
+
         <div class="scroll">
           <table id="myTable">
             <tr class="header">
@@ -423,45 +426,78 @@ $rollno = $_SESSION['username'];
               <th>Edit</th>
               <th>Delete</th>
             </tr>
+
             <?php
             $q = "SELECT * FROM sworkshop WHERE RollNo='$rollno'";
             $res = mysqli_query($conn, $q);
-            while ($rows = mysqli_fetch_assoc($res)) {
-              $file = $rows['file'];
-              $ext  = strtolower(pathinfo($file, PATHINFO_EXTENSION));
-              $filepath = "images/" . $file;
+
+            if ($res && mysqli_num_rows($res) > 0) {
+
+              while ($rows = mysqli_fetch_assoc($res)) {
+
+                $file = $rows['file'];
+                $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+                $filepath = "images/" . $file;
             ?>
-              <tr>
-                <td><?php echo $rows['RollNo']; ?></td>
-                <td><?php echo $rows['Name']; ?></td>
-                <td><?php echo $rows['WorkShopName']; ?></td>
-                <td><?php echo $rows['OrgName']; ?></td>
-                <td><?php echo $rows['StartDate']; ?></td>
-                <td><?php echo $rows['EndDate']; ?></td>
-                <td><?php echo $rows['Duration']; ?></td>
-                <td><?php echo $rows['Place']; ?></td>
-                <td>
-                  <?php if ($ext == 'pdf'): ?>
-                    <embed src="<?php echo $filepath; ?>" type="application/pdf" width="160" height="90">
-                  <?php else: ?>
-                    <a href="<?php echo $filepath; ?>" data-lightbox="mygallery">
-                      <img src="<?php echo $filepath; ?>" width="160" height="90">
+
+                <tr>
+                  <td><?php echo $rows['RollNo']; ?></td>
+                  <td><?php echo $rows['Name']; ?></td>
+                  <td><?php echo $rows['WorkShopName']; ?></td>
+                  <td><?php echo $rows['OrgName']; ?></td>
+                  <td><?php echo $rows['StartDate']; ?></td>
+                  <td><?php echo $rows['EndDate']; ?></td>
+                  <td><?php echo $rows['Duration']; ?></td>
+                  <td><?php echo $rows['Place']; ?></td>
+
+                  <td>
+                    <?php if ($ext == "pdf") { ?>
+                      <embed src="<?php echo $filepath; ?>" type="application/pdf" width="160" height="90">
+                    <?php } else { ?>
+                      <a href="<?php echo $filepath; ?>" data-lightbox="mygallery">
+                        <img src="<?php echo $filepath; ?>" width="160" height="90">
+                      </a>
+                    <?php } ?>
+                  </td>
+
+                  <td><?php echo $rows['branch']; ?></td>
+                  <td><?php echo $rows['year']; ?></td>
+                  <td><?php echo $rows['counsular']; ?></td>
+                  <td><?php echo $rows['classteacher']; ?></td>
+
+                  <td>
+                    <a href="<?php echo $filepath; ?>" download>
+                      <button class="act-btn download">
+                        <i class="fa fa-download"></i>
+                      </button>
                     </a>
-                  <?php endif; ?>
-                </td>
-                <td><?php echo $rows['branch']; ?></td>
-                <td><?php echo $rows['year']; ?></td>
-                <td><?php echo $rows['counsular']; ?></td>
-                <td><?php echo $rows['classteacher']; ?></td>
-                <td><a href="<?php echo $filepath; ?>" download><button class="act-btn download"><i class="fa fa-download"></i></button></a></td>
-                <td><a href="sewa.php?editwn=<?php echo urlencode($rows['WorkShopName']); ?>"><button class="act-btn edit">Edit</button></a></td>
-                <td><a href="sdwa.php?editwn=<?php echo urlencode($rows['WorkShopName']); ?>&edi=<?php echo urlencode($rows['file']); ?>"><button class="act-btn delete">Delete</button></a></td>
-              </tr>
-            <?php } ?>
+                  </td>
+
+                  <td>
+                    <a href="sewa.php?editwn=<?php echo urlencode($rows['WorkShopName']); ?>">
+                      <button class="act-btn edit">Edit</button>
+                    </a>
+                  </td>
+
+                  <td>
+                    <a href="sdwa.php?editwn=<?php echo urlencode($rows['WorkShopName']); ?>&edi=<?php echo urlencode($rows['file']); ?>">
+                      <button class="act-btn delete">Delete</button>
+                    </a>
+                  </td>
+                </tr>
+
+            <?php
+              }
+            } else {
+              echo "<tr class='empty-row'>
+                        <td colspan='16'>No Workshop records found yet.</td>
+                      </tr>";
+            }
+            ?>
+
           </table>
         </div>
       </div>
-
       <!-- ════════════ INTERNSHIP ════════════ -->
       <div id="sec_internship" class="section-card" style="display:none;">
         <h1>Internships</h1>
