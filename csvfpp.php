@@ -253,10 +253,11 @@
             font-weight: 600;
             background: #eaf6ea;
             border: 1px solid #b7dfb9;
-            padding: 12px 18px;
-            border-radius: var(--radius-sm);
-            display: inline-block;
-            margin-top: 14px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            width: fit-content;
+            margin: 20px auto;
+            text-align: center;
         }
 
         .status-error {
@@ -264,11 +265,13 @@
             font-weight: 600;
             background: #fbeae4;
             border: 1px solid #eec4b4;
-            padding: 12px 18px;
-            border-radius: var(--radius-sm);
-            display: inline-block;
-            margin-top: 14px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            width: fit-content;
+            margin: 20px auto;
+            text-align: center;
         }
+
 
         @media (max-width: 600px) {
             .preview-wrap {
@@ -325,20 +328,17 @@
             }
             echo '</tr>';
 
-            // CSV column order:
-            // 0: Academic Year | 1: Month | 2: Faculty Name | 3: Title | 4: Journal
-            // 5: Number | 6: Volume | 7: Indexing Type (UGC/Scopus/SCI)
-            // 8: URL/DOI | 9: Proof Link
-            $academic_year  = isset($data[0]) ? $data[0] : '';
-            $month          = isset($data[1]) ? $data[1] : '';
-            $faculty_name   = isset($data[2]) ? $data[2] : '';
-            $title          = isset($data[3]) ? $data[3] : '';
-            $journal        = isset($data[4]) ? $data[4] : '';
-            $number         = isset($data[5]) ? $data[5] : '';
-            $volume         = isset($data[6]) ? $data[6] : '';
-            $indexing_type  = isset($data[7]) ? $data[7] : '';
-            $url_doi        = isset($data[8]) ? $data[8] : '';
-            $proof_link     = isset($data[9]) ? $data[9] : '';
+            $academic_year  = isset($data[1]) ? $data[1] : '';
+            $month          = isset($data[2]) ? $data[2] : '';
+            $faculty_name   = isset($data[3]) ? $data[3] : '';
+            $title          = isset($data[4]) ? $data[4] : '';
+            $journal        = isset($data[5]) ? $data[5] : '';
+            $number         = isset($data[6]) ? $data[6] : '';
+            $volume         = isset($data[7]) ? $data[7] : '';
+            $indexing_type  = isset($data[8]) ? $data[8] : '';
+            $url_doi        = isset($data[9]) ? $data[9] : '';
+            $proof_link     = isset($data[10]) ? $data[10] : '';
+            $faculty_id     = isset($data[0]) ? $data[0] : '';
 
             // Escape values before inserting (basic protection against SQL injection)
             $academic_year  = $conn->real_escape_string($academic_year);
@@ -351,11 +351,12 @@
             $indexing_type  = $conn->real_escape_string($indexing_type);
             $url_doi        = $conn->real_escape_string($url_doi);
             $proof_link     = $conn->real_escape_string($proof_link);
+            $faculty_id     = $conn->real_escape_string($faculty_id);
 
             $sql = "INSERT INTO paperpublications
-                        (academic_year, month, faculty_name, title, journal, number, volume, indexing_type, url_doi, proof_link)
+                        (academic_year, month, faculty_name, title, journal, number, volume, indexing_type, url_doi, proof_link, faculty_id)
                     VALUES
-                        ('$academic_year','$month','$faculty_name','$title','$journal','$number','$volume','$indexing_type','$url_doi','$proof_link')";
+                        ('$academic_year','$month','$faculty_name','$title','$journal','$number','$volume','$indexing_type','$url_doi','$proof_link','$faculty_id')";
             $conn->query($sql);
         }
 

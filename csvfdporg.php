@@ -457,15 +457,17 @@
 
         // CSV column order:
         // 0 Academic Year | 1 Name of the Faculty | 2 Name of the FDP |
-        // 3 In Association with | 4 Mode | 5 Date(s) | 6 Duration | 7 Certificate Link
+        // 3 In Association with | 4 Mode | 5 Date(s) | 6 Duration | 7 Certificate Link |
+        // 8 Faculty ID  <-- NEW: add this as the last column in your CSV.
+        // Must match the same value used everywhere else as faculty_id (rollno).
         $stmt = $conn->prepare(
             "INSERT INTO fdporg
                 (academic_year, faculty_name, fdp_name, association, mode,
-                 start_date, end_date, dates_raw, duration, certificate_link)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                 start_date, end_date, dates_raw, duration, certificate_link, faculty_id)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         );
         $stmt->bind_param(
-            "ssssssssss",
+            "sssssssssss",
             $academic_year,
             $faculty_name,
             $fdp_name,
@@ -475,7 +477,8 @@
             $end_date,
             $dates_raw,
             $duration,
-            $certificate_link
+            $certificate_link,
+            $faculty_id
         );
 
         $rowCount = 0;
@@ -485,14 +488,15 @@
         while (($data = fgetcsv($handle, 1000, ",")) !== false) {
             $rowNum++;
 
-            $academic_year    = isset($data[0]) ? trim($data[0]) : '';
-            $faculty_name     = isset($data[1]) ? trim($data[1]) : '';
-            $fdp_name         = isset($data[2]) ? trim($data[2]) : '';
-            $association      = isset($data[3]) ? trim($data[3]) : '';
-            $mode             = isset($data[4]) ? trim($data[4]) : '';
-            $dates_raw        = isset($data[5]) ? trim($data[5]) : '';
-            $duration         = isset($data[6]) ? trim($data[6]) : '';
-            $certificate_link = isset($data[7]) ? trim($data[7]) : '';
+            $academic_year    = isset($data[1]) ? trim($data[1]) : '';
+            $faculty_name     = isset($data[2]) ? trim($data[2]) : '';
+            $fdp_name         = isset($data[3]) ? trim($data[3]) : '';
+            $association      = isset($data[4]) ? trim($data[4]) : '';
+            $mode             = isset($data[5]) ? trim($data[5]) : '';
+            $dates_raw        = isset($data[6]) ? trim($data[6]) : '';
+            $duration         = isset($data[7]) ? trim($data[7]) : '';
+            $certificate_link = isset($data[8]) ? trim($data[8]) : '';
+            $faculty_id       = isset($data[0]) ? trim($data[0]) : '';
 
             // Skip fully blank rows
             if ($academic_year === '' && $faculty_name === '' && $fdp_name === '') {

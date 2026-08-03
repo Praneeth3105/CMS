@@ -327,14 +327,6 @@
     <?php
     include "db_conn.php";
 
-    /**
-     * Try to parse a date string that may come in many different formats
-     * (mixed within the same CSV) and return it as 'Y-m-d', or null if
-     * it truly cannot be understood.
-     *
-     * Assumes day-first (DD/MM/YYYY) interpretation for ambiguous numeric
-     * dates, since that matches Indian date conventions.
-     */
     function parseFlexibleDate($dateStr)
     {
         $original = $dateStr;
@@ -422,19 +414,15 @@
             echo '<th>' . htmlspecialchars($column) . '</th>';
         }
         echo '</tr>';
-
-        // CSV column order:
-        // 0 Academic Year | 1 Name | 2 Workshop | 3 Org | 4 Start Date |
-        // 5 End Date | 6 Duration | 7 Online/Offline | 8 Link for Certificate
         $stmt = $conn->prepare(
             "INSERT INTO ffworkshop
                 (academic_year, name, workshop, org,
                  start_date, start_date_raw, end_date, end_date_raw,
-                 duration, mode, certificate_link)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                 duration, mode, certificate_link, faculty_id)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         );
         $stmt->bind_param(
-            "sssssssssss",
+            "ssssssssssss",
             $academic_year,
             $name,
             $workshop,
@@ -445,7 +433,8 @@
             $end_date_raw,
             $duration,
             $mode,
-            $certificate_link
+            $certificate_link,
+            $faculty_id
         );
 
         $rowCount = 0;
@@ -455,15 +444,16 @@
         while (($data = fgetcsv($handle, 1000, ",")) !== false) {
             $rowNum++;
 
-            $academic_year    = isset($data[0]) ? trim($data[0]) : '';
-            $name             = isset($data[1]) ? trim($data[1]) : '';
-            $workshop         = isset($data[2]) ? trim($data[2]) : '';
-            $org              = isset($data[3]) ? trim($data[3]) : '';
-            $start_date_raw   = isset($data[4]) ? trim($data[4]) : '';
-            $end_date_raw     = isset($data[5]) ? trim($data[5]) : '';
+            $academic_year    = isset($data[1]) ? trim($data[1]) : '';
+            $name             = isset($data[2]) ? trim($data[2]) : '';
+            $workshop         = isset($data[3]) ? trim($data[3]) : '';
+            $org              = isset($data[4]) ? trim($data[4]) : '';
+            $start_date_raw   = isset($data[5]) ? trim($data[5]) : '';
+            $end_date_raw     = isset($data[6]) ? trim($data[6]) : '';
             $duration         = isset($data[6]) ? trim($data[6]) : '';
             $mode             = isset($data[7]) ? trim($data[7]) : '';
             $certificate_link = isset($data[8]) ? trim($data[8]) : '';
+            $faculty_id       = isset($data[0]) ? trim($data[0]) : '';
 
             // Skip fully blank rows (e.g. trailing empty lines in the CSV)
             if ($academic_year === '' && $name === '' && $workshop === '') {
