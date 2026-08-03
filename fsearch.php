@@ -1142,7 +1142,7 @@ $id = $_SESSION['id'];
             <th>Delete</th>
           </tr>
           <?php
-          $query = "SELECT * FROM outside_participations WHERE faculty_name='" . $_SESSION['name'] . "'";
+          $query = "SELECT * FROM outside_participations WHERE  faculty_id='$id'";
           $result = mysqli_query($conn, $query);
           if ($result && mysqli_num_rows($result) > 0) {
             while ($rows = mysqli_fetch_assoc($result)) {
@@ -1195,7 +1195,7 @@ $id = $_SESSION['id'];
             <th>Delete</th>
           </tr>
           <?php
-          $query = "SELECT * FROM reviewer_activities WHERE faculty_name='" . $_SESSION['name'] . "'";
+          $query = "SELECT * FROM reviewer_activities WHERE  faculty_id='$id'";
           $result = mysqli_query($conn, $query);
           if ($result && mysqli_num_rows($result) > 0) {
             while ($rows = mysqli_fetch_assoc($result)) {
@@ -1247,7 +1247,7 @@ $id = $_SESSION['id'];
             <th>Delete</th>
           </tr>
           <?php
-          $query = "SELECT * FROM professional_membership WHERE faculty_name='" . $_SESSION['name'] . "'";
+          $query = "SELECT * FROM professional_membership  WHERE  faculty_id='$id'";
           $result = mysqli_query($conn, $query);
           if ($result && mysqli_num_rows($result) > 0) {
             while ($rows = mysqli_fetch_assoc($result)) {
@@ -1298,7 +1298,7 @@ $id = $_SESSION['id'];
             <th>Delete</th>
           </tr>
           <?php
-          $query = "SELECT * FROM phd_details WHERE faculty_name='" . $_SESSION['name'] . "'";
+          $query = "SELECT * FROM phd_details WHERE  faculty_id='$id'";
           $result = mysqli_query($conn, $query);
           if ($result && mysqli_num_rows($result) > 0) {
             while ($rows = mysqli_fetch_assoc($result)) {
@@ -1355,7 +1355,7 @@ $id = $_SESSION['id'];
             <th>Delete</th>
           </tr>
           <?php
-          $query = "SELECT * FROM consultancy_work";
+          $query = "SELECT * FROM consultancy_work WHERE  faculty_id='$id'";
           $result = mysqli_query($conn, $query);
           if ($result && mysqli_num_rows($result) > 0) {
             while ($rows = mysqli_fetch_assoc($result)) {
@@ -1408,7 +1408,7 @@ $id = $_SESSION['id'];
             <th>Delete</th>
           </tr>
           <?php
-          $query = "SELECT * FROM working_models";
+          $query = "SELECT * FROM working_models WHERE  faculty_id='$id'";
           $result = mysqli_query($conn, $query);
           if ($result && mysqli_num_rows($result) > 0) {
             while ($rows = mysqli_fetch_assoc($result)) {
@@ -1460,7 +1460,7 @@ $id = $_SESSION['id'];
             <th>Delete</th>
           </tr>
           <?php
-          $query = "SELECT * FROM funding_projects WHERE faculty_name='" . $_SESSION['name'] . "'";
+          $query = "SELECT * FROM funding_projects WHERE  faculty_id='$id'";
           $result = mysqli_query($conn, $query);
           if ($result && mysqli_num_rows($result) > 0) {
             while ($rows = mysqli_fetch_assoc($result)) {

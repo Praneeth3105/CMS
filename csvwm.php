@@ -334,12 +334,21 @@
     <?php
     include "db_conn.php";
 
+    $createTableSql = "CREATE TABLE IF NOT EXISTS working_models (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    academic_year VARCHAR(20) NOT NULL,
+    model_name VARCHAR(255),
+    duration VARCHAR(50),
+    students_count VARCHAR(50),
+    domain_name VARCHAR(150),
+    proof_link TEXT,
+    faculty_id VARCHAR(100) NOT NULL
+)";
+    $conn->query($createTableSql);
 
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
         $file = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
-        // Read and discard the CSV's own header row (labels are hardcoded below
-        // to avoid blank/inconsistent header cells breaking the table).
         fgetcsv($handle, 1000, ",");
 
         echo '<div class="preview-wrap">';
@@ -347,16 +356,18 @@
         echo '<div class="table-scroll">';
         echo '<table>';
         echo '<colgroup>
-                <col class="col-year">
-                <col class="col-modelname">
-                <col class="col-duration">
-                <col class="col-students">
-                <col class="col-domain">
-                <col class="col-link">
-              </colgroup>';
+            <col class="col-facultyid">
+            <col class="col-year">
+            <col class="col-modelname">
+            <col class="col-duration">
+            <col class="col-students">
+            <col class="col-domain">
+            <col class="col-link">
+          </colgroup>';
 
         echo '<tr>';
         $headerLabels = [
+            'Faculty ID',
             'Academic Year',
             'Working Model Name/Product Name',
             'Duration',
@@ -369,28 +380,16 @@
         }
         echo '</tr>';
 
-        $stmt = $conn->prepare(
-            "INSERT INTO working_models
-                (academic_year, model_name, duration, students_count, domain_name, proof_link)
-             VALUES (?, ?, ?, ?, ?, ?)"
-        );
-        $stmt->bind_param(
-            "ssssss",
-            $academicYear,
-            $modelName,
-            $duration,
-            $studentsCount,
-            $domainName,
-            $proofLink
-        );
+        $success = 0;
+        $failed = 0;
 
         while (($data = fgetcsv($handle, 1000, ",")) !== false) {
-            // Skip only rows that are completely blank, or missing Academic
-            // Year — the sole required (NOT NULL) column. Every other field
-            // (Model Name, Duration, etc.) is allowed to be empty.
+
+            // 0 Faculty ID | 1 Academic Year | 2 Model Name | 3 Duration
+            // 4 No. of Students | 5 Domain Name | 6 Proof Link
+
             $rowIsEmpty = count(array_filter($data, fn($v) => trim($v) !== '')) === 0;
-            $missingKeyFields = empty(trim($data[0] ?? ''));
-            if ($rowIsEmpty || $missingKeyFields) {
+            if ($rowIsEmpty) {
                 continue;
             }
 
@@ -400,25 +399,47 @@
             }
             echo '</tr>';
 
-            $academicYear  = isset($data[0]) ? $data[0] : '';
-            $modelName     = isset($data[1]) ? $data[1] : '';
+            $facultyId     = mysqli_real_escape_string($conn, isset($data[0]) ? trim($data[0]) : "");
+            $academicYear  = mysqli_real_escape_string($conn, isset($data[1]) ? trim($data[1]) : "");
+            $modelName     = mysqli_real_escape_string($conn, isset($data[2]) ? trim($data[2]) : "");
             // Duration accepted as-is, in whatever format the CSV has — no
             // parsing, so nothing here can fail on a weird format.
-            $duration      = isset($data[2]) ? $data[2] : '';
-            $studentsCount = isset($data[3]) ? $data[3] : '';
-            $domainName    = isset($data[4]) ? $data[4] : '';
-            $proofLink     = isset($data[5]) ? $data[5] : '';
+            $duration      = mysqli_real_escape_string($conn, isset($data[3]) ? trim($data[3]) : "");
+            $studentsCount = mysqli_real_escape_string($conn, isset($data[4]) ? trim($data[4]) : "");
+            $domainName    = mysqli_real_escape_string($conn, isset($data[5]) ? trim($data[5]) : "");
+            $proofLink     = mysqli_real_escape_string($conn, isset($data[6]) ? trim($data[6]) : "");
 
-            $stmt->execute();
+            $sql = "INSERT INTO working_models
+    (
+        faculty_id, academic_year, model_name, duration,
+        students_count, domain_name, proof_link
+    )
+    VALUES
+    (
+        '$facultyId', '$academicYear', '$modelName', '$duration',
+        '$studentsCount', '$domainName', '$proofLink'
+    )";
+
+            if (mysqli_query($conn, $sql)) {
+                $success++;
+            } else {
+                $failed++;
+                echo "<p class='status-error'>MySQL Error : " . mysqli_error($conn) . "</p>";
+            }
         }
 
-        $stmt->close();
+        fclose($handle);
 
         echo '</table>';
         echo '</div>';
-        fclose($handle);
+
+        echo "<br>";
 
         echo '<p class="status-success"><i class="fa fa-check-circle"></i> CSV Data Uploaded Successfully.</p>';
+        if ($failed > 0) {
+            echo "<p class='status-error'>Failed : $failed</p>";
+        }
+
         echo '</div>';
     } elseif (isset($_FILES['csvFile'])) {
         echo '<div class="preview-wrap"><p class="status-error"><i class="fa fa-times-circle"></i> Error uploading the CSV file.</p></div>';
@@ -426,7 +447,6 @@
 
     $conn->close();
     ?>
-
 </body>
 
 </html>

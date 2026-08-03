@@ -346,11 +346,24 @@
     <?php
     include "db_conn.php";
 
+    $createTableSql = "CREATE TABLE IF NOT EXISTS funding_projects (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    academic_year VARCHAR(20) NOT NULL,
+    faculty_name VARCHAR(150),
+    title VARCHAR(255),
+    agency_name VARCHAR(255),
+    amount VARCHAR(50),
+    start_date VARCHAR(50),
+    end_date VARCHAR(50),
+    duration VARCHAR(50),
+    funding_type VARCHAR(100),
+    faculty_id VARCHAR(100) NOT NULL
+)";
+    $conn->query($createTableSql);
+
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
         $file = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
-        // Read and discard the CSV's own header row (labels are hardcoded below
-        // to avoid blank/inconsistent header cells breaking the table).
         fgetcsv($handle, 1000, ",");
 
         echo '<div class="preview-wrap">';
@@ -358,19 +371,21 @@
         echo '<div class="table-scroll">';
         echo '<table>';
         echo '<colgroup>
-                <col class="col-year">
-                <col class="col-faculty">
-                <col class="col-title">
-                <col class="col-agency">
-                <col class="col-amount">
-                <col class="col-startdate">
-                <col class="col-enddate">
-                <col class="col-duration">
-                <col class="col-fundingtype">
-              </colgroup>';
+            <col class="col-facultyid">
+            <col class="col-year">
+            <col class="col-faculty">
+            <col class="col-title">
+            <col class="col-agency">
+            <col class="col-amount">
+            <col class="col-startdate">
+            <col class="col-enddate">
+            <col class="col-duration">
+            <col class="col-fundingtype">
+          </colgroup>';
 
         echo '<tr>';
         $headerLabels = [
+            'Faculty ID',
             'Academic Year',
             'Faculty Name',
             'Title',
@@ -386,34 +401,16 @@
         }
         echo '</tr>';
 
-        // Prepared statement matching the CSV column order:
-        // 0 Academic Year | 1 Faculty Name | 2 Title | 3 Agency Name | 4 Amount
-        // 5 Start Date | 6 End Date | 7 Duration | 8 Type of Funding
-        $stmt = $conn->prepare(
-            "INSERT INTO funding_projects
-                (academic_year, faculty_name, title, agency_name, amount, start_date, end_date, duration, funding_type)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
-        );
-        $stmt->bind_param(
-            "sssssssss",
-            $academicYear,
-            $facultyName,
-            $title,
-            $agencyName,
-            $amount,
-            $startDate,
-            $endDate,
-            $duration,
-            $fundingType
-        );
+        $success = 0;
+        $failed = 0;
 
         while (($data = fgetcsv($handle, 1000, ",")) !== false) {
-            // Skip only rows that are completely blank, or missing Academic
-            // Year — the sole required (NOT NULL) column. Every other field
-            // (Faculty Name, Title, dates, etc.) is allowed to be empty.
+
+            // 0 Faculty ID | 1 Academic Year | 2 Faculty Name | 3 Title | 4 Agency Name
+            // 5 Amount | 6 Start Date | 7 End Date | 8 Duration | 9 Type of Funding
+
             $rowIsEmpty = count(array_filter($data, fn($v) => trim($v) !== '')) === 0;
-            $missingKeyFields = empty(trim($data[0] ?? ''));
-            if ($rowIsEmpty || $missingKeyFields) {
+            if ($rowIsEmpty) {
                 continue;
             }
 
@@ -423,28 +420,50 @@
             }
             echo '</tr>';
 
-            $academicYear = isset($data[0]) ? $data[0] : '';
-            $facultyName  = isset($data[1]) ? $data[1] : '';
-            $title        = isset($data[2]) ? $data[2] : '';
-            $agencyName   = isset($data[3]) ? $data[3] : '';
-            $amount       = isset($data[4]) ? $data[4] : '';
+            $facultyId    = mysqli_real_escape_string($conn, isset($data[0]) ? trim($data[0]) : "");
+            $academicYear = mysqli_real_escape_string($conn, isset($data[1]) ? trim($data[1]) : "");
+            $facultyName  = mysqli_real_escape_string($conn, isset($data[2]) ? trim($data[2]) : "");
+            $title        = mysqli_real_escape_string($conn, isset($data[3]) ? trim($data[3]) : "");
+            $agencyName   = mysqli_real_escape_string($conn, isset($data[4]) ? trim($data[4]) : "");
+            $amount       = mysqli_real_escape_string($conn, isset($data[5]) ? trim($data[5]) : "");
             // Dates/duration accepted as-is, in whatever format the CSV has —
             // no strtotime()/parsing, so nothing here can fail on a weird format.
-            $startDate    = isset($data[5]) ? $data[5] : '';
-            $endDate      = isset($data[6]) ? $data[6] : '';
-            $duration     = isset($data[7]) ? $data[7] : '';
-            $fundingType  = isset($data[8]) ? $data[8] : '';
+            $startDate    = mysqli_real_escape_string($conn, isset($data[6]) ? trim($data[6]) : "");
+            $endDate      = mysqli_real_escape_string($conn, isset($data[7]) ? trim($data[7]) : "");
+            $duration     = mysqli_real_escape_string($conn, isset($data[8]) ? trim($data[8]) : "");
+            $fundingType  = mysqli_real_escape_string($conn, isset($data[9]) ? trim($data[9]) : "");
 
-            $stmt->execute();
+            $sql = "INSERT INTO funding_projects
+    (
+        faculty_id, academic_year, faculty_name, title, agency_name,
+        amount, start_date, end_date, duration, funding_type
+    )
+    VALUES
+    (
+        '$facultyId', '$academicYear', '$facultyName', '$title', '$agencyName',
+        '$amount', '$startDate', '$endDate', '$duration', '$fundingType'
+    )";
+
+            if (mysqli_query($conn, $sql)) {
+                $success++;
+            } else {
+                $failed++;
+                echo "<p class='status-error'>MySQL Error : " . mysqli_error($conn) . "</p>";
+            }
         }
 
-        $stmt->close();
+        fclose($handle);
 
         echo '</table>';
         echo '</div>';
-        fclose($handle);
+
+        echo "<br>";
 
         echo '<p class="status-success"><i class="fa fa-check-circle"></i> CSV Data Uploaded Successfully.</p>';
+        if ($failed > 0) {
+            echo "<p class='status-error'>Failed : $failed</p>";
+        }
+
         echo '</div>';
     } elseif (isset($_FILES['csvFile'])) {
         echo '<div class="preview-wrap"><p class="status-error"><i class="fa fa-times-circle"></i> Error uploading the CSV file.</p></div>';
@@ -452,7 +471,6 @@
 
     $conn->close();
     ?>
-
 </body>
 
 </html>

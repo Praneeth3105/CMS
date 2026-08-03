@@ -338,11 +338,23 @@
     <?php
     include "db_conn.php";
 
+    // Ensure the table exists (safe to run every load)
+    $createTableSql = "CREATE TABLE IF NOT EXISTS professional_membership (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    faculty_name VARCHAR(150) NOT NULL,
+    membership_name VARCHAR(255),
+    membership_id VARCHAR(100),
+    membership_type VARCHAR(100),
+    start_date VARCHAR(50),
+    end_date VARCHAR(50),
+    proof_link TEXT,
+    faculty_id VARCHAR(100) NOT NULL
+)";
+    $conn->query($createTableSql);
+
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
         $file = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
-        // Read and discard the CSV's own header row (labels are hardcoded below
-        // to avoid blank/inconsistent header cells breaking the table).
         fgetcsv($handle, 1000, ",");
 
         echo '<div class="preview-wrap">';
@@ -350,17 +362,19 @@
         echo '<div class="table-scroll">';
         echo '<table>';
         echo '<colgroup>
-                <col class="col-faculty">
-                <col class="col-membershipname">
-                <col class="col-membershipid">
-                <col class="col-membershiptype">
-                <col class="col-startdate">
-                <col class="col-enddate">
-                <col class="col-link">
-              </colgroup>';
+            <col class="col-facultyid">
+            <col class="col-faculty">
+            <col class="col-membershipname">
+            <col class="col-membershipid">
+            <col class="col-membershiptype">
+            <col class="col-startdate">
+            <col class="col-enddate">
+            <col class="col-link">
+          </colgroup>';
 
         echo '<tr>';
         $headerLabels = [
+            'Faculty ID',
             'Faculty Name',
             'Membership Name',
             'Membership ID',
@@ -374,28 +388,16 @@
         }
         echo '</tr>';
 
-        $stmt = $conn->prepare(
-            "INSERT INTO professional_membership
-                (faculty_name, membership_name, membership_id, membership_type, start_date, end_date, proof_link)
-             VALUES (?, ?, ?, ?, ?, ?, ?)"
-        );
-        $stmt->bind_param(
-            "sssssss",
-            $facultyName,
-            $membershipName,
-            $membershipId,
-            $membershipType,
-            $startDate,
-            $endDate,
-            $proofLink
-        );
+        $success = 0;
+        $failed = 0;
 
         while (($data = fgetcsv($handle, 1000, ",")) !== false) {
-            // Skip rows that are blank, or missing the required (NOT NULL)
-            // fields — protects against stray/leftover rows in the CSV.
+
+            // 0 Faculty ID | 1 Faculty Name | 2 Membership Name | 3 Membership ID
+            // 4 Membership Type | 5 Start Date | 6 End Date | 7 Proof Link
+
             $rowIsEmpty = count(array_filter($data, fn($v) => trim($v) !== '')) === 0;
-            $missingKeyFields = empty(trim($data[0] ?? '')) || empty(trim($data[1] ?? ''));
-            if ($rowIsEmpty || $missingKeyFields) {
+            if ($rowIsEmpty) {
                 continue;
             }
 
@@ -405,26 +407,48 @@
             }
             echo '</tr>';
 
-            $facultyName     = isset($data[0]) ? $data[0] : '';
-            $membershipName  = isset($data[1]) ? $data[1] : '';
-            $membershipId    = isset($data[2]) ? $data[2] : '';
-            $membershipType  = isset($data[3]) ? $data[3] : '';
+            $facultyId      = mysqli_real_escape_string($conn, isset($data[0]) ? trim($data[0]) : "");
+            $facultyName    = mysqli_real_escape_string($conn, isset($data[1]) ? trim($data[1]) : "");
+            $membershipName = mysqli_real_escape_string($conn, isset($data[2]) ? trim($data[2]) : "");
+            $membershipId   = mysqli_real_escape_string($conn, isset($data[3]) ? trim($data[3]) : "");
+            $membershipType = mysqli_real_escape_string($conn, isset($data[4]) ? trim($data[4]) : "");
             // Dates accepted as-is, in whatever format the CSV has — no
             // strtotime()/parsing, so nothing here can fail on a weird format.
-            $startDate       = isset($data[4]) ? $data[4] : '';
-            $endDate         = isset($data[5]) ? $data[5] : '';
-            $proofLink       = isset($data[6]) ? $data[6] : '';
+            $startDate      = mysqli_real_escape_string($conn, isset($data[5]) ? trim($data[5]) : "");
+            $endDate        = mysqli_real_escape_string($conn, isset($data[6]) ? trim($data[6]) : "");
+            $proofLink      = mysqli_real_escape_string($conn, isset($data[7]) ? trim($data[7]) : "");
 
-            $stmt->execute();
+            $sql = "INSERT INTO professional_membership
+    (
+        faculty_id, faculty_name, membership_name, membership_id,
+        membership_type, start_date, end_date, proof_link
+    )
+    VALUES
+    (
+        '$facultyId', '$facultyName', '$membershipName', '$membershipId',
+        '$membershipType', '$startDate', '$endDate', '$proofLink'
+    )";
+
+            if (mysqli_query($conn, $sql)) {
+                $success++;
+            } else {
+                $failed++;
+                echo "<p class='status-error'>MySQL Error : " . mysqli_error($conn) . "</p>";
+            }
         }
 
-        $stmt->close();
+        fclose($handle);
 
         echo '</table>';
         echo '</div>';
-        fclose($handle);
+
+        echo "<br>";
 
         echo '<p class="status-success"><i class="fa fa-check-circle"></i> CSV Data Uploaded Successfully.</p>';
+        if ($failed > 0) {
+            echo "<p class='status-error'>Failed : $failed</p>";
+        }
+
         echo '</div>';
     } elseif (isset($_FILES['csvFile'])) {
         echo '<div class="preview-wrap"><p class="status-error"><i class="fa fa-times-circle"></i> Error uploading the CSV file.</p></div>';
@@ -432,7 +456,6 @@
 
     $conn->close();
     ?>
-
 </body>
 
 </html>

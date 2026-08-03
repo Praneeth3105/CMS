@@ -338,11 +338,22 @@
     <?php
     include "db_conn.php";
 
+    $createTableSql = "CREATE TABLE IF NOT EXISTS phd_details (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    faculty_name VARCHAR(150) NOT NULL,
+    university_name VARCHAR(255),
+    status VARCHAR(50),
+    domain_name VARCHAR(150),
+    date_of_completion VARCHAR(50),
+    pursuing_year VARCHAR(20),
+    proof_link TEXT,
+    faculty_id VARCHAR(100) NOT NULL
+)";
+    $conn->query($createTableSql);
+
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
         $file = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
-        // Read and discard the CSV's own header row (labels are hardcoded below
-        // to avoid blank/inconsistent header cells breaking the table).
         fgetcsv($handle, 1000, ",");
 
         echo '<div class="preview-wrap">';
@@ -350,17 +361,19 @@
         echo '<div class="table-scroll">';
         echo '<table>';
         echo '<colgroup>
-                <col class="col-faculty">
-                <col class="col-university">
-                <col class="col-status">
-                <col class="col-domain">
-                <col class="col-completiondate">
-                <col class="col-pursuingyear">
-                <col class="col-link">
-              </colgroup>';
+            <col class="col-facultyid">
+            <col class="col-faculty">
+            <col class="col-university">
+            <col class="col-status">
+            <col class="col-domain">
+            <col class="col-completiondate">
+            <col class="col-pursuingyear">
+            <col class="col-link">
+          </colgroup>';
 
         echo '<tr>';
         $headerLabels = [
+            'Faculty ID',
             'Faculty Name',
             'University Name',
             'Pursuing/Completed',
@@ -374,31 +387,16 @@
         }
         echo '</tr>';
 
-        // Prepared statement matching the CSV column order:
-        // 0 Faculty Name | 1 University Name | 2 Pursuing/Completed | 3 Domain Name
-        // 4 Date of Completion | 5 Pursuing Year | 6 Link Proof
-        $stmt = $conn->prepare(
-            "INSERT INTO phd_details
-                (faculty_name, university_name, status, domain_name, date_of_completion, pursuing_year, proof_link)
-             VALUES (?, ?, ?, ?, ?, ?, ?)"
-        );
-        $stmt->bind_param(
-            "sssssss",
-            $facultyName,
-            $universityName,
-            $status,
-            $domainName,
-            $dateOfCompletion,
-            $pursuingYear,
-            $proofLink
-        );
+        $success = 0;
+        $failed = 0;
 
         while (($data = fgetcsv($handle, 1000, ",")) !== false) {
-            // Skip rows that are blank, or missing the required (NOT NULL)
-            // fields — protects against stray/leftover rows in the CSV.
+
+            // 0 Faculty ID | 1 Faculty Name | 2 University Name | 3 Pursuing/Completed
+            // 4 Domain Name | 5 Date of Completion | 6 Pursuing Year | 7 Link Proof
+
             $rowIsEmpty = count(array_filter($data, fn($v) => trim($v) !== '')) === 0;
-            $missingKeyFields = empty(trim($data[0] ?? '')) || empty(trim($data[1] ?? ''));
-            if ($rowIsEmpty || $missingKeyFields) {
+            if ($rowIsEmpty) {
                 continue;
             }
 
@@ -408,26 +406,48 @@
             }
             echo '</tr>';
 
-            $facultyName      = isset($data[0]) ? $data[0] : '';
-            $universityName   = isset($data[1]) ? $data[1] : '';
-            $status           = isset($data[2]) ? $data[2] : '';
-            $domainName       = isset($data[3]) ? $data[3] : '';
+            $facultyId        = mysqli_real_escape_string($conn, isset($data[0]) ? trim($data[0]) : "");
+            $facultyName      = mysqli_real_escape_string($conn, isset($data[1]) ? trim($data[1]) : "");
+            $universityName   = mysqli_real_escape_string($conn, isset($data[2]) ? trim($data[2]) : "");
+            $status           = mysqli_real_escape_string($conn, isset($data[3]) ? trim($data[3]) : "");
+            $domainName       = mysqli_real_escape_string($conn, isset($data[4]) ? trim($data[4]) : "");
             // Dates accepted as-is, in whatever format the CSV has — no
             // strtotime()/parsing, so nothing here can fail on a weird format.
-            $dateOfCompletion = isset($data[4]) ? $data[4] : '';
-            $pursuingYear     = isset($data[5]) ? $data[5] : '';
-            $proofLink        = isset($data[6]) ? $data[6] : '';
+            $dateOfCompletion = mysqli_real_escape_string($conn, isset($data[5]) ? trim($data[5]) : "");
+            $pursuingYear     = mysqli_real_escape_string($conn, isset($data[6]) ? trim($data[6]) : "");
+            $proofLink        = mysqli_real_escape_string($conn, isset($data[7]) ? trim($data[7]) : "");
 
-            $stmt->execute();
+            $sql = "INSERT INTO phd_details
+    (
+        faculty_id, faculty_name, university_name, status,
+        domain_name, date_of_completion, pursuing_year, proof_link
+    )
+    VALUES
+    (
+        '$facultyId', '$facultyName', '$universityName', '$status',
+        '$domainName', '$dateOfCompletion', '$pursuingYear', '$proofLink'
+    )";
+
+            if (mysqli_query($conn, $sql)) {
+                $success++;
+            } else {
+                $failed++;
+                echo "<p class='status-error'>MySQL Error : " . mysqli_error($conn) . "</p>";
+            }
         }
 
-        $stmt->close();
+        fclose($handle);
 
         echo '</table>';
         echo '</div>';
-        fclose($handle);
+
+        echo "<br>";
 
         echo '<p class="status-success"><i class="fa fa-check-circle"></i> CSV Data Uploaded Successfully.</p>';
+        if ($failed > 0) {
+            echo "<p class='status-error'>Failed : $failed</p>";
+        }
+
         echo '</div>';
     } elseif (isset($_FILES['csvFile'])) {
         echo '<div class="preview-wrap"><p class="status-error"><i class="fa fa-times-circle"></i> Error uploading the CSV file.</p></div>';
@@ -435,7 +455,6 @@
 
     $conn->close();
     ?>
-
 </body>
 
 </html>

@@ -342,11 +342,24 @@
     <?php
     include "db_conn.php";
 
+    // Ensure the table exists (safe to run every load)
+    $createTableSql = "CREATE TABLE IF NOT EXISTS outside_participations (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    academic_year VARCHAR(20) NOT NULL,
+    month VARCHAR(20),
+    faculty_name VARCHAR(150) NOT NULL,
+    date_attended DATE NULL,
+    organization VARCHAR(255),
+    conference_journal_name VARCHAR(255),
+    type VARCHAR(50),
+    proof_link TEXT,
+    faculty_id VARCHAR(100) NOT NULL
+)";
+    $conn->query($createTableSql);
 
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
         $file = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
-
         fgetcsv($handle, 1000, ",");
 
         echo '<div class="preview-wrap">';
@@ -354,18 +367,20 @@
         echo '<div class="table-scroll">';
         echo '<table>';
         echo '<colgroup>
-                <col class="col-year">
-                <col class="col-month">
-                <col class="col-faculty">
-                <col class="col-date">
-                <col class="col-organization">
-                <col class="col-confjournal">
-                <col class="col-type">
-                <col class="col-link">
-              </colgroup>';
+            <col class="col-facultyid">
+            <col class="col-year">
+            <col class="col-month">
+            <col class="col-faculty">
+            <col class="col-date">
+            <col class="col-organization">
+            <col class="col-confjournal">
+            <col class="col-type">
+            <col class="col-link">
+          </colgroup>';
 
         echo '<tr>';
         $headerLabels = [
+            'Faculty ID',
             'Academic Year',
             'Month',
             'Faculty Name',
@@ -380,28 +395,16 @@
         }
         echo '</tr>';
 
-        $stmt = $conn->prepare(
-            "INSERT INTO outside_participations
-                (academic_year, month, faculty_name, date_attended, organization, conference_journal_name, type, proof_link)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
-        );
-        $stmt->bind_param(
-            "ssssssss",
-            $academicYear,
-            $month,
-            $facultyName,
-            $dateAttended,
-            $organization,
-            $confJournalName,
-            $type,
-            $proofLink
-        );
+        $success = 0;
+        $failed = 0;
 
         while (($data = fgetcsv($handle, 1000, ",")) !== false) {
 
+            // 0 Faculty ID | 1 Academic Year | 2 Month | 3 Faculty Name | 4 Date
+            // 5 Organization Name | 6 Conference / Journal | 7 Type | 8 Proof Link
+
             $rowIsEmpty = count(array_filter($data, fn($v) => trim($v) !== '')) === 0;
-            $missingKeyFields = empty(trim($data[0] ?? '')) || empty(trim($data[2] ?? ''));
-            if ($rowIsEmpty || $missingKeyFields) {
+            if ($rowIsEmpty) {
                 continue;
             }
 
@@ -411,25 +414,51 @@
             }
             echo '</tr>';
 
-            $academicYear    = isset($data[0]) ? $data[0] : '';
-            $month           = isset($data[1]) ? $data[1] : '';
-            $facultyName     = isset($data[2]) ? $data[2] : '';
-            $dateAttended    = isset($data[3]) ? $data[3] : '';
-            $organization    = isset($data[4]) ? $data[4] : '';
-            $confJournalName = isset($data[5]) ? $data[5] : '';
-            $type            = isset($data[6]) ? $data[6] : '';
-            $proofLink       = isset($data[7]) ? $data[7] : '';
+            $facultyId       = mysqli_real_escape_string($conn, isset($data[0]) ? trim($data[0]) : "");
+            $academicYear    = mysqli_real_escape_string($conn, isset($data[1]) ? trim($data[1]) : "");
+            $month           = mysqli_real_escape_string($conn, isset($data[2]) ? trim($data[2]) : "");
+            $facultyName     = mysqli_real_escape_string($conn, isset($data[3]) ? trim($data[3]) : "");
 
-            $stmt->execute();
+            $rawDate = isset($data[4]) ? trim($data[4]) : '';
+            $dateAttended = ($rawDate !== '' && strtotime($rawDate) !== false) ? date('Y-m-d', strtotime($rawDate)) : null;
+            $dateAttendedSql = $dateAttended === null ? "NULL" : "'" . mysqli_real_escape_string($conn, $dateAttended) . "'";
+
+            $organization    = mysqli_real_escape_string($conn, isset($data[5]) ? trim($data[5]) : "");
+            $confJournalName = mysqli_real_escape_string($conn, isset($data[6]) ? trim($data[6]) : "");
+            $type            = mysqli_real_escape_string($conn, isset($data[7]) ? trim($data[7]) : "");
+            $proofLink       = mysqli_real_escape_string($conn, isset($data[8]) ? trim($data[8]) : "");
+
+            $sql = "INSERT INTO outside_participations
+    (
+        faculty_id, academic_year, month, faculty_name, date_attended,
+        organization, conference_journal_name, type, proof_link
+    )
+    VALUES
+    (
+        '$facultyId', '$academicYear', '$month', '$facultyName', $dateAttendedSql,
+        '$organization', '$confJournalName', '$type', '$proofLink'
+    )";
+
+            if (mysqli_query($conn, $sql)) {
+                $success++;
+            } else {
+                $failed++;
+                echo "<p class='status-error'>MySQL Error : " . mysqli_error($conn) . "</p>";
+            }
         }
 
-        $stmt->close();
+        fclose($handle);
 
         echo '</table>';
         echo '</div>';
-        fclose($handle);
+
+        echo "<br>";
 
         echo '<p class="status-success"><i class="fa fa-check-circle"></i> CSV Data Uploaded Successfully.</p>';
+        if ($failed > 0) {
+            echo "<p class='status-error'>Failed : $failed</p>";
+        }
+
         echo '</div>';
     } elseif (isset($_FILES['csvFile'])) {
         echo '<div class="preview-wrap"><p class="status-error"><i class="fa fa-times-circle"></i> Error uploading the CSV file.</p></div>';
@@ -437,7 +466,6 @@
 
     $conn->close();
     ?>
-
 </body>
 
 </html>
