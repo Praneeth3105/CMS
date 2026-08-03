@@ -347,20 +347,19 @@
 
                 echo "</tr>";
 
-                // CSV Mapping
-                // Change these indexes according to your CSV columns
 
-                $name       = mysqli_real_escape_string($conn, isset($data[0]) ? $data[0] : "");
-                $department = mysqli_real_escape_string($conn, isset($data[1]) ? $data[1] : "");
-                $fdpname    = mysqli_real_escape_string($conn, isset($data[2]) ? $data[2] : "");
-                $org        = mysqli_real_escape_string($conn, isset($data[3]) ? $data[3] : "");
-                $mode       = mysqli_real_escape_string($conn, isset($data[4]) ? $data[4] : "");
-                $duration   = mysqli_real_escape_string($conn, isset($data[5]) ? $data[5] : "");
+
+                $name       = mysqli_real_escape_string($conn, isset($data[1]) ? $data[1] : "");
+                $department = mysqli_real_escape_string($conn, isset($data[2]) ? $data[2] : "");
+                $fdpname    = mysqli_real_escape_string($conn, isset($data[3]) ? $data[3] : "");
+                $org        = mysqli_real_escape_string($conn, isset($data[4]) ? $data[4] : "");
+                $mode       = mysqli_real_escape_string($conn, isset($data[5]) ? $data[5] : "");
+                $duration   = mysqli_real_escape_string($conn, isset($data[6]) ? $data[6] : "");
 
                 $startdate = "";
                 $enddate   = "";
 
-                $dateText = trim($data[6]);
+                $dateText = trim($data[7]);
 
                 if (!empty($dateText)) {
 
@@ -387,18 +386,9 @@
                         $enddate = date("Y-m-d", strtotime(str_replace("/", "-", $enddate)));
                 }
 
-                $certificatelink = mysqli_real_escape_string($conn, trim($data[8] ?? ""));
+                $certificatelink = mysqli_real_escape_string($conn, trim($data[9] ?? ""));
 
-                // NEW: faculty_id now comes straight from the CSV row itself
-                // (this is the new column you're adding to the CSV).
-                // Index 9 = 10th column — change this number if you put the
-                // faculty_id column somewhere else in your sheet.
-                //
-                // NOTE: this must contain the same value the rest of the system
-                // uses as faculty_id — check with whoever built the login/search
-                // pages whether that's rollno or username, they are NOT the same
-                // column in your `login` table.
-                $faculty_id = mysqli_real_escape_string($conn, isset($data[9]) ? trim($data[9]) : "");
+                $faculty_id = mysqli_real_escape_string($conn, isset($data[0]) ? trim($data[0]) : "");
 
                 $sql = "INSERT INTO fdp
         (
