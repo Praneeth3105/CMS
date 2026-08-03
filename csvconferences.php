@@ -350,87 +350,112 @@
     <?php
     include "db_conn.php";
 
-    // Check if a file is uploaded
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
+
         $file = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
-        $columns = fgetcsv($handle, 1000, ",");
 
-        echo '<div class="preview-wrap">';
-        echo '<h3>CSV Preview</h3>';
-        echo '<div class="table-scroll">';
-        echo '<table>';
-        echo '<colgroup>
-                <col class="col-year">
-                <col class="col-faculty">
-                <col class="col-coauthors">
-                <col class="col-authortype">
-                <col class="col-title">
-                <col class="col-proceedings">
-                <col class="col-ugc">
-                <col class="col-url">
-                <col class="col-doi">
-                <col class="col-proof">
-              </colgroup>';
-        echo '<tr>';
-        foreach ($columns as $column) {
-            echo '<th>' . htmlspecialchars($column) . '</th>';
-        }
-        echo '</tr>';
+        if ($handle) {
 
-        // Prepared statement matching the CSV column order:
-        // 0 Academic Year | 1 Name of the Faculty | 2 No of Co-Authors | 3 Main Author/Others
-        // 4 Title of the Paper | 5 Conference Proceedings | 6 UGC/Scopus | 7 URL | 8 DOI | 9 Proof Link
-        $stmt = $conn->prepare(
-            "INSERT INTO conferences
-                (academic_year, faculty_name, co_authors_count, author_type, paper_title, conference_proceedings, ugc_scopus, url, doi, proof_link)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-        );
-        $stmt->bind_param(
-            "ssssssssss",
-            $academicYear,
-            $facultyName,
-            $coAuthors,
-            $authorType,
-            $paperTitle,
-            $conferenceProceedings,
-            $ugcScopus,
-            $url,
-            $doi,
-            $proofLink
-        );
+            // Skip Header Row
+            $header = fgetcsv($handle, 1000, ",");
 
-        while (($data = fgetcsv($handle, 1000, ",")) !== false) {
-            echo '<tr>';
-            foreach ($data as $value) {
-                echo '<td>' . htmlspecialchars($value) . '</td>';
+            echo '<div class="preview-wrap">';
+            echo "<h3>CSV Preview</h3>";
+            echo '<div class="table-scroll">';
+            echo "<table>";
+            echo "<tr>";
+
+            foreach ($header as $head) {
+                echo "<th>" . htmlspecialchars($head) . "</th>";
             }
-            echo '</tr>';
 
-            $academicYear          = isset($data[0]) ? $data[0] : '';
-            $facultyName            = isset($data[1]) ? $data[1] : '';
-            $coAuthors              = isset($data[2]) ? $data[2] : '';
-            $authorType             = isset($data[3]) ? $data[3] : '';
-            $paperTitle             = isset($data[4]) ? $data[4] : '';
-            $conferenceProceedings  = isset($data[5]) ? $data[5] : '';
-            $ugcScopus              = isset($data[6]) ? $data[6] : '';
-            $url                    = isset($data[7]) ? $data[7] : '';
-            $doi                    = isset($data[8]) ? $data[8] : '';
-            $proofLink              = isset($data[9]) ? $data[9] : '';
+            echo "</tr>";
 
-            $stmt->execute();
+            $success = 0;
+            $failed = 0;
+
+            while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+
+                echo "<tr>";
+
+                foreach ($data as $value) {
+                    echo "<td>" . htmlspecialchars($value) . "</td>";
+                }
+
+                echo "</tr>";
+
+                // 0 Faculty ID | 1 Academic Year | 2 Name of the Faculty | 3 No of Co-Authors
+                // 4 Main Author/Others | 5 Title of the Paper | 6 Conference Proceedings
+                // 7 UGC/Scopus | 8 URL | 9 DOI | 10 Proof Link
+
+                $faculty_id             = mysqli_real_escape_string($conn, isset($data[0]) ? trim($data[0]) : "");
+                $academicYear           = mysqli_real_escape_string($conn, isset($data[1]) ? trim($data[1]) : "");
+                $facultyName            = mysqli_real_escape_string($conn, isset($data[2]) ? trim($data[2]) : "");
+                $coAuthors              = mysqli_real_escape_string($conn, isset($data[3]) ? trim($data[3]) : "");
+                $authorType             = mysqli_real_escape_string($conn, isset($data[4]) ? trim($data[4]) : "");
+                $paperTitle             = mysqli_real_escape_string($conn, isset($data[5]) ? trim($data[5]) : "");
+                $conferenceProceedings  = mysqli_real_escape_string($conn, isset($data[6]) ? trim($data[6]) : "");
+                $ugcScopus              = mysqli_real_escape_string($conn, isset($data[7]) ? trim($data[7]) : "");
+                $url                    = mysqli_real_escape_string($conn, isset($data[8]) ? trim($data[8]) : "");
+                $doi                    = mysqli_real_escape_string($conn, isset($data[9]) ? trim($data[9]) : "");
+                $proofLink              = mysqli_real_escape_string($conn, isset($data[10]) ? trim($data[10]) : "");
+
+                $sql = "INSERT INTO conferences
+        (
+            faculty_id,
+            academic_year,
+            faculty_name,
+            co_authors_count,
+            author_type,
+            paper_title,
+            conference_proceedings,
+            ugc_scopus,
+            url,
+            doi,
+            proof_link
+        )
+
+        VALUES
+        (
+            '$faculty_id',
+            '$academicYear',
+            '$facultyName',
+            '$coAuthors',
+            '$authorType',
+            '$paperTitle',
+            '$conferenceProceedings',
+            '$ugcScopus',
+            '$url',
+            '$doi',
+            '$proofLink'
+        )";
+
+                if (mysqli_query($conn, $sql)) {
+                    $success++;
+                } else {
+                    $failed++;
+
+                    echo "<p class='status-error'>MySQL Error : " . mysqli_error($conn) . "</p>";
+                }
+            }
+
+            fclose($handle);
+
+            echo "</table>";
+            echo "</div>"; // .table-scroll
+
+            echo "<br>";
+
+            echo '<p class="status-success"><i class="fa fa-check-circle"></i> CSV Data Uploaded Successfully.</p>';
+            if ($failed > 0) {
+                echo "<p class='status-error'>Failed : $failed</p>";
+            }
+
+            echo '</div>'; // .preview-wrap
+        } else {
+            echo '<div class="preview-wrap"><p class="status-error">Unable to open CSV file.</p></div>';
         }
-
-        $stmt->close();
-
-        echo '</table>';
-        echo '</div>';
-        fclose($handle);
-
-        echo '<p class="status-success"><i class="fa fa-check-circle"></i> CSV Data Uploaded Successfully.</p>';
-        echo '</div>';
-    } elseif (isset($_FILES['csvFile'])) {
-        echo '<div class="preview-wrap"><p class="status-error"><i class="fa fa-times-circle"></i> Error uploading the CSV file.</p></div>';
     }
 
     $conn->close();

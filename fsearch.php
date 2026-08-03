@@ -757,7 +757,7 @@ $id = $_SESSION['id'];
             <th>Delete</th>
           </tr>
           <?php
-          $query = "SELECT * FROM conferences WHERE faculty_name='" . $_SESSION['name'] . "'";
+          $query = "SELECT * FROM conferences WHERE faculty_id='$id'";
           $result = mysqli_query($conn, $query);
           if ($result && mysqli_num_rows($result) > 0) {
             while ($rows = mysqli_fetch_assoc($result)) {
@@ -925,7 +925,7 @@ $id = $_SESSION['id'];
             <th>Delete</th>
           </tr>
           <?php
-          $query = "SELECT * FROM textbook WHERE faculty_name='" . $_SESSION['name'] . "'";
+          $query = "SELECT * FROM textbook WHERE faculty_id='$id'";
           $result = mysqli_query($conn, $query);
           if ($result && mysqli_num_rows($result) > 0) {
             while ($rows = mysqli_fetch_assoc($result)) {
@@ -979,7 +979,7 @@ $id = $_SESSION['id'];
             <th>Delete</th>
           </tr>
           <?php
-          $query = "SELECT * FROM patents WHERE faculty_name='" . $_SESSION['name'] . "'";
+          $query = "SELECT * FROM patents WHERE faculty_id='$id'";
           $result = mysqli_query($conn, $query);
           if ($result && mysqli_num_rows($result) > 0) {
             while ($rows = mysqli_fetch_assoc($result)) {
@@ -1036,7 +1036,7 @@ $id = $_SESSION['id'];
             <th>Delete</th>
           </tr>
           <?php
-          $query = "SELECT * FROM nptel WHERE faculty_name='" . $_SESSION['name'] . "'";
+          $query = "SELECT * FROM nptel WHERE faculty_id='$id'";
           $result = mysqli_query($conn, $query);
           if ($result && mysqli_num_rows($result) > 0) {
             while ($rows = mysqli_fetch_assoc($result)) {
@@ -1090,7 +1090,7 @@ $id = $_SESSION['id'];
             <th>Delete</th>
           </tr>
           <?php
-          $query = "SELECT * FROM achievements WHERE faculty_name='" . $_SESSION['name'] . "'";
+          $query = "SELECT * FROM achievements WHERE faculty_id='$id'";
           $result = mysqli_query($conn, $query);
           if ($result && mysqli_num_rows($result) > 0) {
             while ($rows = mysqli_fetch_assoc($result)) {

@@ -217,7 +217,11 @@
             overflow: hidden;
         }
 
-        /* Per-column widths tuned for the 7 textbook CSV fields */
+        /* Per-column widths tuned for the 8 textbook CSV fields (incl. faculty_id) */
+        col.col-facultyid {
+            width: 120px;
+        }
+
         col.col-year {
             width: 100px;
         }
@@ -340,27 +344,33 @@
 
     // Ensure the textbook table exists (safe to run every load)
     $createTableSql = "CREATE TABLE IF NOT EXISTS textbook (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        academic_year VARCHAR(20) NOT NULL,
-        month VARCHAR(20),
-        faculty_name VARCHAR(150) NOT NULL,
-        main_editor VARCHAR(100),
-        textbook_name VARCHAR(255) NOT NULL,
-        publisher_name VARCHAR(200),
-        url TEXT
-    )";
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    academic_year VARCHAR(20) NOT NULL,
+    month VARCHAR(20),
+    faculty_name VARCHAR(150) NOT NULL,
+    main_editor VARCHAR(100),
+    textbook_name VARCHAR(255) NOT NULL,
+    publisher_name VARCHAR(200),
+    url TEXT,
+    faculty_id VARCHAR(100) NOT NULL
+)";
     $conn->query($createTableSql);
 
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
+
         $file = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
-        $columns = fgetcsv($handle, 1000, ",");
 
-        echo '<div class="preview-wrap">';
-        echo '<h3>CSV Preview</h3>';
-        echo '<div class="table-scroll">';
-        echo '<table>';
-        echo '<colgroup>
+        if ($handle) {
+
+            $columns = fgetcsv($handle, 1000, ",");
+
+            echo '<div class="preview-wrap">';
+            echo '<h3>CSV Preview</h3>';
+            echo '<div class="table-scroll">';
+            echo '<table>';
+            echo '<colgroup>
+                <col class="col-facultyid">
                 <col class="col-year">
                 <col class="col-month">
                 <col class="col-faculty">
@@ -369,69 +379,96 @@
                 <col class="col-publisher">
                 <col class="col-url">
               </colgroup>';
-        echo '<tr>';
-        foreach ($columns as $column) {
-            echo '<th>' . htmlspecialchars($column) . '</th>';
-        }
-        echo '</tr>';
-
-
-        $stmt = $conn->prepare(
-            "INSERT INTO textbook
-                (academic_year, month, faculty_name, main_editor, textbook_name, publisher_name, url)
-             VALUES (?, ?, ?, ?, ?, ?, ?)"
-        );
-        $stmt->bind_param(
-            "sssssss",
-            $academicYear,
-            $month,
-            $facultyName,
-            $mainEditor,
-            $textbookName,
-            $publisherName,
-            $url
-        );
-
-        while (($data = fgetcsv($handle, 1000, ",")) !== false) {
-        
-            $rowIsEmpty = count(array_filter($data, fn($v) => trim($v) !== '')) === 0;
-            $missingKeyFields = empty(trim($data[0] ?? '')) || empty(trim($data[2] ?? ''));
-            if ($rowIsEmpty || $missingKeyFields) {
-                continue;
-            }
-
             echo '<tr>';
-            foreach ($data as $value) {
-                echo '<td>' . htmlspecialchars($value) . '</td>';
+            foreach ($columns as $column) {
+                echo '<th>' . htmlspecialchars($column) . '</th>';
             }
             echo '</tr>';
 
-            $academicYear   = isset($data[0]) ? $data[0] : '';
-            $month          = isset($data[1]) ? $data[1] : '';
-            $facultyName    = isset($data[2]) ? $data[2] : '';
-            $mainEditor     = isset($data[3]) ? $data[3] : '';
-            $textbookName   = isset($data[4]) ? $data[4] : '';
-            $publisherName  = isset($data[5]) ? $data[5] : '';
-            $url            = isset($data[6]) ? $data[6] : '';
+            $success = 0;
+            $failed = 0;
 
-            $stmt->execute();
+            while (($data = fgetcsv($handle, 1000, ",")) !== false) {
+
+                // Skip only rows that are completely blank across every column
+                $rowIsEmpty = count(array_filter($data, fn($v) => trim($v) !== '')) === 0;
+                if ($rowIsEmpty) {
+                    continue;
+                }
+
+                echo '<tr>';
+                foreach ($data as $value) {
+                    echo '<td>' . htmlspecialchars($value) . '</td>';
+                }
+                echo '</tr>';
+
+                // 0 Faculty ID | 1 Academic Year | 2 Month | 3 Faculty Name
+                // 4 Main Editor | 5 Textbook Name | 6 Publisher | 7 URL
+
+                $facultyId      = mysqli_real_escape_string($conn, isset($data[0]) ? trim($data[0]) : "");
+                $academicYear   = mysqli_real_escape_string($conn, isset($data[1]) ? trim($data[1]) : "");
+                $month          = mysqli_real_escape_string($conn, isset($data[2]) ? trim($data[2]) : "");
+                $facultyName    = mysqli_real_escape_string($conn, isset($data[3]) ? trim($data[3]) : "");
+                $mainEditor     = mysqli_real_escape_string($conn, isset($data[4]) ? trim($data[4]) : "");
+                $textbookName   = mysqli_real_escape_string($conn, isset($data[5]) ? trim($data[5]) : "");
+                $publisherName  = mysqli_real_escape_string($conn, isset($data[6]) ? trim($data[6]) : "");
+                $url            = mysqli_real_escape_string($conn, isset($data[7]) ? trim($data[7]) : "");
+
+                $sql = "INSERT INTO textbook
+        (
+            faculty_id,
+            academic_year,
+            month,
+            faculty_name,
+            main_editor,
+            textbook_name,
+            publisher_name,
+            url
+        )
+
+        VALUES
+        (
+            '$facultyId',
+            '$academicYear',
+            '$month',
+            '$facultyName',
+            '$mainEditor',
+            '$textbookName',
+            '$publisherName',
+            '$url'
+        )";
+
+                if (mysqli_query($conn, $sql)) {
+                    $success++;
+                } else {
+                    $failed++;
+
+                    echo "<p class='status-error'>MySQL Error : " . mysqli_error($conn) . "</p>";
+                }
+            }
+
+            fclose($handle);
+
+            echo '</table>';
+            echo '</div>';
+
+            echo "<br>";
+
+            echo '<p class="status-success"><i class="fa fa-check-circle"></i> CSV Data Uploaded Successfully.</p>';
+            if ($failed > 0) {
+                echo "<p class='status-error'>Failed : $failed</p>";
+            }
+
+            echo '</div>';
+        } else {
+            echo '<div class="preview-wrap"><p class="status-error">Unable to open CSV file.</p></div>';
         }
-
-        $stmt->close();
-
-        echo '</table>';
-        echo '</div>';
-        fclose($handle);
-
-        echo '<p class="status-success"><i class="fa fa-check-circle"></i> CSV Data Uploaded Successfully.</p>';
-        echo '</div>';
     } elseif (isset($_FILES['csvFile'])) {
         echo '<div class="preview-wrap"><p class="status-error"><i class="fa fa-times-circle"></i> Error uploading the CSV file.</p></div>';
     }
 
     $conn->close();
     ?>
-
 </body>
 
 </html>

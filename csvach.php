@@ -338,27 +338,9 @@
     <?php
     include "db_conn.php";
 
-    // Ensure the achievements table exists (safe to run every load).
-    // achievement_date is stored as VARCHAR (free text) on purpose so that
-    // dates in ANY format ("12/08/2025", "Aug 2025", "2025", "N/A", etc.)
-    // are accepted as-is without conversion or validation errors.
-    $createTableSql = "CREATE TABLE IF NOT EXISTS achievements (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        academic_year VARCHAR(20) NOT NULL,
-        faculty_name VARCHAR(150) NOT NULL,
-        award_name VARCHAR(255),
-        description TEXT,
-        achievement_date VARCHAR(50),
-        organization VARCHAR(200),
-        achievement_link TEXT
-    )";
-    $conn->query($createTableSql);
-
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
         $file = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
-        // Read and discard the CSV's own header row (labels are hardcoded below
-        // to avoid blank/inconsistent header cells breaking the table).
         fgetcsv($handle, 1000, ",");
 
         echo '<div class="preview-wrap">';
@@ -366,17 +348,19 @@
         echo '<div class="table-scroll">';
         echo '<table>';
         echo '<colgroup>
-                <col class="col-year">
-                <col class="col-faculty">
-                <col class="col-award">
-                <col class="col-description">
-                <col class="col-date">
-                <col class="col-organization">
-                <col class="col-link">
-              </colgroup>';
+            <col class="col-facultyid">
+            <col class="col-year">
+            <col class="col-faculty">
+            <col class="col-award">
+            <col class="col-description">
+            <col class="col-date">
+            <col class="col-organization">
+            <col class="col-link">
+          </colgroup>';
 
         echo '<tr>';
         $headerLabels = [
+            'Faculty ID',
             'Academic Year',
             'Faculty Name',
             'Award Name',
@@ -390,31 +374,16 @@
         }
         echo '</tr>';
 
-        // Prepared statement matching the CSV column order:
-        // 0 Academic Year | 1 Faculty Name | 2 Award Name | 3 Description
-        // 4 Date | 5 Organization | 6 Link for Achievement
-        $stmt = $conn->prepare(
-            "INSERT INTO achievements
-                (academic_year, faculty_name, award_name, description, achievement_date, organization, achievement_link)
-             VALUES (?, ?, ?, ?, ?, ?, ?)"
-        );
-        $stmt->bind_param(
-            "sssssss",
-            $academicYear,
-            $facultyName,
-            $awardName,
-            $description,
-            $achievementDate,
-            $organization,
-            $achievementLink
-        );
+        $success = 0;
+        $failed = 0;
 
         while (($data = fgetcsv($handle, 1000, ",")) !== false) {
-            // Skip rows that are blank, or missing the required (NOT NULL)
-            // fields — protects against stray/leftover rows in the CSV.
+
+            // 0 Faculty ID | 1 Academic Year | 2 Faculty Name | 3 Award Name
+            // 4 Description | 5 Date | 6 Organization | 7 Link for Achievement
+
             $rowIsEmpty = count(array_filter($data, fn($v) => trim($v) !== '')) === 0;
-            $missingKeyFields = empty(trim($data[0] ?? '')) || empty(trim($data[1] ?? ''));
-            if ($rowIsEmpty || $missingKeyFields) {
+            if ($rowIsEmpty) {
                 continue;
             }
 
@@ -424,24 +393,46 @@
             }
             echo '</tr>';
 
-            $academicYear     = isset($data[0]) ? $data[0] : '';
-            $facultyName      = isset($data[1]) ? $data[1] : '';
-            $awardName        = isset($data[2]) ? $data[2] : '';
-            $description      = isset($data[3]) ? $data[3] : '';
-            $achievementDate  = isset($data[4]) ? $data[4] : '';
-            $organization     = isset($data[5]) ? $data[5] : '';
-            $achievementLink  = isset($data[6]) ? $data[6] : '';
+            $facultyId       = mysqli_real_escape_string($conn, isset($data[0]) ? trim($data[0]) : "");
+            $academicYear    = mysqli_real_escape_string($conn, isset($data[1]) ? trim($data[1]) : "");
+            $facultyName     = mysqli_real_escape_string($conn, isset($data[2]) ? trim($data[2]) : "");
+            $awardName       = mysqli_real_escape_string($conn, isset($data[3]) ? trim($data[3]) : "");
+            $description     = mysqli_real_escape_string($conn, isset($data[4]) ? trim($data[4]) : "");
+            $achievementDate = mysqli_real_escape_string($conn, isset($data[5]) ? trim($data[5]) : "");
+            $organization    = mysqli_real_escape_string($conn, isset($data[6]) ? trim($data[6]) : "");
+            $achievementLink = mysqli_real_escape_string($conn, isset($data[7]) ? trim($data[7]) : "");
 
-            $stmt->execute();
+            $sql = "INSERT INTO achievements
+    (
+        faculty_id, academic_year, faculty_name, award_name,
+        description, achievement_date, organization, achievement_link
+    )
+    VALUES
+    (
+        '$facultyId', '$academicYear', '$facultyName', '$awardName',
+        '$description', '$achievementDate', '$organization', '$achievementLink'
+    )";
+
+            if (mysqli_query($conn, $sql)) {
+                $success++;
+            } else {
+                $failed++;
+                echo "<p class='status-error'>MySQL Error : " . mysqli_error($conn) . "</p>";
+            }
         }
 
-        $stmt->close();
+        fclose($handle);
 
         echo '</table>';
         echo '</div>';
-        fclose($handle);
+
+        echo "<br>";
 
         echo '<p class="status-success"><i class="fa fa-check-circle"></i> CSV Data Uploaded Successfully.</p>';
+        if ($failed > 0) {
+            echo "<p class='status-error'>Failed : $failed</p>";
+        }
+
         echo '</div>';
     } elseif (isset($_FILES['csvFile'])) {
         echo '<div class="preview-wrap"><p class="status-error"><i class="fa fa-times-circle"></i> Error uploading the CSV file.</p></div>';

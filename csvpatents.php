@@ -350,12 +350,9 @@
     <?php
     include "db_conn.php";
 
-
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
         $file = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
-        // Read and discard the CSV's own header row (labels are hardcoded below
-        // to avoid blank/inconsistent header cells breaking the table).
         fgetcsv($handle, 1000, ",");
 
         echo '<div class="preview-wrap">';
@@ -363,20 +360,22 @@
         echo '<div class="table-scroll">';
         echo '<table>';
         echo '<colgroup>
-                <col class="col-year">
-                <col class="col-month">
-                <col class="col-faculty">
-                <col class="col-details">
-                <col class="col-area">
-                <col class="col-appno">
-                <col class="col-status">
-                <col class="col-type">
-                <col class="col-agency">
-                <col class="col-proof">
-              </colgroup>';
+            <col class="col-facultyid">
+            <col class="col-year">
+            <col class="col-month">
+            <col class="col-faculty">
+            <col class="col-details">
+            <col class="col-area">
+            <col class="col-appno">
+            <col class="col-status">
+            <col class="col-type">
+            <col class="col-agency">
+            <col class="col-proof">
+          </colgroup>';
 
         echo '<tr>';
         $headerLabels = [
+            'Faculty ID',
             'Academic Year',
             'Month',
             'Name of the Faculty',
@@ -393,35 +392,17 @@
         }
         echo '</tr>';
 
-        // Prepared statement matching the CSV column order:
-        // 0 Academic Year | 1 Month | 2 Name of the Faculty | 3 Patent Details
-        // 4 Area of the Patent Filed/Obtained | 5 Application Number | 6 Status
-        // 7 Type (Publication/Grant/Design) | 8 Filing Agency | 9 Proof Link
-        $stmt = $conn->prepare(
-            "INSERT INTO patents
-                (academic_year, month, faculty_name, patent_details, area_of_patent, application_number, status, patent_type, filing_agency, proof_link)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-        );
-        $stmt->bind_param(
-            "ssssssssss",
-            $academicYear,
-            $month,
-            $facultyName,
-            $patentDetails,
-            $areaOfPatent,
-            $applicationNumber,
-            $status,
-            $patentType,
-            $filingAgency,
-            $proofLink
-        );
+        $success = 0;
+        $failed = 0;
 
         while (($data = fgetcsv($handle, 1000, ",")) !== false) {
-            // Skip rows that are blank, or missing the required (NOT NULL)
-            // fields — protects against stray/leftover rows in the CSV.
+
+            // 0 Faculty ID | 1 Academic Year | 2 Month | 3 Name of the Faculty | 4 Patent Details
+            // 5 Area of the Patent Filed/Obtained | 6 Application Number | 7 Status
+            // 8 Type (Publication/Grant/Design) | 9 Filing Agency | 10 Proof Link
+
             $rowIsEmpty = count(array_filter($data, fn($v) => trim($v) !== '')) === 0;
-            $missingKeyFields = empty(trim($data[0] ?? '')) || empty(trim($data[2] ?? ''));
-            if ($rowIsEmpty || $missingKeyFields) {
+            if ($rowIsEmpty) {
                 continue;
             }
 
@@ -431,27 +412,49 @@
             }
             echo '</tr>';
 
-            $academicYear       = isset($data[0]) ? $data[0] : '';
-            $month              = isset($data[1]) ? $data[1] : '';
-            $facultyName        = isset($data[2]) ? $data[2] : '';
-            $patentDetails      = isset($data[3]) ? $data[3] : '';
-            $areaOfPatent       = isset($data[4]) ? $data[4] : '';
-            $applicationNumber  = isset($data[5]) ? $data[5] : '';
-            $status             = isset($data[6]) ? $data[6] : '';
-            $patentType         = isset($data[7]) ? $data[7] : '';
-            $filingAgency       = isset($data[8]) ? $data[8] : '';
-            $proofLink          = isset($data[9]) ? $data[9] : '';
+            $facultyId         = mysqli_real_escape_string($conn, isset($data[0]) ? trim($data[0]) : "");
+            $academicYear      = mysqli_real_escape_string($conn, isset($data[1]) ? trim($data[1]) : "");
+            $month             = mysqli_real_escape_string($conn, isset($data[2]) ? trim($data[2]) : "");
+            $facultyName       = mysqli_real_escape_string($conn, isset($data[3]) ? trim($data[3]) : "");
+            $patentDetails     = mysqli_real_escape_string($conn, isset($data[4]) ? trim($data[4]) : "");
+            $areaOfPatent      = mysqli_real_escape_string($conn, isset($data[5]) ? trim($data[5]) : "");
+            $applicationNumber = mysqli_real_escape_string($conn, isset($data[6]) ? trim($data[6]) : "");
+            $status            = mysqli_real_escape_string($conn, isset($data[7]) ? trim($data[7]) : "");
+            $patentType        = mysqli_real_escape_string($conn, isset($data[8]) ? trim($data[8]) : "");
+            $filingAgency      = mysqli_real_escape_string($conn, isset($data[9]) ? trim($data[9]) : "");
+            $proofLink         = mysqli_real_escape_string($conn, isset($data[10]) ? trim($data[10]) : "");
 
-            $stmt->execute();
+            $sql = "INSERT INTO patents
+    (
+        faculty_id, academic_year, month, faculty_name, patent_details,
+        area_of_patent, application_number, status, patent_type, filing_agency, proof_link
+    )
+    VALUES
+    (
+        '$facultyId', '$academicYear', '$month', '$facultyName', '$patentDetails',
+        '$areaOfPatent', '$applicationNumber', '$status', '$patentType', '$filingAgency', '$proofLink'
+    )";
+
+            if (mysqli_query($conn, $sql)) {
+                $success++;
+            } else {
+                $failed++;
+                echo "<p class='status-error'>MySQL Error : " . mysqli_error($conn) . "</p>";
+            }
         }
 
-        $stmt->close();
+        fclose($handle);
 
         echo '</table>';
         echo '</div>';
-        fclose($handle);
+
+        echo "<br>";
 
         echo '<p class="status-success"><i class="fa fa-check-circle"></i> CSV Data Uploaded Successfully.</p>';
+        if ($failed > 0) {
+            echo "<p class='status-error'>Failed : $failed</p>";
+        }
+
         echo '</div>';
     } elseif (isset($_FILES['csvFile'])) {
         echo '<div class="preview-wrap"><p class="status-error"><i class="fa fa-times-circle"></i> Error uploading the CSV file.</p></div>';

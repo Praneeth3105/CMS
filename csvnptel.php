@@ -350,27 +350,10 @@
     <?php
     include "db_conn.php";
 
-    // Ensure the nptel table exists (safe to run every load)
-    $createTableSql = "CREATE TABLE IF NOT EXISTS nptel (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        academic_year VARCHAR(20) NOT NULL,
-        faculty_name VARCHAR(150) NOT NULL,
-        course_name VARCHAR(255),
-        duration VARCHAR(50),
-        start_date DATE NULL,
-        end_date DATE NULL,
-        percentage VARCHAR(20),
-        top_percentage VARCHAR(20),
-        remarks VARCHAR(50),
-        certificate_link TEXT
-    )";
-    $conn->query($createTableSql);
 
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
         $file = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
-        // Read and discard the CSV's own header row (labels are hardcoded below
-        // to avoid blank/inconsistent header cells breaking the table).
         fgetcsv($handle, 1000, ",");
 
         echo '<div class="preview-wrap">';
@@ -378,20 +361,22 @@
         echo '<div class="table-scroll">';
         echo '<table>';
         echo '<colgroup>
-                <col class="col-year">
-                <col class="col-faculty">
-                <col class="col-course">
-                <col class="col-duration">
-                <col class="col-startdate">
-                <col class="col-enddate">
-                <col class="col-percentage">
-                <col class="col-toppercentage">
-                <col class="col-remarks">
-                <col class="col-certlink">
-              </colgroup>';
+            <col class="col-facultyid">
+            <col class="col-year">
+            <col class="col-faculty">
+            <col class="col-course">
+            <col class="col-duration">
+            <col class="col-startdate">
+            <col class="col-enddate">
+            <col class="col-percentage">
+            <col class="col-toppercentage">
+            <col class="col-remarks">
+            <col class="col-certlink">
+          </colgroup>';
 
         echo '<tr>';
         $headerLabels = [
+            'Faculty ID',
             'Academic Year',
             'Faculty Name',
             'Course Name',
@@ -408,35 +393,17 @@
         }
         echo '</tr>';
 
-        // Prepared statement matching the CSV column order:
-        // 0 Academic Year | 1 Faculty Name | 2 Course Name | 3 Duration
-        // 4 Start Date | 5 End Date | 6 Percentage | 7 TOP % (if any)
-        // 8 Remarks (Elite/Gold) | 9 Link for Certificate
-        $stmt = $conn->prepare(
-            "INSERT INTO nptel
-                (academic_year, faculty_name, course_name, duration, start_date, end_date, percentage, top_percentage, remarks, certificate_link)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-        );
-        $stmt->bind_param(
-            "ssssssssss",
-            $academicYear,
-            $facultyName,
-            $courseName,
-            $duration,
-            $startDate,
-            $endDate,
-            $percentage,
-            $topPercentage,
-            $remarks,
-            $certificateLink
-        );
+        $success = 0;
+        $failed = 0;
 
         while (($data = fgetcsv($handle, 1000, ",")) !== false) {
-            // Skip rows that are blank, or missing the required (NOT NULL)
-            // fields — protects against stray/leftover rows in the CSV.
+
+            // 0 Faculty ID | 1 Academic Year | 2 Faculty Name | 3 Course Name | 4 Duration
+            // 5 Start Date | 6 End Date | 7 Percentage | 8 TOP % (if any)
+            // 9 Remarks (Elite/Gold) | 10 Link for Certificate
+
             $rowIsEmpty = count(array_filter($data, fn($v) => trim($v) !== '')) === 0;
-            $missingKeyFields = empty(trim($data[0] ?? '')) || empty(trim($data[1] ?? ''));
-            if ($rowIsEmpty || $missingKeyFields) {
+            if ($rowIsEmpty) {
                 continue;
             }
 
@@ -446,32 +413,55 @@
             }
             echo '</tr>';
 
-            $academicYear = isset($data[0]) ? $data[0] : '';
-            $facultyName  = isset($data[1]) ? $data[1] : '';
-            $courseName   = isset($data[2]) ? $data[2] : '';
-            $duration     = isset($data[3]) ? $data[3] : '';
+            $facultyId    = mysqli_real_escape_string($conn, isset($data[0]) ? trim($data[0]) : "");
+            $academicYear = mysqli_real_escape_string($conn, isset($data[1]) ? trim($data[1]) : "");
+            $facultyName  = mysqli_real_escape_string($conn, isset($data[2]) ? trim($data[2]) : "");
+            $courseName   = mysqli_real_escape_string($conn, isset($data[3]) ? trim($data[3]) : "");
+            $duration     = mysqli_real_escape_string($conn, isset($data[4]) ? trim($data[4]) : "");
 
-            // Convert dates to Y-m-d for the DATE columns; store NULL if blank/unparseable.
-            $rawStart = isset($data[4]) ? trim($data[4]) : '';
-            $rawEnd   = isset($data[5]) ? trim($data[5]) : '';
+            $rawStart = isset($data[5]) ? trim($data[5]) : '';
+            $rawEnd   = isset($data[6]) ? trim($data[6]) : '';
             $startDate = ($rawStart !== '' && strtotime($rawStart) !== false) ? date('Y-m-d', strtotime($rawStart)) : null;
             $endDate   = ($rawEnd !== '' && strtotime($rawEnd) !== false) ? date('Y-m-d', strtotime($rawEnd)) : null;
+            $startDateSql = $startDate === null ? "NULL" : "'" . mysqli_real_escape_string($conn, $startDate) . "'";
+            $endDateSql   = $endDate === null ? "NULL" : "'" . mysqli_real_escape_string($conn, $endDate) . "'";
 
-            $percentage      = isset($data[6]) ? $data[6] : '';
-            $topPercentage   = isset($data[7]) ? $data[7] : '';
-            $remarks         = isset($data[8]) ? $data[8] : '';
-            $certificateLink = isset($data[9]) ? $data[9] : '';
+            $percentage      = mysqli_real_escape_string($conn, isset($data[7]) ? trim($data[7]) : "");
+            $topPercentage   = mysqli_real_escape_string($conn, isset($data[8]) ? trim($data[8]) : "");
+            $remarks         = mysqli_real_escape_string($conn, isset($data[9]) ? trim($data[9]) : "");
+            $certificateLink = mysqli_real_escape_string($conn, isset($data[10]) ? trim($data[10]) : "");
 
-            $stmt->execute();
+            $sql = "INSERT INTO nptel
+    (
+        faculty_id, academic_year, faculty_name, course_name, duration,
+        start_date, end_date, percentage, top_percentage, remarks, certificate_link
+    )
+    VALUES
+    (
+        '$facultyId', '$academicYear', '$facultyName', '$courseName', '$duration',
+        $startDateSql, $endDateSql, '$percentage', '$topPercentage', '$remarks', '$certificateLink'
+    )";
+
+            if (mysqli_query($conn, $sql)) {
+                $success++;
+            } else {
+                $failed++;
+                echo "<p class='status-error'>MySQL Error : " . mysqli_error($conn) . "</p>";
+            }
         }
 
-        $stmt->close();
+        fclose($handle);
 
         echo '</table>';
         echo '</div>';
-        fclose($handle);
+
+        echo "<br>";
 
         echo '<p class="status-success"><i class="fa fa-check-circle"></i> CSV Data Uploaded Successfully.</p>';
+        if ($failed > 0) {
+            echo "<p class='status-error'>Failed : $failed</p>";
+        }
+
         echo '</div>';
     } elseif (isset($_FILES['csvFile'])) {
         echo '<div class="preview-wrap"><p class="status-error"><i class="fa fa-times-circle"></i> Error uploading the CSV file.</p></div>';
