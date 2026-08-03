@@ -399,14 +399,6 @@
     <?php
     include "db_conn.php";
 
-    /**
-     * Try to parse a date string that may come in many different formats
-     * (mixed within the same CSV) and return it as 'Y-m-d', or null if
-     * it truly cannot be understood.
-     *
-     * Assumes day-first (DD/MM/YYYY) interpretation for ambiguous numeric
-     * dates, since that matches Indian date conventions.
-     */
     function parseFlexibleDate($dateStr)
     {
         $dateStr = trim((string) $dateStr);
@@ -414,25 +406,18 @@
         if ($dateStr === '') {
             return null;
         }
-
-        // Remove ordinal suffixes: "10th" -> "10", "21st" -> "21"
         $dateStr = preg_replace('/(\d+)(st|nd|rd|th)\b/i', '$1', $dateStr);
 
-        // Normalize spaced-out dashes: "19 -Dec-23" -> "19-Dec-23"
         $dateStr = preg_replace('/\s*-\s*/', '-', $dateStr);
 
-        // Trim stray leading/trailing dashes, spaces
         $dateStr = trim($dateStr, "- \t\n\r\0\x0B");
 
-        // Collapse repeated whitespace
         $dateStr = preg_replace('/\s+/', ' ', $dateStr);
 
         if ($dateStr === '') {
             return null;
         }
 
-        // Explicit formats to try, in priority order.
-        // Day-first numeric formats are listed before month-first ones.
         $formats = [
             'Y-m-d',
             'Y/m/d',
@@ -461,7 +446,6 @@
             }
         }
 
-        // Handle "Month Year" with no day, e.g. "June 2025" -> 1st of that month
         if (preg_match('/^[A-Za-z]+ \d{4}$/', $dateStr)) {
             $d = DateTime::createFromFormat('F Y', $dateStr);
             if ($d !== false) {
@@ -469,16 +453,14 @@
             }
         }
 
-        // Last resort: let PHP's own parser take a guess
         $timestamp = strtotime($dateStr);
         if ($timestamp !== false) {
             return date('Y-m-d', $timestamp);
         }
 
-        return null; // Could not understand this date at all
+        return null; 
     }
 
-    // Check if a file is uploaded
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
         $file = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
@@ -493,19 +475,15 @@
             echo '<th>' . htmlspecialchars($column) . '</th>';
         }
         echo '</tr>';
-
-        // CSV column order:
-        // 0 Academic Year | 1 Name | 2 Certificate | 3 Org | 4 Start Date |
-        // 5 End Date | 6 Duration | 7 Online/Offline | 8 Link for Certificate
         $stmt = $conn->prepare(
             "INSERT INTO certificates
                 (academic_year, name, certificate, org,
                  start_date, start_date_raw, end_date, end_date_raw,
-                 duration, mode, certificate_link)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                 duration, mode, certificate_link, faculty_id)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         );
         $stmt->bind_param(
-            "sssssssssss",
+            "ssssssssssss",
             $academic_year,
             $name,
             $certificate,
@@ -516,7 +494,8 @@
             $end_date_raw,
             $duration,
             $mode,
-            $certificate_link
+            $certificate_link,
+            $faculty_id
         );
 
         $rowCount = 0;
@@ -526,15 +505,16 @@
         while (($data = fgetcsv($handle, 1000, ",")) !== false) {
             $rowNum++;
 
-            $academic_year    = isset($data[0]) ? trim($data[0]) : '';
-            $name             = isset($data[1]) ? trim($data[1]) : '';
-            $certificate      = isset($data[2]) ? trim($data[2]) : '';
-            $org              = isset($data[3]) ? trim($data[3]) : '';
-            $start_date_raw   = isset($data[4]) ? trim($data[4]) : '';
-            $end_date_raw     = isset($data[5]) ? trim($data[5]) : '';
-            $duration         = isset($data[6]) ? trim($data[6]) : '';
-            $mode             = isset($data[7]) ? trim($data[7]) : '';
-            $certificate_link = isset($data[8]) ? trim($data[8]) : '';
+            $academic_year    = isset($data[1]) ? trim($data[1]) : '';
+            $name             = isset($data[2]) ? trim($data[2]) : '';
+            $certificate      = isset($data[3]) ? trim($data[3]) : '';
+            $org              = isset($data[4]) ? trim($data[4]) : '';
+            $start_date_raw   = isset($data[5]) ? trim($data[5]) : '';
+            $end_date_raw     = isset($data[6]) ? trim($data[6]) : '';
+            $duration         = isset($data[7]) ? trim($data[7]) : '';
+            $mode             = isset($data[8]) ? trim($data[8]) : '';
+            $certificate_link = isset($data[9]) ? trim($data[9]) : '';
+            $faculty_id       = isset($data[0]) ? trim($data[0]) : '';
 
             // Skip fully blank rows (e.g. trailing empty lines in the CSV)
             if ($academic_year === '' && $name === '' && $certificate === '') {

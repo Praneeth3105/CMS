@@ -367,18 +367,16 @@
             }
             echo '</tr>';
 
-            // CSV column order:
-            // 0: Academic Year | 1: Month | 2: Faculty Name | 3: No. of Authors
-            // 4: Book Name | 5: Publisher Name | 6: ISBN Number | 7: URL | 8: Proof Link
-            $academic_year   = isset($data[0]) ? $data[0] : '';
-            $month           = isset($data[1]) ? $data[1] : '';
-            $faculty_name    = isset($data[2]) ? $data[2] : '';
-            $no_of_authors   = isset($data[3]) ? $data[3] : '';
-            $book_name       = isset($data[4]) ? $data[4] : '';
-            $publisher_name  = isset($data[5]) ? $data[5] : '';
-            $isbn_number     = isset($data[6]) ? $data[6] : '';
-            $url             = isset($data[7]) ? $data[7] : '';
-            $proof_link      = isset($data[8]) ? $data[8] : '';
+            $academic_year   = isset($data[1]) ? $data[1] : '';
+            $month           = isset($data[2]) ? $data[2] : '';
+            $faculty_name    = isset($data[3]) ? $data[3] : '';
+            $no_of_authors   = isset($data[4]) ? $data[4] : '';
+            $book_name       = isset($data[5]) ? $data[5] : '';
+            $publisher_name  = isset($data[6]) ? $data[6] : '';
+            $isbn_number     = isset($data[7]) ? $data[7] : '';
+            $url             = isset($data[8]) ? $data[8] : '';
+            $proof_link      = isset($data[9]) ? $data[9] : '';
+            $faculty_id      = isset($data[0]) ? $data[0] : '';
 
             // Escape values before inserting
             $academic_year   = $conn->real_escape_string($academic_year);
@@ -390,11 +388,12 @@
             $isbn_number     = $conn->real_escape_string($isbn_number);
             $url             = $conn->real_escape_string($url);
             $proof_link      = $conn->real_escape_string($proof_link);
+            $faculty_id      = $conn->real_escape_string($faculty_id);
 
             $sql = "INSERT INTO bookedited
-                    (academic_year, month, faculty_name, no_of_authors, book_name, publisher_name, isbn_number, url, proof_link)
+                    (academic_year, month, faculty_name, no_of_authors, book_name, publisher_name, isbn_number, url, proof_link, faculty_id)
                 VALUES
-                    ('$academic_year','$month','$faculty_name','$no_of_authors','$book_name','$publisher_name','$isbn_number','$url','$proof_link')";
+                    ('$academic_year','$month','$faculty_name','$no_of_authors','$book_name','$publisher_name','$isbn_number','$url','$proof_link','$faculty_id')";
             $conn->query($sql);
         }
 

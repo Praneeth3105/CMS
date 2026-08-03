@@ -414,19 +414,21 @@
         }
         echo '</tr>';
 
-        // Prepared statement — matches the 12 columns in your real CSV,
+        // Prepared statement — matches the 13 columns in your CSV,
         // in the exact order they appear:
         // Academic Year | MONTH | Name of the Faculty | No of Authors |
         // Main Author/Other | Title of the Book Chapter | Name of the Publisher |
-        // SCOPUS/SCI | URL | ISBN | DOI | Proof Link
+        // SCOPUS/SCI | URL | ISBN | DOI | Proof Link | Faculty ID
+        // Faculty ID is NEW — add it as the last column in your CSV.
+        // Must match the same value used everywhere else as faculty_id (rollno).
         $stmt = $conn->prepare(
             "INSERT INTO bookpublish
                 (academic_year, month, faculty_name, no_of_authors, author_position,
-                 title, publisher, scopus_sci, url, isbn, doi, proof_link)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+                 title, publisher, scopus_sci, url, isbn, doi, proof_link, faculty_id)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         );
         $stmt->bind_param(
-            "ssssssssssss",
+            "sssssssssssss",
             $academic_year,
             $month,
             $faculty_name,
@@ -438,7 +440,8 @@
             $url,
             $isbn,
             $doi,
-            $proof_link
+            $proof_link,
+            $faculty_id
         );
 
         $rowCount = 0;
@@ -451,18 +454,19 @@
             echo '</tr>';
 
             // Map CSV columns by index (0-based, matches CSV header order)
-            $academic_year   = isset($data[0]) ? trim($data[0]) : '';
-            $month           = isset($data[1]) ? trim($data[1]) : '';
-            $faculty_name    = isset($data[2]) ? trim($data[2]) : '';
-            $no_of_authors   = isset($data[3]) ? trim($data[3]) : '';
-            $author_position = isset($data[4]) ? trim($data[4]) : '';
-            $title           = isset($data[5]) ? trim($data[5]) : '';
-            $publisher       = isset($data[6]) ? trim($data[6]) : '';
-            $scopus_sci      = isset($data[7]) ? trim($data[7]) : '';
-            $url             = isset($data[8]) ? trim($data[8]) : '';
-            $isbn            = isset($data[9]) ? trim($data[9]) : '';
-            $doi             = isset($data[10]) ? trim($data[10]) : '';
-            $proof_link      = isset($data[11]) ? trim($data[11]) : '';
+            $academic_year   = isset($data[1]) ? trim($data[1]) : '';
+            $month           = isset($data[2]) ? trim($data[2]) : '';
+            $faculty_name    = isset($data[3]) ? trim($data[3]) : '';
+            $no_of_authors   = isset($data[4]) ? trim($data[4]) : '';
+            $author_position = isset($data[5]) ? trim($data[5]) : '';
+            $title           = isset($data[6]) ? trim($data[6]) : '';
+            $publisher       = isset($data[7]) ? trim($data[7]) : '';
+            $scopus_sci      = isset($data[8]) ? trim($data[8]) : '';
+            $url             = isset($data[9]) ? trim($data[9]) : '';
+            $isbn            = isset($data[10]) ? trim($data[10]) : '';
+            $doi             = isset($data[11]) ? trim($data[11]) : '';
+            $proof_link      = isset($data[12]) ? trim($data[12]) : '';
+            $faculty_id      = isset($data[0]) ? trim($data[0]) : '';
 
             // Skip completely blank rows (e.g. trailing empty lines in the CSV)
             if ($academic_year === '' && $faculty_name === '' && $title === '') {
