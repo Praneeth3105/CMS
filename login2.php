@@ -5,16 +5,26 @@ if (isset($_POST['submit'])) {
 
 	session_start();
 
-	$uname = $_POST['username'];
-	$pass  = $_POST['password'];
+	// CHANGED: escape user input before it touches SQL
+	$uname = mysqli_real_escape_string($conn, $_POST['username']);
+	$pass  = mysqli_real_escape_string($conn, $_POST['password']);
 
-	$_SESSION['username'] = $uname;
-	$_SESSION['password'] = $pass;
-
-	$query = "SELECT * FROM faculty WHERE id='$uname' AND password='$pass'";
+	$query  = "SELECT * FROM faculty WHERE id='$uname' AND password='$pass'";
 	$result = mysqli_query($conn, $query);
 
-	if (mysqli_num_rows($result) == 1) {
+	if ($result && mysqli_num_rows($result) == 1) {
+
+		// CHANGED: fetch the actual row instead of discarding it —
+		// this is where name/department come from for every add_*.php page
+		$row = mysqli_fetch_assoc($result);
+
+		// ===== Session vars every other page relies on =====
+		$_SESSION['username']   = $uname;
+		$_SESSION['id']         = $row['id'];
+		$_SESSION['name']       = $row['name'];
+		$_SESSION['department'] = $row['department'];
+		// REMOVED: $_SESSION['password'] = $pass;  -> no reason to keep the password around
+		// =====================================================
 
 		header("Location: facultydat.php");
 		exit();
@@ -26,8 +36,6 @@ if (isset($_POST['submit'])) {
 }
 ?>
 
-<!DOCTYPE html>
-<html>
 <!DOCTYPE html>
 <html>
 
@@ -66,9 +74,6 @@ if (isset($_POST['submit'])) {
 			align-items: center;
 			overflow-x: hidden;
 		}
-
-		/* Background */
-
 
 		body::before {
 			content: '';

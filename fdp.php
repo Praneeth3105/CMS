@@ -2,6 +2,16 @@
 include "db_conn.php";
 session_start();
 
+// ===== GUARD: must be logged in =====
+// Without this, a request with no valid session would insert a row
+// with an empty faculty_id — a row that then belongs to nobody and
+// never shows up in fsearch.php for any user.
+if (!isset($_SESSION['id'])) {
+    header("Location: login.php");
+    exit;
+}
+// =====================================
+
 // table: fdp
 // columns: id, name, department, fdpname, org, mode, duration, startdate, enddate, certificate_link, faculty_id
 // (name, department, faculty_id come from the session — NOT from the form)
@@ -9,7 +19,7 @@ session_start();
 if (isset($_POST['submit'])) {
 
     $id         = $_SESSION['id'];
-    $name       = $_SESSION['name'];
+    $name       = $_SESSION['name'];        // now populated correctly (set at login)
     $department = $_SESSION['department'];
 
     $fdpname          = mysqli_real_escape_string($conn, $_POST['fdpname']);
@@ -20,11 +30,11 @@ if (isset($_POST['submit'])) {
     $certificate_link = mysqli_real_escape_string($conn, $_POST['certificate_link']);
 
     // duration is stored in the table, but we can also recompute it from the dates
-    $duration = mysqli_real_escape_string($conn, $_POST['duration']);
+    $duration  = mysqli_real_escape_string($conn, $_POST['duration']);
     $datetime1 = date_create($startdate);
     $datetime2 = date_create($enddate);
     if ($datetime1 && $datetime2) {
-        $diff = date_diff($datetime1, $datetime2);
+        $diff     = date_diff($datetime1, $datetime2);
         $duration = $diff->format('%m months, %d days');
     }
 
@@ -37,4 +47,5 @@ if (isset($_POST['submit'])) {
     }
 
     echo "<script>alert('Data Uploaded Successfully');window.location='facultyadd.php';</script>";
+    exit;
 }
