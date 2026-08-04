@@ -7,23 +7,6 @@ if (!isset($_SESSION['id'])) {
     header("Location: login.php");
     exit;
 }
-// =====================================
-
-// table: consultancy_work
-//
-// IMPORTANT: this is the table your fsearch.php page already explicitly
-// flagged with a warning: "this table has NO faculty_id / faculty_name
-// column at all in your schema... showing ALL faculty". This is the one
-// case where that warning is NOT contradicted elsewhere, so it should be
-// taken at face value. Run this first:
-//
-//   ALTER TABLE consultancy_work ADD faculty_id VARCHAR(100);
-//
-// (optionally also ADD faculty_name VARCHAR(100) if you want the name
-// displayed directly instead of joined from the faculty table). After
-// that, the INSERT below will start correctly scoping new records. Old
-// rows already in the table will still have faculty_id = NULL and will
-// need manual backfill or will need to stay globally visible.
 
 if (isset($_POST['submit'])) {
     $faculty_id        = $_SESSION['id'];
