@@ -1,9 +1,6 @@
 <?php
 include "db_conn.php";
 session_start();
-// table: working_models
-// columns: id, academic_year, model_name, duration, students_count, domain_name, proof_link
-//          (no faculty_name / faculty_id column in this table)
 if (isset($_POST['submit'])) {
     $academic_year  = mysqli_real_escape_string($conn, $_POST['academic_year']);
     $model_name     = mysqli_real_escape_string($conn, $_POST['model_name']);
