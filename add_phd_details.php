@@ -2,21 +2,10 @@
 include "db_conn.php";
 session_start();
 
-// ===== GUARD: must be logged in =====
 if (!isset($_SESSION['id'])) {
     header("Location: login.php");
     exit;
 }
-// =====================================
-
-// table: phd_details
-// columns: id, faculty_name, university_name, status, domain_name,
-//          date_of_completion, pursuing_year, proof_link, faculty_id
-//
-// NOTE: comment said "no faculty_id column", but fsearch.php filters this
-// table with "WHERE faculty_id='$id'". Run `DESCRIBE phd_details;` to
-// confirm. If missing: ALTER TABLE phd_details ADD faculty_id VARCHAR(100);
-
 if (isset($_POST['submit'])) {
     $faculty_name       = $_SESSION['name'];
     $faculty_id         = $_SESSION['id'];

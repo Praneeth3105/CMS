@@ -2,7 +2,6 @@
 include "db_conn.php";
 session_start();
 
-// ===== GUARD: must be logged in =====
 if (!isset($_SESSION['id'])) {
     header("Location: login.php");
     exit;

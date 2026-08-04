@@ -1,23 +1,10 @@
 <?php
 include "db_conn.php";
 session_start();
-
-// ===== GUARD: must be logged in =====
 if (!isset($_SESSION['id'])) {
     header("Location: login.php");
     exit;
 }
-// =====================================
-
-// table: textbook
-// columns: id, academic_year, month, faculty_name, main_editor, textbook_name,
-//          publisher_name, url, faculty_id
-//
-// NOTE: the original comment said "no faculty_id column in this table",
-// but fsearch.php filters this table with "WHERE faculty_id='$id'". Run
-// `DESCRIBE textbook;` to confirm before deploying. If the column really
-// doesn't exist:
-//   ALTER TABLE textbook ADD faculty_id VARCHAR(100);
 
 if (isset($_POST['submit'])) {
     $faculty_name   = $_SESSION['name'];

@@ -2,24 +2,10 @@
 include "db_conn.php";
 session_start();
 
-// ===== GUARD: must be logged in =====
 if (!isset($_SESSION['id'])) {
     header("Location: login.php");
     exit;
 }
-// =====================================
-
-// table: conferences
-// columns: id, academic_year, faculty_name, co_authors_count, author_type,
-//          paper_title, conference_proceedings, ugc_scopus, url, doi,
-//          proof_link, faculty_id, created_at (auto-filled by MySQL, no need to insert it)
-//
-// FIXED: this file never captured or inserted faculty_id at all, even
-// though it has a faculty_id column and your fsearch.php page filters
-// this table with "WHERE faculty_id='$id'". Every conference record
-// submitted through the old version of this file would have an empty
-// faculty_id and silently never appear for ANY faculty in the listing
-// page. That is now fixed below.
 
 if (isset($_POST['submit'])) {
 

@@ -2,17 +2,10 @@
 include "db_conn.php";
 session_start();
 
-// ===== GUARD: must be logged in =====
 if (!isset($_SESSION['id'])) {
     header("Location: login.php");
     exit;
 }
-// =====================================
-
-// table: paperpublications
-// columns: id, faculty_name, title, journal, indexing_type, volume, number,
-//          url_doi, academic_year, month, proof_link, faculty_id
-// (no real date columns here, so there is nothing to compute)
 
 if (isset($_POST['submit'])) {
 

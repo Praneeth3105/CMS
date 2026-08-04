@@ -2,17 +2,10 @@
 include "db_conn.php";
 session_start();
 
-// ===== GUARD: must be logged in =====
 if (!isset($_SESSION['id'])) {
     header("Location: login.php");
     exit;
 }
-// =====================================
-
-// table: ffworkshop
-// columns: id, academic_year, name, workshop, org, start_date, start_date_raw,
-//          end_date, end_date_raw, duration, mode, certificate_link, faculty_id
-
 if (isset($_POST['submit'])) {
 
     $faculty_id = $_SESSION['id'];

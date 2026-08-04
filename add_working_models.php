@@ -2,7 +2,6 @@
 include "db_conn.php";
 session_start();
 
-// ===== GUARD: must be logged in =====
 if (!isset($_SESSION['id'])) {
     header("Location: login.php");
     exit;
@@ -18,9 +17,6 @@ if (isset($_POST['submit'])) {
     $domain_name    = mysqli_real_escape_string($conn, $_POST['domain_name']);
     $proof_link     = mysqli_real_escape_string($conn, $_POST['proof_link']);
 
-    // NOTE: this INSERT assumes faculty_id (and optionally faculty_name)
-    // columns exist. Remove them from both the column list and VALUES
-    // list below if DESCRIBE shows they don't exist yet.
     $sql = "INSERT INTO working_models (academic_year, model_name, duration, students_count, domain_name, proof_link, faculty_id)
             VALUES ('$academic_year', '$model_name', '$duration', '$students_count', '$domain_name', '$proof_link', '$faculty_id')";
     $res = mysqli_query($conn, $sql);
