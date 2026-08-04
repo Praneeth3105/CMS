@@ -1,6 +1,321 @@
 <?php
 include_once('db_conn.php');
 // session_start();
+
+/*
+ * ============================================================
+ *  CONFIG — one entry per "type" in the dropdown.
+ *  This is the ONLY place you edit if a table/column changes,
+ *  or if you want to add a 20th category later.
+ *
+ *  key      -> value shown in <select>, also used to build the
+ *              div id ($key . "Div") and table id ($key . "Table")
+ *  label    -> heading shown to the user
+ *  table    -> real MySQL table name
+ *  columns  -> [ db_column => "Header shown in table" ]
+ *              (id and faculty_id are deliberately left out —
+ *               they're internal, not useful to display)
+ *  search   -> which db_column the search box filters on
+ *  link     -> OPTIONAL. db_column that holds a URL
+ *              (certificate_link / proof_link / achievement_link / url ...)
+ *              If set, that column is rendered as a "View" button
+ *              instead of a plain text cell.
+ * ============================================================
+ */
+$config = [
+  'fdp' => [
+    'label'   => 'FDP Attended',
+    'table'   => 'fdp',
+    'columns' => [
+      'name'       => 'Name',
+      'department' => 'Department',
+      'fdpname'    => 'FDP Name',
+      'org'        => 'Organisation',
+      'mode'       => 'Mode',
+      'duration'   => 'Duration',
+      'startdate'  => 'Start Date',
+      'enddate'    => 'End Date',
+    ],
+    'search' => 'fdpname',
+    'link'   => 'certificate_link',
+  ],
+  'fdporg' => [
+    'label'   => 'FDP Organized',
+    'table'   => 'fdporg',
+    'columns' => [
+      'academic_year' => 'Academic Year',
+      'faculty_name'  => 'Name',
+      'fdp_name'      => 'FDP Name',
+      'association'   => 'Association',
+      'mode'          => 'Mode',
+      'start_date'    => 'Start Date',
+      'end_date'      => 'End Date',
+      'duration'      => 'Duration',
+    ],
+    'search' => 'fdp_name',
+    'link'   => 'certificate_link',
+  ],
+  'ffworkshop' => [
+    'label'   => 'Workshop / Seminar Attended',
+    'table'   => 'ffworkshop',
+    'columns' => [
+      'academic_year' => 'Academic Year',
+      'name'          => 'Name',
+      'workshop'      => 'Workshop Name',
+      'org'           => 'Organisation',
+      'start_date'    => 'Start Date',
+      'end_date'      => 'End Date',
+      'duration'      => 'Duration',
+      'mode'          => 'Mode',
+    ],
+    'search' => 'workshop',
+    'link'   => 'certificate_link',
+  ],
+  'paperpublications' => [
+    'label'   => 'Paper Publication (Journal)',
+    'table'   => 'paperpublications',
+    'columns' => [
+      'faculty_name'  => 'Name',
+      'title'         => 'Title',
+      'journal'       => 'Journal',
+      'indexing_type' => 'Indexing',
+      'volume'        => 'Volume',
+      'number'        => 'Issue No.',
+      'academic_year' => 'Academic Year',
+      'month'         => 'Month',
+    ],
+    'search' => 'title',
+    'link'   => 'proof_link',
+  ],
+  'conferences' => [
+    'label'   => 'Conference Paper Publication',
+    'table'   => 'conferences',
+    'columns' => [
+      'academic_year'          => 'Academic Year',
+      'faculty_name'           => 'Name',
+      'author_type'            => 'Author Type',
+      'paper_title'            => 'Paper Title',
+      'conference_proceedings' => 'Conference / Proceedings',
+      'ugc_scopus'             => 'UGC / Scopus',
+    ],
+    'search' => 'paper_title',
+    'link'   => 'proof_link',
+  ],
+  'certificates' => [
+    'label'   => 'Certificates',
+    'table'   => 'certificates',
+    'columns' => [
+      'academic_year' => 'Academic Year',
+      'name'          => 'Name',
+      'certificate'   => 'Certificate',
+      'org'           => 'Organisation',
+      'start_date'    => 'Start Date',
+      'end_date'      => 'End Date',
+      'duration'      => 'Duration',
+      'mode'          => 'Mode',
+    ],
+    'search' => 'certificate',
+    'link'   => 'certificate_link',
+  ],
+  'bookpublish' => [
+    'label'   => 'Book Published',
+    'table'   => 'bookpublish',
+    'columns' => [
+      'academic_year'   => 'Academic Year',
+      'faculty_name'    => 'Name',
+      'author_position' => 'Author Position',
+      'title'           => 'Title',
+      'publisher'       => 'Publisher',
+      'scopus_sci'      => 'Scopus / SCI',
+      'isbn'            => 'ISBN',
+    ],
+    'search' => 'title',
+    'link'   => 'proof_link',
+  ],
+  'bookedited' => [
+    'label'   => 'Book Edited',
+    'table'   => 'bookedited',
+    'columns' => [
+      'faculty_name'   => 'Name',
+      'no_of_authors'  => 'No. of Authors',
+      'book_name'      => 'Book Name',
+      'publisher_name' => 'Publisher',
+      'isbn_number'    => 'ISBN',
+      'academic_year'  => 'Academic Year',
+      'month'          => 'Month',
+    ],
+    'search' => 'book_name',
+    'link'   => 'proof_link',
+  ],
+  'textbook' => [
+    'label'   => 'Textbook Published',
+    'table'   => 'textbook',
+    'columns' => [
+      'academic_year'   => 'Academic Year',
+      'faculty_name'    => 'Name',
+      'main_editor'     => 'Main Editor',
+      'textbook_name'   => 'Textbook Name',
+      'publisher_name'  => 'Publisher',
+      'month'           => 'Month',
+    ],
+    'search' => 'textbook_name',
+    'link'   => 'url',
+  ],
+  'patents' => [
+    'label'   => 'Patents',
+    'table'   => 'patents',
+    'columns' => [
+      'academic_year'      => 'Academic Year',
+      'faculty_name'       => 'Name',
+      'patent_details'     => 'Patent Details',
+      'area_of_patent'     => 'Area',
+      'application_number' => 'Application No.',
+      'status'             => 'Status',
+      'patent_type'        => 'Type',
+      'filing_agency'      => 'Filing Agency',
+    ],
+    'search' => 'patent_details',
+    'link'   => 'proof_link',
+  ],
+  'nptel' => [
+    'label'   => 'NPTEL Courses',
+    'table'   => 'nptel',
+    'columns' => [
+      'academic_year' => 'Academic Year',
+      'faculty_name'  => 'Name',
+      'course_name'   => 'Course Name',
+      'duration'      => 'Duration',
+      'start_date'    => 'Start Date',
+      'end_date'      => 'End Date',
+      'percentage'    => 'Percentage',
+      'top_percentage' => 'Top %',
+      'remarks'       => 'Remarks',
+    ],
+    'search' => 'course_name',
+    'link'   => 'certificate_link',
+  ],
+  'achievements' => [
+    'label'   => 'Achievements',
+    'table'   => 'achievements',
+    'columns' => [
+      'academic_year'    => 'Academic Year',
+      'faculty_name'     => 'Name',
+      'award_name'       => 'Award Name',
+      'description'      => 'Description',
+      'achievement_date' => 'Date',
+      'organization'     => 'Organisation',
+    ],
+    'search' => 'award_name',
+    'link'   => 'achievement_link',
+  ],
+  'outside_participations' => [
+    'label'   => 'Outside Participation',
+    'table'   => 'outside_participations',
+    'columns' => [
+      'academic_year'            => 'Academic Year',
+      'faculty_name'             => 'Name',
+      'date_attended'            => 'Date Attended',
+      'organization'             => 'Organisation',
+      'conference_journal_name'  => 'Conference / Journal',
+      'type'                     => 'Type',
+    ],
+    'search' => 'conference_journal_name',
+    'link'   => 'proof_link',
+  ],
+  'reviewer_activities' => [
+    'label'   => 'Reviewer Activities',
+    'table'   => 'reviewer_activities',
+    'columns' => [
+      'academic_year'            => 'Academic Year',
+      'faculty_name'             => 'Name',
+      'date_attended'            => 'Date',
+      'organization'             => 'Organisation',
+      'conference_journal_name'  => 'Conference / Journal',
+      'type'                     => 'Type',
+    ],
+    'search' => 'conference_journal_name',
+    'link'   => 'proof_link',
+  ],
+  'professional_membership' => [
+    'label'   => 'Professional Membership',
+    'table'   => 'professional_membership',
+    'columns' => [
+      'faculty_name'     => 'Name',
+      'membership_name'  => 'Membership',
+      'membership_id'    => 'Membership ID',
+      'membership_type'  => 'Type',
+      'start_date'       => 'Start Date',
+      'end_date'         => 'End Date',
+    ],
+    'search' => 'membership_name',
+    'link'   => 'proof_link',
+  ],
+  'phd_details' => [
+    'label'   => 'PhD Details',
+    'table'   => 'phd_details',
+    'columns' => [
+      'faculty_name'        => 'Name',
+      'university_name'     => 'University',
+      'status'              => 'Status',
+      'domain_name'         => 'Domain',
+      'date_of_completion'  => 'Completion Date',
+      'pursuing_year'       => 'Pursuing Year',
+    ],
+    'search' => 'university_name',
+    'link'   => 'proof_link',
+  ],
+  'consultancy_work' => [
+    'label'   => 'Consultancy Work',
+    'table'   => 'consultancy_work',
+    'columns' => [
+      'academic_year'     => 'Academic Year',
+      'faculty_name'      => 'Name',
+      'description'       => 'Description',
+      'organization'      => 'Organisation',
+      'amount'            => 'Amount',
+      'start_date'        => 'Start Date',
+      'end_date'          => 'End Date',
+      'duration'          => 'Duration',
+      'students_involved' => 'Students Involved',
+    ],
+    'search' => 'organization',
+    'link'   => 'proof_link',
+  ],
+  'working_models' => [
+    'label'   => 'Working Models / Projects',
+    'table'   => 'working_models',
+    'columns' => [
+      'academic_year'  => 'Academic Year',
+      'model_name'     => 'Model Name',
+      'duration'       => 'Duration',
+      'students_count' => 'Students Count',
+      'domain_name'    => 'Domain',
+    ],
+    'search' => 'model_name',
+    'link'   => 'proof_link',
+  ],
+  'funding_projects' => [
+    'label'   => 'Funding Projects',
+    'table'   => 'funding_projects',
+    'columns' => [
+      'academic_year' => 'Academic Year',
+      'faculty_name'  => 'Name',
+      'title'         => 'Title',
+      'agency_name'   => 'Agency',
+      'amount'        => 'Amount',
+      'start_date'    => 'Start Date',
+      'end_date'      => 'End Date',
+      'duration'      => 'Duration',
+      'funding_type'  => 'Funding Type',
+    ],
+    'search' => 'title',
+    'link'   => 'proof_link',
+  ],
+];
+
+// Whitelist of real table names, built straight from $config, so no
+// user-controlled value is ever concatenated into SQL as a table name.
+$allowedTables = array_column($config, 'table');
 ?>
 <!DOCTYPE html>
 <html>
@@ -91,10 +406,6 @@ include_once('db_conn.php');
       color: var(--bg-dark);
     }
 
-    .topbar .btn {
-      float: none;
-    }
-
     .panel {
       background: var(--white);
       margin: 24px 32px;
@@ -104,7 +415,7 @@ include_once('db_conn.php');
       border: 1px solid var(--border);
     }
 
-    select {
+    select#mySelect {
       background-color: var(--white) !important;
       color: var(--ink) !important;
       border: 1px solid var(--gold) !important;
@@ -113,24 +424,12 @@ include_once('db_conn.php');
       font-size: 15px;
       font-family: 'Poppins', sans-serif;
       cursor: pointer;
-      float: none !important;
       width: 100% !important;
       max-width: 420px;
       margin-bottom: 20px;
     }
 
-    #myInput,
-    #myInput1,
-    #myInput2,
-    #myInput3,
-    #myInputs,
-    #myInputc,
-    #myInput6,
-    #myInputso,
-    #myInputco,
-    #myInputo,
-    #myInput4,
-    #myInput5 {
+    .searchbox {
       background-color: var(--white);
       background-image: url('/css/searchicon.png');
       background-position: 12px 12px;
@@ -144,18 +443,7 @@ include_once('db_conn.php');
       margin: 0 0 16px 0 !important;
     }
 
-    #myTable,
-    #myTable1,
-    #myTable2,
-    #myTable3,
-    #myTable6,
-    #myTables,
-    #myTablec,
-    #myTableo,
-    #myTableso,
-    #myTableco,
-    #myTable4,
-    #myTable5 {
+    table.data-table {
       border-collapse: collapse;
       width: 100%;
       background: var(--white);
@@ -165,64 +453,20 @@ include_once('db_conn.php');
       margin: 0 !important;
     }
 
-    #myTable th,
-    #myTable td,
-    #myTable1 th,
-    #myTable1 td,
-    #myTable2 th,
-    #myTable2 td,
-    #myTable3 th,
-    #myTable3 td,
-    #myTable4 th,
-    #myTable4 td,
-    #myTable5 th,
-    #myTable5 td,
-    #myTable6 th,
-    #myTable6 td,
-    #myTables th,
-    #myTables td,
-    #myTablec th,
-    #myTablec td,
-    #myTableo th,
-    #myTableo td,
-    #myTableso th,
-    #myTableso td,
-    #myTableco th,
-    #myTableco td {
+    table.data-table th,
+    table.data-table td {
       text-align: left;
       padding: 12px 14px;
       border-bottom: 1px solid var(--border);
     }
 
-    #myTable tr.header,
-    #myTable1 tr.header,
-    #myTable2 tr.header,
-    #myTable3 tr.header,
-    #myTable4 tr.header,
-    #myTable5 tr.header,
-    #myTable6 tr.header,
-    #myTables tr.header,
-    #myTablec tr.header,
-    #myTableo tr.header,
-    #myTableso tr.header,
-    #myTableco tr.header {
+    table.data-table tr.header {
       background: var(--bg-dark);
       color: var(--gold-light);
       font-weight: 600;
     }
 
-    #myTable tr:hover,
-    #myTable1 tr:hover,
-    #myTable2 tr:hover,
-    #myTable3 tr:hover,
-    #myTable4 tr:hover,
-    #myTable5 tr:hover,
-    #myTable6 tr:hover,
-    #myTables tr:hover,
-    #myTablec tr:hover,
-    #myTableo tr:hover,
-    #myTableso tr:hover,
-    #myTableco tr:hover {
+    table.data-table tbody tr:hover {
       background-color: #faf6ea;
     }
 
@@ -240,15 +484,12 @@ include_once('db_conn.php');
       display: none;
     }
 
+    .empty-row td {
+      color: var(--muted);
+      font-style: italic;
+    }
+
     @media only screen and (max-width: 900px) {
-      .wave {
-        display: none;
-      }
-
-      .scroll {
-        width: 100%;
-      }
-
       .panel {
         margin: 16px;
         padding: 18px;
@@ -266,980 +507,106 @@ include_once('db_conn.php');
   <div class="panel">
     <select class='btn' id="mySelect" onchange="myFun()" name='opt' required>
       <option value=''>Select the Option</option>
-      <option value='workshopattended'>Workshops Attended</option>
-      <option value='seminarattended'>Seminars Attended</option>
-      <option value='conferenceattended'>Conference Attended</option>
-      <option value='workshoporganized'>Workshops Organized</option>
-      <option value='seminarorganized'>Seminars Organized</option>
-      <option value='conferenceorganized'>Conference Organized</option>
-      <option value='certificate'>Certificates</option>
-      <option value='fdp'>FDP</option>
-      <option value='paperpublication'>Paper Publication</option>
-      <option value='bookpublished'>Book Published</option>
-      <option value='bookedited'>Book Edited</option>
-      <option value='others'>Others</option>
+      <?php foreach ($config as $key => $cfg): ?>
+        <option value='<?php echo htmlspecialchars($key); ?>'><?php echo htmlspecialchars($cfg['label']); ?></option>
+      <?php endforeach; ?>
     </select>
 
     <div id="demo">
+      <?php foreach ($config as $key => $cfg):
+        $table   = $cfg['table'];
+        $columns = $cfg['columns'];
+        $linkCol = $cfg['link'] ?? null;
 
-      <!-- ============ WORKSHOPS ATTENDED -> ffworkshop ============ -->
-      <div id="workshopattendedDiv" class="optionDiv">
-        <h1>Workshops Attended</h1>
-        <input type='text' id='myInput' onkeyup='myFunction()' placeholder='search by Workshop Name..' title='Type in a name'>
-        <div class='scroll'>
-          <table id='myTable'>
-            <tr class='header'>
-              <th>Name</th>
-              <th>Department</th>
-              <th>Title</th>
-              <th>Workshop Name</th>
-              <th>Organisation</th>
-              <th>Place</th>
-              <th>Type</th>
-              <th>Start Date</th>
-              <th>End Date</th>
-              <th>Duration</th>
-              <th>File</th>
-              <th>Download</th>
-            </tr>
-            <?php
-            $query = "SELECT * FROM ffworkshop where type='Workshop'";
-            $result = mysqli_query($conn, $query);
-            while ($rows = mysqli_fetch_assoc($result)) {
-            ?>
-              <tr>
-                <td><?php echo $rows['name']; ?></td>
-                <td><?php echo $rows['department']; ?></td>
-                <td><?php echo $rows['title']; ?></td>
-                <td><?php echo $rows['workshopn']; ?></td>
-                <td><?php echo $rows['org']; ?></td>
-                <td><?php echo $rows['place']; ?></td>
-                <td><?php echo $rows['type']; ?></td>
-                <td><?php echo $rows['startdate']; ?></td>
-                <td><?php echo $rows['enddate']; ?></td>
-                <td><?php echo $rows['duration']; ?></td>
-                <td>
-                  <?php
-                  $ext = pathinfo('images/' . $rows['file'], PATHINFO_EXTENSION);
-                  if ($ext == 'pdf') {
-                    echo "<embed src='images/" . $rows['file'] . "' type='application/pdf' frameBorder='0' scrolling='auto' height='100' width='200'></embed>";
-                  } else {
-                    echo "<a href='images/" . $rows['file'] . "' data-lightbox='mygallery'><img src='images/" . $rows['file'] . "' width='200' height='100'></a>";
-                  }
-                  ?>
-                </td>
-                <td><?php echo "<a href='images/" . $rows['file'] . "' download><button class='btn'><i style='font-size:24px' class='fa'>&#xf019;</i></button></a>"; ?></td>
-              </tr>
-            <?php } ?>
-          </table>
+        // Safety: only ever query a table name that came out of our own
+        // whitelist above, never anything derived from user input.
+        if (!in_array($table, $allowedTables, true)) {
+          continue;
+        }
+
+        $query  = "SELECT * FROM `$table`";
+        $result = mysqli_query($conn, $query);
+      ?>
+        <div id="<?php echo $key; ?>Div" class="optionDiv">
+          <h1><?php echo htmlspecialchars($cfg['label']); ?></h1>
+          <input type="text" class="searchbox" id="search_<?php echo $key; ?>"
+            onkeyup="filterTable('<?php echo $key; ?>')"
+            placeholder="Search <?php echo htmlspecialchars($cfg['label']); ?>...">
+          <div class="scroll">
+            <table class="data-table" id="table_<?php echo $key; ?>"
+              data-searchcol="<?php echo array_search($cfg['search'], array_keys($columns)); ?>">
+              <thead>
+                <tr class="header">
+                  <?php foreach ($columns as $header): ?>
+                    <th><?php echo htmlspecialchars($header); ?></th>
+                  <?php endforeach; ?>
+                  <?php if ($linkCol): ?>
+                    <th>Proof</th>
+                  <?php endif; ?>
+                </tr>
+              </thead>
+              <tbody>
+                <?php if ($result && mysqli_num_rows($result) > 0): ?>
+                  <?php while ($row = mysqli_fetch_assoc($result)): ?>
+                    <tr>
+                      <?php foreach (array_keys($columns) as $col): ?>
+                        <td><?php echo htmlspecialchars($row[$col] ?? ''); ?></td>
+                      <?php endforeach; ?>
+                      <?php if ($linkCol): ?>
+                        <td>
+                          <?php if (!empty($row[$linkCol])): ?>
+                            <a href="<?php echo htmlspecialchars($row[$linkCol]); ?>" target="_blank" rel="noopener">
+                              <button type="button" class="btn">View</button>
+                            </a>
+                          <?php else: ?>
+                            &mdash;
+                          <?php endif; ?>
+                        </td>
+                      <?php endif; ?>
+                    </tr>
+                  <?php endwhile; ?>
+                <?php else: ?>
+                  <tr class="empty-row">
+                    <td colspan="<?php echo count($columns) + ($linkCol ? 1 : 0); ?>">No records found.</td>
+                  </tr>
+                <?php endif; ?>
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
-
-      <!-- ============ SEMINARS ATTENDED -> no table yet ============ -->
-      <div id="seminarattendedDiv" class="optionDiv">
-        <h1>Seminars Attended</h1>
-
-        <input type='text' id='myInput5'
-          onkeyup='myFunction5()'
-          placeholder='search by Seminar Name..'>
-
-        <div class='scroll'>
-          <table id='myTable5'>
-            <tr class='header'>
-              <th>Name</th>
-              <th>Department</th>
-
-              <th>Seminar Name</th>
-              <th>Organisation</th>
-              <th>Place</th>
-
-              <th>Start Date</th>
-              <th>End Date</th>
-              <th>Duration</th>
-              <th>File</th>
-              <th>Download</th>
-            </tr>
-
-            <?php
-            $query = "SELECT * FROM fworkshop where type='Seminar'";
-            $result = mysqli_query($conn, $query);
-
-            while ($rows = mysqli_fetch_assoc($result)) {
-            ?>
-              <tr>
-                <td><?php echo $rows['name']; ?></td>
-                <td><?php echo $rows['department']; ?></td>
-
-                <td><?php echo $rows['workshopn']; ?></td>
-                <td><?php echo $rows['org']; ?></td>
-                <td><?php echo $rows['place']; ?></td>
-
-                <td><?php echo $rows['startdate']; ?></td>
-                <td><?php echo $rows['enddate']; ?></td>
-                <td><?php echo $rows['duration']; ?></td>
-
-                <td>
-                  <?php
-                  $ext = pathinfo('images/' . $rows['file'], PATHINFO_EXTENSION);
-
-                  if ($ext == 'pdf') {
-                    echo "<embed src='images/" . $rows['file'] . "' height='100' width='200'>";
-                  } else {
-                    echo "<a href='images/" . $rows['file'] . "' data-lightbox='mygallery'>
-<img src='images/" . $rows['file'] . "' width='200' height='100'>
-</a>";
-                  }
-                  ?>
-                </td>
-
-                <td>
-                  <a href='images/<?php echo $rows["file"]; ?>' download>
-                    <button class='btn'>
-                      <i class='fa'>&#xf019;</i>
-                    </button>
-                  </a>
-                </td>
-              </tr>
-
-            <?php } ?>
-
-          </table>
-        </div>
-      </div>
-
-      <!-- ============ CONFERENCE ATTENDED -> no table yet ============ -->
-      <div id="conferenceattendedDiv" class="optionDiv">
-        <h1>Conference Attended</h1>
-        <input type='text' id='myInput1' onkeyup='myFunction1()' placeholder='search by Workshop Name..' title='Type in a name'>
-        <div class='scroll'>
-          <table id='myTable1'>
-            <tr class='header'>
-              <th>Name</th>
-              <th>Department</th>
-              <th>Workshop Name</th>
-              <th>Organisation</th>
-              <th>Place</th>
-              <th>Type</th>
-              <th>Start Date</th>
-              <th>End Date</th>
-              <th>Duration</th>
-              <th>File</th>
-              <th>Download</th>
-            </tr>
-            <?php
-            $query = "SELECT * FROM fworkshop where type='Conference'";
-            $result = mysqli_query($conn, $query);
-            while ($rows = mysqli_fetch_assoc($result)) {
-            ?>
-              <tr>
-                <td><?php echo $rows['name']; ?></td>
-                <td><?php echo $rows['department']; ?></td>
-                <td><?php echo $rows['workshopn']; ?></td>
-                <td><?php echo $rows['org']; ?></td>
-                <td><?php echo $rows['place']; ?></td>
-                <td><?php echo $rows['type']; ?></td>
-                <td><?php echo $rows['startdate']; ?></td>
-                <td><?php echo $rows['enddate']; ?></td>
-                <td><?php echo $rows['duration']; ?></td>
-                <td>
-                  <?php
-                  $ext = pathinfo('images/' . $rows['file'], PATHINFO_EXTENSION);
-                  if ($ext == 'pdf') {
-                    echo "<embed src='images/" . $rows['file'] . "' type='application/pdf' frameBorder='0' scrolling='auto' height='100' width='200'></embed>";
-                  } else {
-                    echo "<a href='images/" . $rows['file'] . "' data-lightbox='mygallery'><img src='images/" . $rows['file'] . "' width='200' height='100'></a>";
-                  }
-                  ?>
-                </td>
-                <td><?php echo "<a href='images/" . $rows['file'] . "' download><button class='btn'><i style='font-size:24px' class='fa'>&#xf019;</i></button></a>"; ?></td>
-              </tr>
-            <?php } ?>
-          </table>
-        </div>
-      </div>
-
-      <!-- ============ WORKSHOPS ORGANIZED -> fworkshop ============ -->
-      <div id="workshoporganizedDiv" class="optionDiv">
-        <h1>Workshops Organized</h1>
-        <input type='text' id='myInput1' onkeyup='myFunction1()' placeholder='search by Workshop Name..' title='Type in a name'>
-        <div class='scroll'>
-          <table id='myTable1'>
-            <tr class='header'>
-              <th>Name</th>
-              <th>Department</th>
-              <th>Workshop Name</th>
-              <th>Organisation</th>
-              <th>Place</th>
-              <th>Type</th>
-              <th>Start Date</th>
-              <th>End Date</th>
-              <th>Duration</th>
-              <th>File</th>
-              <th>Download</th>
-            </tr>
-            <?php
-            $query = "SELECT * FROM fworkshop where type='Workshop'";
-            $result = mysqli_query($conn, $query);
-            while ($rows = mysqli_fetch_assoc($result)) {
-            ?>
-              <tr>
-                <td><?php echo $rows['name']; ?></td>
-                <td><?php echo $rows['department']; ?></td>
-                <td><?php echo $rows['workshopn']; ?></td>
-                <td><?php echo $rows['org']; ?></td>
-                <td><?php echo $rows['place']; ?></td>
-                <td><?php echo $rows['type']; ?></td>
-                <td><?php echo $rows['startdate']; ?></td>
-                <td><?php echo $rows['enddate']; ?></td>
-                <td><?php echo $rows['duration']; ?></td>
-                <td>
-                  <?php
-                  $ext = pathinfo('images/' . $rows['file'], PATHINFO_EXTENSION);
-                  if ($ext == 'pdf') {
-                    echo "<embed src='images/" . $rows['file'] . "' type='application/pdf' frameBorder='0' scrolling='auto' height='100' width='200'></embed>";
-                  } else {
-                    echo "<a href='images/" . $rows['file'] . "' data-lightbox='mygallery'><img src='images/" . $rows['file'] . "' width='200' height='100'></a>";
-                  }
-                  ?>
-                </td>
-                <td><?php echo "<a href='images/" . $rows['file'] . "' download><button class='btn'><i style='font-size:24px' class='fa'>&#xf019;</i></button></a>"; ?></td>
-              </tr>
-            <?php } ?>
-          </table>
-        </div>
-      </div>
-
-      <!-- ============ SEMINARS ORGANIZED -> no table yet ============ -->
-      <div id="seminarorganizedDiv" class="optionDiv">
-        <h1>Seminars Organized</h1>
-
-        <input type='text' id='myInput5'
-          onkeyup='myFunction5()'
-          placeholder='search by Seminar Name..'>
-
-        <div class='scroll'>
-          <table id='myTable5'>
-            <tr class='header'>
-              <th>Name</th>
-              <th>Department</th>
-
-              <th>Seminar Name</th>
-              <th>Organisation</th>
-              <th>Place</th>
-
-              <th>Start Date</th>
-              <th>End Date</th>
-              <th>Duration</th>
-              <th>File</th>
-              <th>Download</th>
-            </tr>
-
-            <?php
-            $query = "SELECT * FROM ffworkshop where type='Seminar'";
-            $result = mysqli_query($conn, $query);
-
-            while ($rows = mysqli_fetch_assoc($result)) {
-            ?>
-              <tr>
-                <td><?php echo $rows['name']; ?></td>
-                <td><?php echo $rows['department']; ?></td>
-
-                <td><?php echo $rows['workshopn']; ?></td>
-                <td><?php echo $rows['org']; ?></td>
-                <td><?php echo $rows['place']; ?></td>
-
-                <td><?php echo $rows['startdate']; ?></td>
-                <td><?php echo $rows['enddate']; ?></td>
-                <td><?php echo $rows['duration']; ?></td>
-
-                <td>
-                  <?php
-                  $ext = pathinfo('images/' . $rows['file'], PATHINFO_EXTENSION);
-
-                  if ($ext == 'pdf') {
-                    echo "<embed src='images/" . $rows['file'] . "' height='100' width='200'>";
-                  } else {
-                    echo "<a href='images/" . $rows['file'] . "' data-lightbox='mygallery'>
-<img src='images/" . $rows['file'] . "' width='200' height='100'>
-</a>";
-                  }
-                  ?>
-                </td>
-
-                <td>
-                  <a href='images/<?php echo $rows["file"]; ?>' download>
-                    <button class='btn'>
-                      <i class='fa'>&#xf019;</i>
-                    </button>
-                  </a>
-                </td>
-              </tr>
-
-            <?php } ?>
-
-          </table>
-        </div>
-      </div>
-
-      <!-- ============ CONFERENCE ORGANIZED -> no table yet ============ -->
-      <div id="conferenceorganizedDiv" class="optionDiv">
-        <h1>Conference Organized</h1>
-        <input type='text' id='myInput1' onkeyup='myFunction1()' placeholder='search by Workshop Name..' title='Type in a name'>
-        <div class='scroll'>
-          <table id='myTable1'>
-            <tr class='header'>
-              <th>Name</th>
-              <th>Department</th>
-              <th>Workshop Name</th>
-              <th>Organisation</th>
-              <th>Place</th>
-              <th>Type</th>
-              <th>Start Date</th>
-              <th>End Date</th>
-              <th>Duration</th>
-              <th>File</th>
-              <th>Download</th>
-            </tr>
-            <?php
-            $query = "SELECT * FROM ffworkshop WHERE type='Conference'";
-            $result = mysqli_query($conn, $query);
-            while ($rows = mysqli_fetch_assoc($result)) {
-            ?>
-              <tr>
-                <td><?php echo $rows['name']; ?></td>
-                <td><?php echo $rows['department']; ?></td>
-                <td><?php echo $rows['workshopn']; ?></td>
-                <td><?php echo $rows['org']; ?></td>
-                <td><?php echo $rows['place']; ?></td>
-                <td><?php echo $rows['type']; ?></td>
-                <td><?php echo $rows['startdate']; ?></td>
-                <td><?php echo $rows['enddate']; ?></td>
-                <td><?php echo $rows['duration']; ?></td>
-                <td>
-                  <?php
-                  $ext = pathinfo('images/' . $rows['file'], PATHINFO_EXTENSION);
-                  if ($ext == 'pdf') {
-                    echo "<embed src='images/" . $rows['file'] . "' type='application/pdf' frameBorder='0' scrolling='auto' height='100' width='200'></embed>";
-                  } else {
-                    echo "<a href='images/" . $rows['file'] . "' data-lightbox='mygallery'><img src='images/" . $rows['file'] . "' width='200' height='100'></a>";
-                  }
-                  ?>
-                </td>
-                <td><?php echo "<a href='images/" . $rows['file'] . "' download><button class='btn'><i style='font-size:24px' class='fa'>&#xf019;</i></button></a>"; ?></td>
-              </tr>
-            <?php } ?>
-          </table>
-        </div>
-      </div>
-
-      <!-- ============ CERTIFICATES -> certificates ============ -->
-      <div id="certificateDiv" class="optionDiv">
-        <h1>Certificates</h1>
-        <input type='text' id='myInput2' onkeyup='myFunction2()' placeholder='search by Name..' title='Type in a name'>
-        <div class='scroll'>
-          <table id='myTable2'>
-            <tr class='header'>
-              <th>Name</th>
-              <th>Department</th>
-              <th>Event</th>
-              <th>Organisation</th>
-              <th>Place</th>
-              <th>Start Date</th>
-              <th>End Date</th>
-              <th>Duration</th>
-              <th>File</th>
-              <th>Download</th>
-            </tr>
-            <?php
-            $query = "SELECT * FROM certificates";
-            $result = mysqli_query($conn, $query);
-            while ($rows = mysqli_fetch_assoc($result)) {
-            ?>
-              <tr>
-                <td><?php echo $rows['name']; ?></td>
-                <td><?php echo $rows['department']; ?></td>
-                <td><?php echo $rows['event']; ?></td>
-                <td><?php echo $rows['org']; ?></td>
-                <td><?php echo $rows['place']; ?></td>
-                <td><?php echo $rows['startdate']; ?></td>
-                <td><?php echo $rows['enddate']; ?></td>
-                <td><?php echo $rows['duration']; ?></td>
-                <td>
-                  <?php
-                  $ext = pathinfo('images/' . $rows['file'], PATHINFO_EXTENSION);
-                  if ($ext == 'pdf') {
-                    echo "<embed src='images/" . $rows['file'] . "' type='application/pdf' frameBorder='0' scrolling='auto' height='100' width='200'></embed>";
-                  } else {
-                    echo "<a href='images/" . $rows['file'] . "' data-lightbox='mygallery'><img src='images/" . $rows['file'] . "' width='200' height='100'></a>";
-                  }
-                  ?>
-                </td>
-                <td><?php echo "<a href='images/" . $rows['file'] . "' download><button class='btn'><i style='font-size:24px' class='fa'>&#xf019;</i></button></a>"; ?></td>
-              </tr>
-            <?php } ?>
-          </table>
-        </div>
-      </div>
-
-      <!-- ============ FDP -> fdp ============ -->
-      <div id="fdpDiv" class="optionDiv">
-
-        <h1>FDP Details</h1>
-
-        <input type="text" id="myInput3"
-          onkeyup="myFunction3()"
-          placeholder="Search by FDP Name..."
-          title="Type in FDP Name">
-
-        <div class="scroll">
-
-          <table id="myTable3">
-
-            <tr class="header">
-              <th>Name</th>
-              <th>Department</th>
-              <th>FDP Name</th>
-              <th>Organisation</th>
-              <th>Mode</th>
-              <th>Duration</th>
-              <th>Start Date</th>
-              <th>End Date</th>
-              <th>View</th>
-
-            </tr>
-
-            <?php
-
-            $query = "SELECT * FROM fdp ORDER BY startdate DESC";
-
-            $result = mysqli_query($conn, $query);
-
-            while ($rows = mysqli_fetch_assoc($result)) {
-
-            ?>
-
-              <tr>
-
-                <td><?php echo htmlspecialchars($rows['name']); ?></td>
-
-                <td><?php echo htmlspecialchars($rows['department']); ?></td>
-
-                <td><?php echo htmlspecialchars($rows['fdpname']); ?></td>
-
-                <td><?php echo htmlspecialchars($rows['org']); ?></td>
-
-                <td><?php echo htmlspecialchars($rows['mode']); ?></td>
-
-                <td><?php echo htmlspecialchars($rows['duration']); ?></td>
-
-                <td><?php echo $rows['startdate']; ?></td>
-
-                <td>
-                  <?php
-                  if ($rows['enddate'] == "0000-00-00" || empty($rows['enddate']))
-                    echo "-";
-                  else
-                    echo $rows['enddate'];
-                  ?>
-                </td>
-
-                <!-- View Button -->
-                <td align="center">
-
-                  <?php
-                  if (!empty($rows['certificate_link'])) {
-                  ?>
-
-                    <a href="<?php echo $rows['certificate_link']; ?>" target="_blank">
-                      <button class="btn">View</button>
-                    </a>
-
-                  <?php
-                  } else {
-                    echo "No Certificate";
-                  }
-                  ?>
-
-                </td>
-
-                </td>
-
-              </tr>
-
-            <?php
-
-            }
-
-            ?>
-
-          </table>
-
-        </div>
-
-      </div>
-      <!-- ============ PAPER PUBLICATION -> paperpublications ============ -->
-      <div id="paperpublicationDiv" class="optionDiv">
-        <h1>Paper Publication</h1>
-        <input type='text' id='myInputs' onkeyup='myFunctions()' placeholder='search by Title..' title='Type in a title'>
-        <div class='scroll'>
-          <table id='myTables'>
-            <tr class='header'>
-              <th>Name</th>
-              <th>Title</th>
-              <th>Journal</th>
-              <th>Authorship Position</th>
-              <th>Type</th>
-              <th>Date</th>
-              <th>URL</th>
-              <th>ISSN</th>
-              <th>Issue</th>
-              <th>Volume</th>
-              <th>File</th>
-              <th>Download</th>
-            </tr>
-            <?php
-            $query = "SELECT * FROM paperpublications";
-            $result = mysqli_query($conn, $query);
-            while ($rows = mysqli_fetch_assoc($result)) {
-            ?>
-              <tr>
-                <td><?php echo $rows['name']; ?></td>
-                <td><?php echo $rows['title']; ?></td>
-                <td><?php echo $rows['journal']; ?></td>
-                <td><?php echo $rows['authorship_position']; ?></td>
-                <td><?php echo $rows['type']; ?></td>
-                <td><?php echo $rows['date']; ?></td>
-                <td><?php echo "<a href='" . $rows['url'] . "' target='_blank'>Link</a>"; ?></td>
-                <td><?php echo $rows['issn']; ?></td>
-                <td><?php echo $rows['issue']; ?></td>
-                <td><?php echo $rows['volume']; ?></td>
-                <td>
-                  <?php
-                  $ext = pathinfo('images/' . $rows['file'], PATHINFO_EXTENSION);
-                  if ($ext == 'pdf') {
-                    echo "<embed src='images/" . $rows['file'] . "' type='application/pdf' frameBorder='0' scrolling='auto' height='100' width='200'></embed>";
-                  } else {
-                    echo "<a href='images/" . $rows['file'] . "' data-lightbox='mygallery'><img src='images/" . $rows['file'] . "' width='200' height='100'></a>";
-                  }
-                  ?>
-                </td>
-                <td><?php echo "<a href='images/" . $rows['file'] . "' download><button class='btn'><i style='font-size:24px' class='fa'>&#xf019;</i></button></a>"; ?></td>
-              </tr>
-            <?php } ?>
-          </table>
-        </div>
-      </div>
-
-      <!-- ============ BOOK PUBLISHED -> bookpublish ============ -->
-      <div id="bookpublishedDiv" class="optionDiv">
-        <h1>Book Published</h1>
-        <input type='text' id='myInputc' onkeyup='myFunctionc()' placeholder='search by Title..' title='Type in a title'>
-        <div class='scroll'>
-          <table id='myTablec'>
-            <tr class='header'>
-              <th>Name</th>
-              <th>Title</th>
-              <th>Journal</th>
-              <th>Publication Type</th>
-              <th>Authorship Position</th>
-              <th>Type</th>
-              <th>Date</th>
-              <th>URL</th>
-              <th>ISSN</th>
-              <th>Issue</th>
-              <th>Volume</th>
-              <th>File</th>
-              <th>Download</th>
-            </tr>
-            <?php
-            $query = "SELECT * FROM bookpublish";
-            $result = mysqli_query($conn, $query);
-            while ($rows = mysqli_fetch_assoc($result)) {
-            ?>
-              <tr>
-                <td><?php echo $rows['name']; ?></td>
-                <td><?php echo $rows['title']; ?></td>
-                <td><?php echo $rows['journal']; ?></td>
-                <td><?php echo $rows['publication_type']; ?></td>
-                <td><?php echo $rows['authorship_position']; ?></td>
-                <td><?php echo $rows['type']; ?></td>
-                <td><?php echo $rows['date']; ?></td>
-                <td><?php echo "<a href='" . $rows['url'] . "' target='_blank'>Link</a>"; ?></td>
-                <td><?php echo $rows['issn']; ?></td>
-                <td><?php echo $rows['issue']; ?></td>
-                <td><?php echo $rows['volume']; ?></td>
-                <td>
-                  <?php
-                  $ext = pathinfo('images/' . $rows['file'], PATHINFO_EXTENSION);
-                  if ($ext == 'pdf') {
-                    echo "<embed src='images/" . $rows['file'] . "' type='application/pdf' frameBorder='0' scrolling='auto' height='100' width='200'></embed>";
-                  } else {
-                    echo "<a href='images/" . $rows['file'] . "' data-lightbox='mygallery'><img src='images/" . $rows['file'] . "' width='200' height='100'></a>";
-                  }
-                  ?>
-                </td>
-                <td><?php echo "<a href='images/" . $rows['file'] . "' download><button class='btn'><i style='font-size:24px' class='fa'>&#xf019;</i></button></a>"; ?></td>
-              </tr>
-            <?php } ?>
-          </table>
-        </div>
-      </div>
-
-      <!-- ============ BOOK EDITED -> bookedited ============ -->
-      <div id="bookeditedDiv" class="optionDiv">
-        <h1>Book Edited</h1>
-        <input type='text' id='myInputo' onkeyup='myFunctiono()' placeholder='search by Title..' title='Type in a title'>
-        <div class='scroll'>
-          <table id='myTableo'>
-            <tr class='header'>
-              <th>Name</th>
-              <th>Title</th>
-              <th>Journal</th>
-              <th>Publication Type</th>
-              <th>Authorship Position</th>
-              <th>Type</th>
-              <th>Date</th>
-              <th>URL</th>
-              <th>ISSN</th>
-              <th>Issue</th>
-              <th>Volume</th>
-              <th>File</th>
-              <th>Download</th>
-            </tr>
-            <?php
-            $query = "SELECT * FROM bookedited";
-            $result = mysqli_query($conn, $query);
-            while ($rows = mysqli_fetch_assoc($result)) {
-            ?>
-              <tr>
-                <td><?php echo $rows['name']; ?></td>
-                <td><?php echo $rows['title']; ?></td>
-                <td><?php echo $rows['journal']; ?></td>
-                <td><?php echo $rows['publication_type']; ?></td>
-                <td><?php echo $rows['authorship_position']; ?></td>
-                <td><?php echo $rows['type']; ?></td>
-                <td><?php echo $rows['date']; ?></td>
-                <td><?php echo "<a href='" . $rows['url'] . "' target='_blank'>Link</a>"; ?></td>
-                <td><?php echo $rows['issn']; ?></td>
-                <td><?php echo $rows['issue']; ?></td>
-                <td><?php echo $rows['volume']; ?></td>
-                <td>
-                  <?php
-                  // NOTE: this table's file column is named 'fiie' (likely a typo for 'file' in the DB itself)
-                  $ext = pathinfo('images/' . $rows['file'], PATHINFO_EXTENSION);
-                  if ($ext == 'pdf') {
-                    echo "<embed src='images/" . $rows['file'] . "' type='application/pdf' frameBorder='0' scrolling='auto' height='100' width='200'></embed>";
-                  } else {
-                    echo "<a href='images/" . $rows['file'] . "' data-lightbox='mygallery'><img src='images/" . $rows['file'] . "' width='200' height='100'></a>";
-                  }
-                  ?>
-                </td>
-                <td><?php echo "<a href='images/" . $rows['file'] . "' download><button class='btn'><i style='font-size:24px' class='fa'>&#xf019;</i></button></a>"; ?></td>
-              </tr>
-            <?php } ?>
-          </table>
-        </div>
-      </div>
-
-      <!-- ============ OTHERS -> others ============ -->
-      <div id="othersDiv" class="optionDiv">
-        <h1>Others</h1>
-        <input type='text' id='myInput4' onkeyup='myFunction4()' placeholder='search by Course Name..' title='Type in a name'>
-        <div class='scroll'>
-          <table id='myTable4'>
-            <tr class='header'>
-              <th>Roll No</th>
-              <th>Name</th>
-              <th>Course Name</th>
-              <th>Offered By</th>
-              <th>Place</th>
-              <th>Start Date</th>
-              <th>End Date</th>
-              <th>Duration</th>
-              <th>File</th>
-              <th>Download</th>
-            </tr>
-            <?php
-            $query = "SELECT * FROM others";
-            $result = mysqli_query($conn, $query);
-            while ($rows = mysqli_fetch_assoc($result)) {
-            ?>
-              <tr>
-                <td><?php echo $rows['rollno']; ?></td>
-                <td><?php echo $rows['name']; ?></td>
-                <td><?php echo $rows['cname']; ?></td>
-                <td><?php echo $rows['ooffered']; ?></td>
-                <td><?php echo $rows['place']; ?></td>
-                <td><?php echo $rows['startdate']; ?></td>
-                <td><?php echo $rows['enddate']; ?></td>
-                <td><?php echo $rows['duration']; ?></td>
-                <td>
-                  <?php
-                  $ext = pathinfo('images/' . $rows['file'], PATHINFO_EXTENSION);
-                  if ($ext == 'pdf') {
-                    echo "<embed src='images/" . $rows['file'] . "' type='application/pdf' frameBorder='0' scrolling='auto' height='100' width='200'></embed>";
-                  } else {
-                    echo "<a href='images/" . $rows['file'] . "' data-lightbox='mygallery'><img src='images/" . $rows['file'] . "' width='200' height='100'></a>";
-                  }
-                  ?>
-                </td>
-                <td><?php echo "<a href='images/" . $rows['file'] . "' download><button class='btn'><i style='font-size:24px' class='fa'>&#xf019;</i></button></a>"; ?></td>
-              </tr>
-            <?php } ?>
-          </table>
-        </div>
-      </div>
-
+      <?php endforeach; ?>
     </div>
   </div>
   <br>
 
   <script>
-    // Shows only the section matching the dropdown's value (e.g. "fdp" -> "fdpDiv")
+    // Show only the section matching the dropdown's value (e.g. "fdp" -> "fdpDiv")
     function myFun() {
       var sections = document.getElementsByClassName('optionDiv');
       for (var i = 0; i < sections.length; i++) {
         sections[i].style.display = 'none';
       }
-      var inputElement = document.getElementById("mySelect");
-      var outputElement = document.getElementById("demo");
-      var val = inputElement.value;
-
+      var val = document.getElementById("mySelect").value;
       if (val) {
         var target = document.getElementById(val + "Div");
-        if (target) {
-          target.style.display = 'block';
-        }
-      }
-    }
-  </script>
-
-  <script src="mainl.js"></script>
-  <script>
-    function myFunction() {
-      var input, filter, table, tr, td, i, txtValue;
-      input = document.getElementById("myInput");
-      filter = input.value.toUpperCase();
-      table = document.getElementById("myTable");
-      tr = table.getElementsByTagName("tr");
-      for (i = 0; i < tr.length; i++) {
-        td = tr[i].getElementsByTagName("td")[3];
-        if (td) {
-          txtValue = td.textContent || td.innerText;
-          if (txtValue.toUpperCase().indexOf(filter) > -1) {
-            tr[i].style.display = "";
-          } else {
-            tr[i].style.display = "none";
-          }
-        }
+        if (target) target.style.display = 'block';
       }
     }
 
-    function myFunction1() {
-      var input, filter, table, tr, td, i, txtValue;
-      input = document.getElementById("myInput1");
-      filter = input.value.toUpperCase();
-      table = document.getElementById("myTable1");
-      tr = table.getElementsByTagName("tr");
-      for (i = 0; i < tr.length; i++) {
-        td = tr[i].getElementsByTagName("td")[2];
-        if (td) {
-          txtValue = td.textContent || td.innerText;
-          if (txtValue.toUpperCase().indexOf(filter) > -1) {
-            tr[i].style.display = "";
-          } else {
-            tr[i].style.display = "none";
-          }
-        }
-      }
-    }
+    // One generic filter for every table, driven by the table's
+    // data-searchcol attribute (set server-side from $cfg['search']).
+    function filterTable(key) {
+      var input = document.getElementById("search_" + key);
+      var filter = input.value.toUpperCase();
+      var table = document.getElementById("table_" + key);
+      var col = parseInt(table.getAttribute("data-searchcol"), 10);
+      var rows = table.getElementsByTagName("tbody")[0].getElementsByTagName("tr");
 
-    function myFunction2() {
-      var input, filter, table, tr, td, i, txtValue;
-      input = document.getElementById("myInput2");
-      filter = input.value.toUpperCase();
-      table = document.getElementById("myTable2");
-      tr = table.getElementsByTagName("tr");
-      for (i = 0; i < tr.length; i++) {
-        td = tr[i].getElementsByTagName("td")[0];
+      for (var i = 0; i < rows.length; i++) {
+        var td = rows[i].getElementsByTagName("td")[col];
         if (td) {
-          txtValue = td.textContent || td.innerText;
-          if (txtValue.toUpperCase().indexOf(filter) > -1) {
-            tr[i].style.display = "";
-          } else {
-            tr[i].style.display = "none";
-          }
-        }
-      }
-    }
-
-    function myFunction3() {
-      var input, filter, table, tr, td, i, txtValue;
-      input = document.getElementById("myInput3");
-      filter = input.value.toUpperCase();
-      table = document.getElementById("myTable3");
-      tr = table.getElementsByTagName("tr");
-      for (i = 0; i < tr.length; i++) {
-        td = tr[i].getElementsByTagName("td")[2];
-        if (td) {
-          txtValue = td.textContent || td.innerText;
-          if (txtValue.toUpperCase().indexOf(filter) > -1) {
-            tr[i].style.display = "";
-          } else {
-            tr[i].style.display = "none";
-          }
-        }
-      }
-    }
-
-    function myFunctions() {
-      var input, filter, table, tr, td, i, txtValue;
-      input = document.getElementById("myInputs");
-      filter = input.value.toUpperCase();
-      table = document.getElementById("myTables");
-      tr = table.getElementsByTagName("tr");
-      for (i = 0; i < tr.length; i++) {
-        td = tr[i].getElementsByTagName("td")[1];
-        if (td) {
-          txtValue = td.textContent || td.innerText;
-          if (txtValue.toUpperCase().indexOf(filter) > -1) {
-            tr[i].style.display = "";
-          } else {
-            tr[i].style.display = "none";
-          }
-        }
-      }
-    }
-
-    function myFunctionc() {
-      var input, filter, table, tr, td, i, txtValue;
-      input = document.getElementById("myInputc");
-      filter = input.value.toUpperCase();
-      table = document.getElementById("myTablec");
-      tr = table.getElementsByTagName("tr");
-      for (i = 0; i < tr.length; i++) {
-        td = tr[i].getElementsByTagName("td")[1];
-        if (td) {
-          txtValue = td.textContent || td.innerText;
-          if (txtValue.toUpperCase().indexOf(filter) > -1) {
-            tr[i].style.display = "";
-          } else {
-            tr[i].style.display = "none";
-          }
-        }
-      }
-    }
-
-    function myFunctiono() {
-      var input, filter, table, tr, td, i, txtValue;
-      input = document.getElementById("myInputo");
-      filter = input.value.toUpperCase();
-      table = document.getElementById("myTableo");
-      tr = table.getElementsByTagName("tr");
-      for (i = 0; i < tr.length; i++) {
-        td = tr[i].getElementsByTagName("td")[1];
-        if (td) {
-          txtValue = td.textContent || td.innerText;
-          if (txtValue.toUpperCase().indexOf(filter) > -1) {
-            tr[i].style.display = "";
-          } else {
-            tr[i].style.display = "none";
-          }
-        }
-      }
-    }
-
-    function myFunctionso() {
-      var input, filter, table, tr, td, i, txtValue;
-      input = document.getElementById("myInputso");
-      filter = input.value.toUpperCase();
-      table = document.getElementById("myTableso");
-      tr = table.getElementsByTagName("tr");
-      for (i = 0; i < tr.length; i++) {
-        td = tr[i].getElementsByTagName("td")[3];
-        if (td) {
-          txtValue = td.textContent || td.innerText;
-          if (txtValue.toUpperCase().indexOf(filter) > -1) {
-            tr[i].style.display = "";
-          } else {
-            tr[i].style.display = "none";
-          }
-        }
-      }
-    }
-
-    function myFunctionco() {
-      var input, filter, table, tr, td, i, txtValue;
-      input = document.getElementById("myInputco");
-      filter = input.value.toUpperCase();
-      table = document.getElementById("myTableco");
-      tr = table.getElementsByTagName("tr");
-      for (i = 0; i < tr.length; i++) {
-        td = tr[i].getElementsByTagName("td")[3];
-        if (td) {
-          txtValue = td.textContent || td.innerText;
-          if (txtValue.toUpperCase().indexOf(filter) > -1) {
-            tr[i].style.display = "";
-          } else {
-            tr[i].style.display = "none";
-          }
-        }
-      }
-    }
-
-    function myFunction4() {
-      var input, filter, table, tr, td, i, txtValue;
-      input = document.getElementById("myInput4");
-      filter = input.value.toUpperCase();
-      table = document.getElementById("myTable4");
-      tr = table.getElementsByTagName("tr");
-      for (i = 0; i < tr.length; i++) {
-        td = tr[i].getElementsByTagName("td")[2];
-        if (td) {
-          txtValue = td.textContent || td.innerText;
-          if (txtValue.toUpperCase().indexOf(filter) > -1) {
-            tr[i].style.display = "";
-          } else {
-            tr[i].style.display = "none";
-          }
-        }
-      }
-    }
-
-    function myFunction5() {
-      var input, filter, table, tr, td, i, txtValue;
-      input = document.getElementById("myInput5");
-      filter = input.value.toUpperCase();
-      table = document.getElementById("myTable5");
-      tr = table.getElementsByTagName("tr");
-      for (i = 0; i < tr.length; i++) {
-        td = tr[i].getElementsByTagName("td")[2];
-        if (td) {
-          txtValue = td.textContent || td.innerText;
-          if (txtValue.toUpperCase().indexOf(filter) > -1) {
-            tr[i].style.display = "";
-          } else {
-            tr[i].style.display = "none";
-          }
-        }
-      }
-    }
-
-    function myFunction6() {
-      var input, filter, table, tr, td, i, txtValue;
-      input = document.getElementById("myInput6");
-      filter = input.value.toUpperCase();
-      table = document.getElementById("myTable6");
-      tr = table.getElementsByTagName("tr");
-      for (i = 0; i < tr.length; i++) {
-        td = tr[i].getElementsByTagName("td")[2];
-        if (td) {
-          txtValue = td.textContent || td.innerText;
-          if (txtValue.toUpperCase().indexOf(filter) > -1) {
-            tr[i].style.display = "";
-          } else {
-            tr[i].style.display = "none";
-          }
+          var txt = td.textContent || td.innerText;
+          rows[i].style.display = (txt.toUpperCase().indexOf(filter) > -1) ? "" : "none";
         }
       }
     }
