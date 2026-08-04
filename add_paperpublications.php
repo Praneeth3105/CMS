@@ -2,6 +2,13 @@
 include "db_conn.php";
 session_start();
 
+// ===== GUARD: must be logged in =====
+if (!isset($_SESSION['id'])) {
+    header("Location: login.php");
+    exit;
+}
+// =====================================
+
 // table: paperpublications
 // columns: id, faculty_name, title, journal, indexing_type, volume, number,
 //          url_doi, academic_year, month, proof_link, faculty_id
@@ -31,4 +38,5 @@ if (isset($_POST['submit'])) {
     }
 
     echo "<script>alert('Data Uploaded Successfully');window.location='facultyadd.php';</script>";
+    exit;
 }

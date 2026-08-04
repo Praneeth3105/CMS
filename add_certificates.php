@@ -1,9 +1,18 @@
 <?php
 include "db_conn.php";
 session_start();
+
+// ===== GUARD: must be logged in =====
+if (!isset($_SESSION['id'])) {
+    header("Location: login.php");
+    exit;
+}
+// =====================================
+
 // table: certificates
 // columns: id, academic_year, name, certificate, org, start_date, start_date_raw,
 //          end_date, end_date_raw, duration, mode, certificate_link, faculty_id
+
 if (isset($_POST['submit'])) {
     $name             = $_SESSION['name'];
     $faculty_id       = $_SESSION['id'];
@@ -23,4 +32,5 @@ if (isset($_POST['submit'])) {
         die("SQL ERROR: " . mysqli_error($conn));
     }
     echo "<script>alert('Data Uploaded Successfully');window.location='facultyadd.php';</script>";
+    exit;
 }

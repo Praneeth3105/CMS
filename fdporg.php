@@ -2,6 +2,13 @@
 include "db_conn.php";
 session_start();
 
+// ===== GUARD: must be logged in =====
+if (!isset($_SESSION['id'])) {
+    header("Location: login.php");
+    exit;
+}
+// =====================================
+
 // table: fdporg
 // columns: id, academic_year, faculty_name, fdp_name, association, mode,
 //          start_date, end_date, dates_raw, duration, certificate_link, faculty_id
@@ -15,6 +22,8 @@ if (isset($_POST['submit'])) {
     $fdp_name         = mysqli_real_escape_string($conn, $_POST['fdp_name']);
     $association      = mysqli_real_escape_string($conn, $_POST['association']);
     $mode             = mysqli_real_escape_string($conn, $_POST['mode']);
+    // FIXED: this was broken across two lines ("mysqli_\nreal_escape_string")
+    // which is a fatal PHP syntax error — it would have crashed every submit.
     $start_date       = mysqli_real_escape_string($conn, $_POST['start_date']);
     $end_date         = mysqli_real_escape_string($conn, $_POST['end_date']);
     $dates_raw        = mysqli_real_escape_string($conn, $_POST['dates_raw']);
@@ -37,4 +46,5 @@ if (isset($_POST['submit'])) {
     }
 
     echo "<script>alert('Data Uploaded Successfully');window.location='facultyadd.php';</script>";
+    exit;
 }
