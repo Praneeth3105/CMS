@@ -390,7 +390,6 @@
             }
         }
 
-        // Last resort: let PHP's own parser take a guess
         $timestamp = strtotime($dateStr);
         if ($timestamp !== false) {
             return date('Y-m-d', $timestamp);

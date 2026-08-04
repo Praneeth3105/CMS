@@ -73,7 +73,6 @@
             border-color: #caa24c;
         }
 
-        /* ---------- Page hero ---------- */
         .page-hero {
             text-align: center;
             padding: 42px 24px 8px;
@@ -96,7 +95,6 @@
             margin: 0;
         }
 
-        /* ---------- Form panel ---------- */
         .panel {
             background: var(--cream-card);
             margin: 30px auto;
