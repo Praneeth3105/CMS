@@ -7,15 +7,7 @@ if (!isset($_SESSION['id'])) {
     header("Location: login.php");
     exit;
 }
-// =====================================
 
-// table: funding_projects
-// columns: id, academic_year, faculty_name, title, agency_name, amount, start_date,
-//          end_date, duration, funding_type, faculty_id
-//
-// NOTE: comment said "no faculty_id column", but fsearch.php filters this
-// table with "WHERE faculty_id='$id'". Run `DESCRIBE funding_projects;`
-// to confirm. If missing: ALTER TABLE funding_projects ADD faculty_id VARCHAR(100);
 
 if (isset($_POST['submit'])) {
     $faculty_name  = $_SESSION['name'];
