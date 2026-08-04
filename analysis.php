@@ -186,6 +186,12 @@ session_start();
 			width: 100%;
 		}
 
+		.note {
+			font-size: 12px;
+			color: #8a7f6a;
+			margin: 6px 0 0 0;
+		}
+
 		@media only screen and (max-width: 900px) {
 			.scroll {
 				width: 100%;
@@ -216,282 +222,100 @@ session_start();
 
 		<br>
 		<a href="graph.php" class="n"><button type="button" class="btn" id="btn1">Graph Analysis</button></a>
-		
+
 		<br><br>
 		<h1>Faculty Details</h1>
 
-		<?php if (isset($_POST['submit'])) {
+		<?php
+		/*
+		 * Every faculty activity table (fdp, fdporg, ffworkshop, paperpublications,
+		 * conferences, certificates, bookpublish, bookedited, textbook, patents,
+		 * nptel, achievements, outside_participations, reviewer_activities,
+		 * professional_membership, phd_details, consultancy_work, working_models,
+		 * funding_projects) carries a `faculty_id` column, so that is used as the
+		 * join key instead of matching on `name` (which is fragile).
+		 *
+		 * Only tables that store real DATE columns can be filtered by the
+		 * From/To range above. The others only store academic_year/month as
+		 * text, so their counts are shown as totals regardless of the filter.
+		 */
+		$categories = array(
+			'fdp'                      => array('label' => 'FDP Attended',            'date_cols' => array('startdate', 'enddate')),
+			'fdporg'                   => array('label' => 'FDP Organized',           'date_cols' => array('start_date', 'end_date')),
+			'ffworkshop'               => array('label' => 'Workshops Attended',      'date_cols' => array('start_date', 'end_date')),
+			'paperpublications'        => array('label' => 'Paper Publications',      'date_cols' => null),
+			'conferences'              => array('label' => 'Conferences',             'date_cols' => null),
+			'certificates'             => array('label' => 'Certificates',            'date_cols' => array('start_date', 'end_date')),
+			'bookpublish'              => array('label' => 'Books Published',         'date_cols' => null),
+			'bookedited'               => array('label' => 'Books Edited',            'date_cols' => null),
+			'textbook'                 => array('label' => 'Text Books',              'date_cols' => null),
+			'patents'                  => array('label' => 'Patents',                 'date_cols' => null),
+			'nptel'                    => array('label' => 'NPTEL',                   'date_cols' => array('start_date', 'end_date')),
+			'achievements'             => array('label' => 'Achievements',            'date_cols' => null),
+			'outside_participations'   => array('label' => 'Outside Participation',   'date_cols' => null),
+			'reviewer_activities'      => array('label' => 'Reviewer Activities',     'date_cols' => null),
+			'professional_membership'  => array('label' => 'Professional Membership', 'date_cols' => null),
+			'phd_details'              => array('label' => 'PHD',                     'date_cols' => null),
+			'consultancy_work'         => array('label' => 'Consultancy Work',        'date_cols' => null),
+			'working_models'           => array('label' => 'Working Models',          'date_cols' => null),
+			'funding_projects'         => array('label' => 'Funding Projects',        'date_cols' => null),
+		);
+
+		function getCategoryCount($conn, $table, $faculty_id, $date_cols, $std, $end)
+		{
+			if ($date_cols && $std && $end) {
+				$sql = "SELECT COUNT(*) AS c FROM `$table` WHERE faculty_id = ? AND `{$date_cols[0]}` BETWEEN ? AND ? AND `{$date_cols[1]}` BETWEEN ? AND ?";
+				$stmt = mysqli_prepare($conn, $sql);
+				mysqli_stmt_bind_param($stmt, "sssss", $faculty_id, $std, $end, $std, $end);
+			} else {
+				$sql = "SELECT COUNT(*) AS c FROM `$table` WHERE faculty_id = ?";
+				$stmt = mysqli_prepare($conn, $sql);
+				mysqli_stmt_bind_param($stmt, "s", $faculty_id);
+			}
+			mysqli_stmt_execute($stmt);
+			$res = mysqli_stmt_get_result($stmt);
+			$row = mysqli_fetch_assoc($res);
+			mysqli_stmt_close($stmt);
+			return (int) $row['c'];
+		}
+
+		$std = null;
+		$end = null;
+		if (isset($_POST['submit']) && !empty($_POST['stdd']) && !empty($_POST['endd'])) {
 			$std = $_POST['stdd'];
 			$end = $_POST['endd'];
+		}
 		?>
-			<div class="login-content">
-				<div class="scroll">
-					<table id="myTable">
-						<tr class="header">
-							<th style="width:60%;">Faculty Names</th>
-							<th style="width:60%;">Workshop Attended</th>
-							<th style="width:30%;">Seminar Attended</th>
-							<th style="width:20%;">Conference Attended</th>
-							<th style="width:30%;">Workshop Organized</th>
-							<th style="width:20%;">Seminar Organized</th>
-							<th style="width:30%;">Conference Organized</th>
-							<th style="width:20%;">Paper Publications</th>
 
-							<th style="width:20%;">Certifications</th>
+		<?php if ($std && $end): ?>
+			<p class="note">Showing counts for <?php echo htmlspecialchars($std); ?> to <?php echo htmlspecialchars($end); ?> where a record date is tracked; other categories show all-time totals.</p>
+		<?php endif; ?>
 
-							<th style="width:20%;">Book Chapters Published</th>
-							<th style="width:20%;">Book Chapters Edited</th>
-							<th style="width:20%;">FDP</th>
-
-						</tr>
-						<tr>
-							<?php
-							include "db_conn.php";
-							#$name=$_SESSION['name'];
-							$std = $_POST['stdd'];
-							$endd = $_POST['endd'];
-							$query = "SELECT * FROM faculty";
-							$result = mysqli_query($conn, $query);
-							while ($rows = mysqli_fetch_assoc($result)) {
-								$names = $rows['name'];
-								$sql = "SELECT * from fworkshop WHERE name='$names' and type='workshop' AND startdate BETWEEN '$std' AND '$end'
-AND enddate BETWEEN '$std' AND '$end'";
-
-								if ($results = mysqli_query($conn, $sql)) {
-									$rowcount = mysqli_num_rows($results);
-
-							?>
-									<td><?php echo $rows['name']; ?></td>
-									<td><?php echo $rowcount;
-									} ?></td>
-
-									<?php
-									$sql1 = "SELECT * from fworkshop WHERE name='$names' and type='seminar' AND startdate BETWEEN '$std' AND '$end'
-AND enddate BETWEEN '$std' AND '$end'";
-
-									if ($results1 = mysqli_query($conn, $sql1)) {
-										$rowcount1 = mysqli_num_rows($results1);
-									?>
-										<td><?php echo $rowcount1;
-										} ?></td>
-										<?php
-										$sql2 = "SELECT * from fworkshop WHERE name='$names' and type='conference' AND startdate BETWEEN '$std' AND '$end'
-AND enddate BETWEEN '$std' AND '$end'";
-
-										if ($results2 = mysqli_query($conn, $sql2)) {
-											$rowcount2 = mysqli_num_rows($results2);
-										?>
-											<td><?php echo $rowcount2;
-											} ?></td>
-											<?php
-											$sql3 = "SELECT * from ffworkshop WHERE name='$names' and type='workshop' AND startdate BETWEEN '$std' AND '$end'
-AND enddate BETWEEN '$std' AND '$end'";
-
-											if ($results3 = mysqli_query($conn, $sql3)) {
-												$rowcount3 = mysqli_num_rows($results3);
-											?>
-												<td><?php echo $rowcount3;
-												} ?></td>
-												<?php
-												$sql4 = "SELECT * from ffworkshop WHERE name='$names' and type='seminar' AND startdate BETWEEN '$std' AND '$end'
-AND enddate BETWEEN '$std' AND '$end'";
-
-												if ($results4 = mysqli_query($conn, $sql4)) {
-													$rowcount4 = mysqli_num_rows($results4);
-												?>
-													<td><?php echo $rowcount4;
-													} ?></td>
-													<?php
-													$sql5 = "SELECT * from ffworkshop WHERE name='$names' and type='conference' AND startdate BETWEEN '$std' AND '$end'
-AND enddate BETWEEN '$std' AND '$end'";
-
-													if ($results5 = mysqli_query($conn, $sql5)) {
-														$rowcount5 = mysqli_num_rows($results5);
-													?>
-														<td><?php echo $rowcount5;
-														} ?></td>
-														<?php
-														$sql6 = "SELECT * from paperpublications WHERE name='$names' AND date BETWEEN '$std' AND '$end'";
-
-														if ($results6 = mysqli_query($conn, $sql6)) {
-															$rowcount6 = mysqli_num_rows($results6);
-														?>
-															<td><?php echo $rowcount6;
-															} ?></td>
-															<?php
-															$sql7 = "SELECT * from certificates WHERE name='$names' AND startdate BETWEEN '$std' AND '$end'
-AND enddate BETWEEN '$std' AND '$end'";
-
-															if ($results7 = mysqli_query($conn, $sql7)) {
-																$rowcount7 = mysqli_num_rows($results7);
-															?>
-																<td><?php echo $rowcount7;
-																} ?></td>
-																<?php
-																$sql8 = "SELECT * from bookpublish WHERE name='$names' AND date BETWEEN '$std' AND '$end'";
-
-																if ($results8 = mysqli_query($conn, $sql8)) {
-																	$rowcount8 = mysqli_num_rows($results8);
-																?>
-																	<td><?php echo $rowcount8;
-																	} ?></td>
-																	<?php
-																	$sql9 = "SELECT * from bookedited WHERE name='$names' AND date BETWEEN '$std' AND '$end'";
-
-																	if ($results9 = mysqli_query($conn, $sql9)) {
-																		$rowcount9 = mysqli_num_rows($results9);
-																	?>
-																		<td><?php echo $rowcount9;
-																		} ?></td>
-																		<?php
-																		$sql10 = "SELECT * from fdp WHERE name='$names' AND startdate BETWEEN '$std' AND '$end'
-AND enddate BETWEEN '$std' AND '$end'";
-
-																		if ($results10 = mysqli_query($conn, $sql10)) {
-																			$rowcount10 = mysqli_num_rows($results10);
-																		?>
-																			<td><?php echo $rowcount10;
-																			} ?></td>
-
-						</tr>
+		<div class="login-content">
+			<div class="scroll">
+				<table id="myTable">
+					<tr class="header">
+						<th>Faculty Name</th>
+						<?php foreach ($categories as $cat): ?>
+							<th><?php echo htmlspecialchars($cat['label']); ?></th>
+						<?php endforeach; ?>
+					</tr>
 					<?php
-							}
+					$facResult = mysqli_query($conn, "SELECT id, name FROM faculty");
+					while ($frow = mysqli_fetch_assoc($facResult)) {
+						$fid = $frow['id'];
+						echo "<tr>";
+						echo "<td>" . htmlspecialchars($frow['name']) . "</td>";
+						foreach ($categories as $table => $cat) {
+							$count = getCategoryCount($conn, $table, $fid, $cat['date_cols'], $std, $end);
+							echo "<td>" . $count . "</td>";
+						}
+						echo "</tr>";
+					}
 					?>
-					</table>
-				</div>
+				</table>
 			</div>
-
-		<?php  } else { ?>
-
-			<div class="login-content">
-				<div class="scroll">
-					<table id="myTable">
-						<tr class="header">
-							<th style="width:60%;">Faculty Names</th>
-							<th style="width:60%;">Workshop Attended</th>
-							<th style="width:30%;">Seminar Attended</th>
-							<th style="width:20%;">Conference Attended</th>
-							<th style="width:30%;">Workshop Organized</th>
-							<th style="width:20%;">Seminar Organized</th>
-							<th style="width:30%;">Conference Organized</th>
-							<th style="width:20%;">Paper Publications</th>
-
-							<th style="width:20%;">Certifications</th>
-
-							<th style="width:20%;">Book Chapters Published</th>
-							<th style="width:20%;">Book Chapters Edited</th>
-							<th style="width:20%;">FDP</th>
-
-						</tr>
-						<tr>
-							<?php
-							include "db_conn.php";
-							#$name=$_SESSION['name'];
-							#           $std=$_POST['stdd'];
-							#           $endd=$_POST['endd'];
-							$query = "SELECT * FROM faculty";
-							$result = mysqli_query($conn, $query);
-							while ($rows = mysqli_fetch_assoc($result)) {
-								$names = $rows['name'];
-								$sql = "SELECT * from fworkshop WHERE name='$names' and type='workshop'";
-
-								if ($results = mysqli_query($conn, $sql)) {
-									$rowcount = mysqli_num_rows($results);
-
-							?>
-									<td><?php echo $rows['name']; ?></td>
-									<td><?php echo $rowcount;
-									} ?></td>
-
-									<?php
-									$sql1 = "SELECT * from fworkshop WHERE name='$names' and type='seminar'";
-
-									if ($results1 = mysqli_query($conn, $sql1)) {
-										$rowcount1 = mysqli_num_rows($results1);
-									?>
-										<td><?php echo $rowcount1;
-										} ?></td>
-										<?php
-										$sql2 = "SELECT * from fworkshop WHERE name='$names' and type='conference'";
-
-										if ($results2 = mysqli_query($conn, $sql2)) {
-											$rowcount2 = mysqli_num_rows($results2);
-										?>
-											<td><?php echo $rowcount2;
-											} ?></td>
-											<?php
-											$sql3 = "SELECT * from ffworkshop WHERE name='$names' and type='workshop'";
-
-											if ($results3 = mysqli_query($conn, $sql3)) {
-												$rowcount3 = mysqli_num_rows($results3);
-											?>
-												<td><?php echo $rowcount3;
-												} ?></td>
-												<?php
-												$sql4 = "SELECT * from ffworkshop WHERE name='$names' and type='seminar'";
-
-												if ($results4 = mysqli_query($conn, $sql4)) {
-													$rowcount4 = mysqli_num_rows($results4);
-												?>
-													<td><?php echo $rowcount4;
-													} ?></td>
-													<?php
-													$sql5 = "SELECT * from ffworkshop WHERE name='$names' and type='conference'";
-
-													if ($results5 = mysqli_query($conn, $sql5)) {
-														$rowcount5 = mysqli_num_rows($results5);
-													?>
-														<td><?php echo $rowcount5;
-														} ?></td>
-														<?php
-														$sql6 = "SELECT * from paperpublications WHERE name='$names'";
-
-														if ($results6 = mysqli_query($conn, $sql6)) {
-															$rowcount6 = mysqli_num_rows($results6);
-														?>
-															<td><?php echo $rowcount6;
-															} ?></td>
-															<?php
-															$sql7 = "SELECT * from certificates WHERE name='$names'";
-
-															if ($results7 = mysqli_query($conn, $sql7)) {
-																$rowcount7 = mysqli_num_rows($results7);
-															?>
-																<td><?php echo $rowcount7;
-																} ?></td>
-																<?php
-																$sql8 = "SELECT * from bookpublish WHERE name='$names'";
-
-																if ($results8 = mysqli_query($conn, $sql8)) {
-																	$rowcount8 = mysqli_num_rows($results8);
-																?>
-																	<td><?php echo $rowcount8;
-																	} ?></td>
-																	<?php
-																	$sql9 = "SELECT * from bookedited WHERE name='$names'";
-
-																	if ($results9 = mysqli_query($conn, $sql9)) {
-																		$rowcount9 = mysqli_num_rows($results9);
-																	?>
-																		<td><?php echo $rowcount9;
-																		} ?></td>
-																		<?php
-																		$sql10 = "SELECT * from fdp WHERE name='$names'";
-
-																		if ($results10 = mysqli_query($conn, $sql10)) {
-																			$rowcount10 = mysqli_num_rows($results10);
-																		?>
-																			<td><?php echo $rowcount10;
-																			} ?></td>
-
-						</tr>
-					<?php
-							}
-					?>
-					</table>
-				</div>
-			</div>
-		<?php } ?>
+		</div>
 	</div>
 
 	<div class="panel">
@@ -518,7 +342,7 @@ AND enddate BETWEEN '$std' AND '$end'";
 						<option value="CSD">CSD</option>
 					</select>
 					<input type="submit" name="submi" id="bb">
-</div>
+				</div>
 			</form>
 		</div>
 
@@ -526,7 +350,7 @@ AND enddate BETWEEN '$std' AND '$end'";
 		<a href="graph1.php" class="n"><button type="button" class="btn" id="btn1">Graph Analysis</button></a>
 		<br><br>
 		<h1>Student Details</h1>
-		
+
 
 		<?php if (isset($_POST['submi'])) {
 			$year = $_POST['year'];
@@ -548,7 +372,6 @@ AND enddate BETWEEN '$std' AND '$end'";
 
 						</tr>
 						<?php
-						include "db_conn.php";
 						#session_start();
 						#$name=$_SESSION['name'];
 
@@ -631,7 +454,6 @@ AND enddate BETWEEN '$std' AND '$end'";
 
 						</tr>
 						<?php
-						include "db_conn.php";
 						#session_start();
 						#$name=$_SESSION['name'];
 						#$year=$_POST['year'];
