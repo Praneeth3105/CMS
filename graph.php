@@ -1,3 +1,65 @@
+<?php
+include('db_conn.php');
+
+/*
+ * Same 19 categories used on analysis.php, keyed by faculty_id (not name).
+ * One grouped COUNT query per category instead of one query per faculty
+ * per category — this is O(19) queries total instead of O(19 * faculty_count).
+ */
+$categories = array(
+  'fdp'                      => 'FDP Attended',
+  'fdporg'                   => 'FDP Organized',
+  'ffworkshop'               => 'Workshops Attended',
+  'paperpublications'        => 'Paper Publications',
+  'conferences'              => 'Conferences',
+  'certificates'             => 'Certificates',
+  'bookpublish'              => 'Books Published',
+  'bookedited'               => 'Books Edited',
+  'textbook'                 => 'Text Books',
+  'patents'                  => 'Patents',
+  'nptel'                    => 'NPTEL',
+  'achievements'             => 'Achievements',
+  'outside_participations'   => 'Outside Participation',
+  'reviewer_activities'      => 'Reviewer Activities',
+  'professional_membership'  => 'Professional Membership',
+  'phd_details'              => 'PHD',
+  'consultancy_work'         => 'Consultancy Work',
+  'working_models'           => 'Working Models',
+  'funding_projects'         => 'Funding Projects',
+);
+
+// Faculty list, kept in a fixed order so every chart uses the same x-axis labels.
+$facultyOrder = array();
+$facultyNames = array();
+$fres = mysqli_query($conn, "SELECT id, name FROM faculty ORDER BY name") or die(mysqli_error($conn));
+while ($frow = mysqli_fetch_assoc($fres)) {
+  $facultyOrder[] = $frow['id'];
+  $facultyNames[$frow['id']] = $frow['name'];
+}
+
+$chartData = array();
+foreach ($categories as $table => $label) {
+  $counts = array_fill_keys($facultyOrder, 0);
+  $cres = mysqli_query($conn, "SELECT faculty_id, COUNT(*) AS c FROM `$table` GROUP BY faculty_id");
+  if ($cres) {
+    while ($crow = mysqli_fetch_assoc($cres)) {
+      $fid = $crow['faculty_id'];
+      if (array_key_exists($fid, $counts)) {
+        $counts[$fid] = (int) $crow['c'];
+      }
+    }
+  }
+  $chartData[] = array(
+    'label'  => $label,
+    'values' => array_values($counts),
+  );
+}
+
+$labels = array();
+foreach ($facultyOrder as $fid) {
+  $labels[] = $facultyNames[$fid];
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -8,14 +70,8 @@
   <link rel="stylesheet" href="lightbox.min.css">
   <script src="lightbox-plus-jquery.min.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
-  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script type="text/javascript">
-    google.charts.load('current', {
-      packages: ['corechart']
-    });
-  </script>
 
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap');
@@ -139,11 +195,25 @@
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       padding: 22px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .chart-card .chart-inner {
+      position: relative;
+      width: 100%;
     }
 
     .chart-card canvas {
       width: 100% !important;
-      max-width: 100%;
+      height: 100% !important;
+    }
+
+    .empty-note {
+      text-align: center;
+      color: var(--rust);
+      font-weight: 600;
+      padding: 40px;
     }
 
     @media only screen and (max-width: 900px) {
@@ -157,605 +227,87 @@
 
 <body>
   <div class="topbar">
-    <a href="admin.php" class="n"><button type="button" class="btn" id="btn2">Back</button></a>
+    <a href="analysis.php" class="n"><button type="button" class="btn" id="btn2">Back</button></a>
     <a href="logout.php" class="n"><button type="button" class="btn" id="btn1">Logout</button></a>
   </div>
-
 
   <div class="page-hero">
     <div class="eyebrow">Faculty Records</div>
     <h2>Faculty <span class="accent">Analytics</span></h2>
   </div>
 
-  <div class="chart-grid">
-    <div class="chart-card"><canvas id="myChart"></canvas></div>
-    <div class="chart-card"><canvas id="myChart1"></canvas></div>
-    <div class="chart-card"><canvas id="myChart2"></canvas></div>
-    <div class="chart-card"><canvas id="myChart3"></canvas></div>
-    <div class="chart-card"><canvas id="myChart4"></canvas></div>
-    <div class="chart-card"><canvas id="myChart5"></canvas></div>
-    <div class="chart-card"><canvas id="myChart6"></canvas></div>
-    <div class="chart-card"><canvas id="myChart7"></canvas></div>
-    <div class="chart-card"><canvas id="myChart8"></canvas></div>
-    <div class="chart-card"><canvas id="myChart9"></canvas></div>
-    <div class="chart-card"><canvas id="myChart10"></canvas></div>
-    <div class="chart-card"><canvas id="myChart11"></canvas></div>
-  </div>
+  <?php if (empty($facultyOrder)): ?>
+    <p class="empty-note">No faculty records found.</p>
+  <?php else: ?>
+    <div class="chart-grid" id="chartGrid"></div>
+  <?php endif; ?>
 
   <script>
-    <?php
-    include('db_conn.php');
-    $query = "SELECT * FROM faculty";
-    $res = mysqli_query($conn, $query) or die(mysqli_error($conn));
-    $na = array();
-    while ($data = mysqli_fetch_array($res)) {
-      $na[] = $data["name"];
-    }
-    ?>
-    var xValues = [<?php echo '"' . implode('","', $na) . '"' ?>];
-    console.log('xvalues:', xValues);
-    <?php
-    include('db_conn.php');
-    $num = array();
-    foreach ($na as $value) {
+    const facultyLabels = <?php echo json_encode($labels, JSON_UNESCAPED_UNICODE); ?>;
+    const chartData = <?php echo json_encode($chartData, JSON_UNESCAPED_UNICODE); ?>;
 
-      $query = "SELECT * FROM fworkshop WHERE name='$value' and type='workshop'";
+    const palette = ["#d4af37", "#b5502e", "#2b1d13", "#c9a227", "#8a6d3b", "#7c9070", "#5b7c99", "#9c5b8f"];
+    const barColors = facultyLabels.map((_, i) => palette[i % palette.length]);
 
-      if ($results = mysqli_query($conn, $query)) {
-        $rowcount = mysqli_num_rows($results);
-        $num[] = $rowcount;
-      }
-    }
-    ?>
-    var yValues = [<?php echo '"' . implode('","', $num) . '"' ?>];
-    console.log("yvalues:", yValues);
-    var barColors = ["#d4af37", "#b5502e", "#2b1d13", "#c9a227", "#8a6d3b"];
-    new Chart("myChart", {
-      type: "bar",
-      data: {
-        labels: xValues,
-        datasets: [{
-          backgroundColor: barColors,
-          data: yValues
-        }]
-      },
-      options: {
-        legend: {
-          display: false
+    const grid = document.getElementById('chartGrid');
+
+    // One row per faculty member so every name gets its own bar and label —
+    // no auto-skipped x-axis labels like a vertical bar chart would produce
+    // once there are more than a handful of people.
+    const rowHeight = 30; // px per faculty row
+    const chartPadding = 70; // room for title + axis
+    const cardHeight = Math.max(320, facultyLabels.length * rowHeight + chartPadding);
+
+    chartData.forEach(function(cat, idx) {
+      const card = document.createElement('div');
+      card.className = 'chart-card';
+      card.style.height = cardHeight + 'px';
+
+      const inner = document.createElement('div');
+      inner.className = 'chart-inner';
+      inner.style.height = cardHeight - 44 + 'px';
+
+      const canvas = document.createElement('canvas');
+      canvas.id = 'chart_' + idx;
+      inner.appendChild(canvas);
+      card.appendChild(inner);
+      grid.appendChild(card);
+
+      new Chart(canvas.getContext('2d'), {
+        type: 'horizontalBar',
+        data: {
+          labels: facultyLabels,
+          datasets: [{
+            backgroundColor: barColors,
+            data: cat.values
+          }]
         },
-        title: {
-          display: true,
-          text: "Workshops Attended"
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          legend: {
+            display: false
+          },
+          title: {
+            display: true,
+            text: cat.label
+          },
+          scales: {
+            xAxes: [{
+              ticks: {
+                beginAtZero: true,
+                stepSize: 1,
+                precision: 0
+              }
+            }],
+            yAxes: [{
+              ticks: {
+                autoSkip: false
+              }
+            }]
+          }
         }
-      }
-    });
-  </script>
-  <script>
-    <?php
-    include('db_conn.php');
-    $query1 = "SELECT * FROM faculty";
-    $res1 = mysqli_query($conn, $query1) or die(mysqli_error($conn));
-    $na1 = array();
-    while ($data1 = mysqli_fetch_array($res1)) {
-      $na1[] = $data1["name"];
-    }
-    ?>
-    var xValues = [<?php echo '"' . implode('","', $na1) . '"' ?>];
-
-    <?php
-    include('db_conn.php');
-    $num = array();
-    foreach ($na as $value) {
-
-      $query = "SELECT * FROM fworkshop WHERE name='$value' and type='seminar'";
-
-      if ($results = mysqli_query($conn, $query)) {
-        $rowcount = mysqli_num_rows($results);
-        $num[] = $rowcount;
-      }
-    }
-    ?>
-    var yValues = [<?php echo '"' . implode('","', $num) . '"' ?>];
-    var barColors = ["#d4af37", "#b5502e", "#2b1d13", "#c9a227", "#8a6d3b"];
-
-    new Chart("myChart1", {
-      type: "bar",
-      data: {
-        labels: xValues,
-        datasets: [{
-          backgroundColor: barColors,
-          data: yValues
-        }]
-      },
-      options: {
-        legend: {
-          display: false
-        },
-        title: {
-          display: true,
-          text: "Seminars Attended"
-        }
-      }
-    });
-  </script>
-  <script>
-    <?php
-    include('db_conn.php');
-    $query = "SELECT * FROM faculty";
-    $res = mysqli_query($conn, $query) or die(mysqli_error($conn));
-    $na = array();
-    while ($data = mysqli_fetch_array($res)) {
-      $na[] = $data["name"];
-    }
-    ?>
-    var xValues = [<?php echo '"' . implode('","', $na) . '"' ?>];
-
-    <?php
-    include('db_conn.php');
-    $num = array();
-    foreach ($na as $value) {
-
-      $query = "SELECT * FROM fworkshop WHERE name='$value' and type='conference'";
-
-      if ($results = mysqli_query($conn, $query)) {
-        $rowcount = mysqli_num_rows($results);
-        $num[] = $rowcount;
-      }
-    }
-    ?>
-    var yValues = [<?php echo '"' . implode('","', $num) . '"' ?>];
-    var barColors = ["#d4af37", "#b5502e", "#2b1d13", "#c9a227", "#8a6d3b"];
-
-    new Chart("myChart2", {
-      type: "bar",
-      data: {
-        labels: xValues,
-        datasets: [{
-          backgroundColor: barColors,
-          data: yValues
-        }]
-      },
-      options: {
-        legend: {
-          display: false
-        },
-        title: {
-          display: true,
-          text: "Conference Attended"
-        }
-      }
-    });
-  </script>
-  <script>
-    <?php
-    include('db_conn.php');
-    $query = "SELECT * FROM faculty";
-    $res = mysqli_query($conn, $query) or die(mysqli_error($conn));
-    $na = array();
-    while ($data = mysqli_fetch_array($res)) {
-      $na[] = $data["name"];
-    }
-    ?>
-    var xValues = [<?php echo '"' . implode('","', $na) . '"' ?>];
-
-    <?php
-    include('db_conn.php');
-    $num = array();
-    foreach ($na as $value) {
-
-      $query = "SELECT * FROM ffworkshop WHERE name='$value' and type='workshop'";
-
-      if ($results = mysqli_query($conn, $query)) {
-        $rowcount = mysqli_num_rows($results);
-        $num[] = $rowcount;
-      }
-    }
-    ?>
-    var yValues = [<?php echo '"' . implode('","', $num) . '"' ?>];
-    var barColors = ["#d4af37", "#b5502e", "#2b1d13", "#c9a227", "#8a6d3b"];
-
-    new Chart("myChart3", {
-      type: "bar",
-      data: {
-        labels: xValues,
-        datasets: [{
-          backgroundColor: barColors,
-          data: yValues
-        }]
-      },
-      options: {
-        legend: {
-          display: false
-        },
-        title: {
-          display: true,
-          text: "Workshops Organized"
-        }
-      }
-    });
-  </script>
-  <script>
-    <?php
-    include('db_conn.php');
-    $query = "SELECT * FROM faculty";
-    $res = mysqli_query($conn, $query) or die(mysqli_error($conn));
-    $na = array();
-    while ($data = mysqli_fetch_array($res)) {
-      $na[] = $data["name"];
-    }
-    ?>
-    var xValues = [<?php echo '"' . implode('","', $na) . '"' ?>];
-
-    <?php
-    include('db_conn.php');
-    $num = array();
-    foreach ($na as $value) {
-
-      $query = "SELECT * FROM ffworkshop WHERE name='$value' and type='seminar'";
-
-      if ($results = mysqli_query($conn, $query)) {
-        $rowcount = mysqli_num_rows($results);
-        $num[] = $rowcount;
-      }
-    }
-    ?>
-    var yValues = [<?php echo '"' . implode('","', $num) . '"' ?>];
-    var barColors = ["#d4af37", "#b5502e", "#2b1d13", "#c9a227", "#8a6d3b"];
-
-    new Chart("myChart4", {
-      type: "bar",
-      data: {
-        labels: xValues,
-        datasets: [{
-          backgroundColor: barColors,
-          data: yValues
-        }]
-      },
-      options: {
-        legend: {
-          display: false
-        },
-        title: {
-          display: true,
-          text: "Seminars Organized"
-        }
-      }
-    });
-  </script>
-  <script>
-    <?php
-    include('db_conn.php');
-    $query = "SELECT * FROM faculty";
-    $res = mysqli_query($conn, $query) or die(mysqli_error($conn));
-    $na = array();
-    while ($data = mysqli_fetch_array($res)) {
-      $na[] = $data["name"];
-    }
-    ?>
-    var xValues = [<?php echo '"' . implode('","', $na) . '"' ?>];
-
-    <?php
-    include('db_conn.php');
-    $num = array();
-    foreach ($na as $value) {
-
-      $query = "SELECT * FROM ffworkshop WHERE name='$value' and type='conference'";
-
-      if ($results = mysqli_query($conn, $query)) {
-        $rowcount = mysqli_num_rows($results);
-        $num[] = $rowcount;
-      }
-    }
-    ?>
-    var yValues = [<?php echo '"' . implode('","', $num) . '"' ?>];
-    var barColors = ["#d4af37", "#b5502e", "#2b1d13", "#c9a227", "#8a6d3b"];
-
-    new Chart("myChart5", {
-      type: "bar",
-      data: {
-        labels: xValues,
-        datasets: [{
-          backgroundColor: barColors,
-          data: yValues
-        }]
-      },
-      options: {
-        legend: {
-          display: false
-        },
-        title: {
-          display: true,
-          text: "Conference Organized"
-        }
-      }
-    });
-  </script>
-  <script>
-    <?php
-    include('db_conn.php');
-    $query = "SELECT * FROM faculty";
-    $res = mysqli_query($conn, $query) or die(mysqli_error($conn));
-    $na = array();
-    while ($data = mysqli_fetch_array($res)) {
-      $na[] = $data["name"];
-    }
-    ?>
-    var xValues = [<?php echo '"' . implode('","', $na) . '"' ?>];
-
-    <?php
-    include('db_conn.php');
-    $num = array();
-    foreach ($na as $value) {
-
-      $query = "SELECT * FROM paperpublications WHERE name='$value'";
-
-      if ($results = mysqli_query($conn, $query)) {
-        $rowcount = mysqli_num_rows($results);
-        $num[] = $rowcount;
-      }
-    }
-    ?>
-    var yValues = [<?php echo '"' . implode('","', $num) . '"' ?>];
-    var barColors = ["#d4af37", "#b5502e", "#2b1d13", "#c9a227", "#8a6d3b"];
-
-    new Chart("myChart6", {
-      type: "bar",
-      data: {
-        labels: xValues,
-        datasets: [{
-          backgroundColor: barColors,
-          data: yValues
-        }]
-      },
-      options: {
-        legend: {
-          display: false
-        },
-        title: {
-          display: true,
-          text: "Paper Publications"
-        }
-      }
-    });
-  </script>
-  <script>
-    <?php
-    include('db_conn.php');
-    $query = "SELECT * FROM faculty";
-    $res = mysqli_query($conn, $query) or die(mysqli_error($conn));
-    $na = array();
-    while ($data = mysqli_fetch_array($res)) {
-      $na[] = $data["name"];
-    }
-    ?>
-    var xValues = [<?php echo '"' . implode('","', $na) . '"' ?>];
-
-    <?php
-    include('db_conn.php');
-    $num = array();
-    foreach ($na as $value) {
-
-      $query = "SELECT * FROM certificates WHERE name='$value'";
-
-      if ($results = mysqli_query($conn, $query)) {
-        $rowcount = mysqli_num_rows($results);
-        $num[] = $rowcount;
-      }
-    }
-    ?>
-    var yValues = [<?php echo '"' . implode('","', $num) . '"' ?>];
-    var barColors = ["#d4af37", "#b5502e", "#2b1d13", "#c9a227", "#8a6d3b"];
-
-    new Chart("myChart7", {
-      type: "bar",
-      data: {
-        labels: xValues,
-        datasets: [{
-          backgroundColor: barColors,
-          data: yValues
-        }]
-      },
-      options: {
-        legend: {
-          display: false
-        },
-        title: {
-          display: true,
-          text: "Certificates"
-        }
-      }
-    });
-  </script>
-  <script>
-    <?php
-    include('db_conn.php');
-    $query = "SELECT * FROM faculty";
-    $res = mysqli_query($conn, $query) or die(mysqli_error($conn));
-    $na = array();
-    while ($data = mysqli_fetch_array($res)) {
-      $na[] = $data["name"];
-    }
-    ?>
-    var xValues = [<?php echo '"' . implode('","', $na) . '"' ?>];
-
-    <?php
-    include('db_conn.php');
-    $num = array();
-    foreach ($na as $value) {
-
-      $query = "SELECT * FROM bookpublish WHERE name='$value'";
-
-      if ($results = mysqli_query($conn, $query)) {
-        $rowcount = mysqli_num_rows($results);
-        $num[] = $rowcount;
-      }
-    }
-    ?>
-    var yValues = [<?php echo '"' . implode('","', $num) . '"' ?>];
-    var barColors = ["#d4af37", "#b5502e", "#2b1d13", "#c9a227", "#8a6d3b"];
-
-    new Chart("myChart8", {
-      type: "bar",
-      data: {
-        labels: xValues,
-        datasets: [{
-          backgroundColor: barColors,
-          data: yValues
-        }]
-      },
-      options: {
-        legend: {
-          display: false
-        },
-        title: {
-          display: true,
-          text: "Books Published"
-        }
-      }
-    });
-  </script>
-  <script>
-    <?php
-    include('db_conn.php');
-    $query = "SELECT * FROM faculty";
-    $res = mysqli_query($conn, $query) or die(mysqli_error($conn));
-    $na = array();
-    while ($data = mysqli_fetch_array($res)) {
-      $na[] = $data["name"];
-    }
-    ?>
-    var xValues = [<?php echo '"' . implode('","', $na) . '"' ?>];
-
-    <?php
-    include('db_conn.php');
-    $num = array();
-    foreach ($na as $value) {
-
-      $query = "SELECT * FROM bookedited WHERE name='$value'";
-
-      if ($results = mysqli_query($conn, $query)) {
-        $rowcount = mysqli_num_rows($results);
-        $num[] = $rowcount;
-      }
-    }
-    ?>
-    var yValues = [<?php echo '"' . implode('","', $num) . '"' ?>];
-    var barColors = ["#d4af37", "#b5502e", "#2b1d13", "#c9a227", "#8a6d3b"];
-
-    new Chart("myChart9", {
-      type: "bar",
-      data: {
-        labels: xValues,
-        datasets: [{
-          backgroundColor: barColors,
-          data: yValues
-        }]
-      },
-      options: {
-        legend: {
-          display: false
-        },
-        title: {
-          display: true,
-          text: "Books Edited"
-        }
-      }
-    });
-  </script>
-  <script>
-    <?php
-    include('db_conn.php');
-    $query = "SELECT * FROM faculty";
-    $res = mysqli_query($conn, $query) or die(mysqli_error($conn));
-    $na = array();
-    while ($data = mysqli_fetch_array($res)) {
-      $na[] = $data["name"];
-    }
-    ?>
-    var xValues = [<?php echo '"' . implode('","', $na) . '"' ?>];
-
-    <?php
-    include('db_conn.php');
-    $num = array();
-    foreach ($na as $value) {
-
-      $query = "SELECT * FROM fdp WHERE name='$value'";
-
-      if ($results = mysqli_query($conn, $query)) {
-        $rowcount = mysqli_num_rows($results);
-        $num[] = $rowcount;
-      }
-    }
-    ?>
-    var yValues = [<?php echo '"' . implode('","', $num) . '"' ?>];
-    var barColors = ["#d4af37", "#b5502e", "#2b1d13", "#c9a227", "#8a6d3b"];
-
-    new Chart("myChart10", {
-      type: "bar",
-      data: {
-        labels: xValues,
-        datasets: [{
-          backgroundColor: barColors,
-          data: yValues
-        }]
-      },
-      options: {
-        legend: {
-          display: false
-        },
-        title: {
-          display: true,
-          text: "FDP"
-        }
-      }
-    });
-  </script>
-  <script>
-    <?php
-    include('db_conn.php');
-    $query = "SELECT * FROM faculty";
-    $res = mysqli_query($conn, $query) or die(mysqli_error($conn));
-    $na = array();
-    while ($data = mysqli_fetch_array($res)) {
-      $na[] = $data["name"];
-    }
-    ?>
-    var xValues = [<?php echo '"' . implode('","', $na) . '"' ?>];
-
-    <?php
-    include('db_conn.php');
-    $num = array();
-    foreach ($na as $value) {
-
-      $query = "SELECT * FROM others WHERE name='$value'";
-
-      if ($results = mysqli_query($conn, $query)) {
-        $rowcount = mysqli_num_rows($results);
-        $num[] = $rowcount;
-      }
-    }
-    ?>
-    var yValues = [<?php echo '"' . implode('","', $num) . '"' ?>];
-    var barColors = ["#d4af37", "#b5502e", "#2b1d13", "#c9a227", "#8a6d3b"];
-
-    new Chart("myChart11", {
-      type: "bar",
-      data: {
-        labels: xValues,
-        datasets: [{
-          backgroundColor: barColors,
-          data: yValues
-        }]
-      },
-      options: {
-        legend: {
-          display: false
-        },
-        title: {
-          display: true,
-          text: "Others"
-        }
-      }
+      });
     });
   </script>
 </body>
