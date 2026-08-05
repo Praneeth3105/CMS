@@ -33,7 +33,6 @@ include_once('db_conn.php');
       box-sizing: border-box;
     }
 
-    /* ---- FIX: stop the whole page from scrolling sideways ---- */
     html,
     body {
       max-width: 100%;
@@ -144,7 +143,6 @@ include_once('db_conn.php');
       margin: 0 0 16px 0 !important;
     }
 
-    /* ---- FIX: every table wrapper scrolls within itself, not the whole page ---- */
     .scroll {
       height: auto;
       width: 100%;
@@ -393,8 +391,6 @@ include_once('db_conn.php');
           </table>
         </div>
       </div>
-
-      <!-- ================= CERTIFICATE ================= -->
       <div id="certificateDiv" class="optionDiv">
         <h1>Certificates</h1>
         <input type='text' id='myInput3' onkeyup='myFunction3()' placeholder='search for Name of Certificate..' title='Type in a name'>
@@ -440,7 +436,6 @@ include_once('db_conn.php');
         </div>
       </div>
 
-      <!-- ================= EXTRA CIRCULAR ================= -->
       <div id="extracircularDiv" class="optionDiv">
         <h1>Extra Circular</h1>
         <input type='text' id='myInput4' onkeyup='myFunction4()' placeholder='search for Name of Event..' title='Type in a name'>
@@ -488,7 +483,6 @@ include_once('db_conn.php');
         </div>
       </div>
 
-      <!-- ================= CO CIRCULAR ================= -->
       <div id="cocircularDiv" class="optionDiv">
         <h1>Co Circular</h1>
         <input type='text' id='myInput5' onkeyup='myFunction5()' placeholder='search for Name of Event..' title='Type in a name'>
@@ -541,7 +535,6 @@ include_once('db_conn.php');
   <br>
 
   <script type="text/javascript">
-    // Shows only the section that matches the dropdown's value (e.g. "workshop" -> "workshopDiv")
     function myFun() {
       var sections = document.getElementsByClassName('optionDiv');
       for (var i = 0; i < sections.length; i++) {

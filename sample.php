@@ -15,13 +15,7 @@ class Homec extends CI_Controller {
         {
         echo "connected";
         $volmob=$this->db->query("select * from `voltable` where `mobno`=$username")->row(); 
-        /*if($volmob->level=="STATE OFFICE INCHARGE" || $volmob->level=="DISTRICT PRACHARAK"){ 
-            echo "selected";
-            $_SESSION['admin']=$volmob->level;
-            if(isset($_SESSION['admin'])){
-             redirect(base_url().'home');
-             //  redirect('http://samarastasewa.pscmrcetonline.com/home');
-        }*/
+       
         if($volmob->level="STATE OFFICE INCHARGE" || $volmob->level="DISTRICT PRACHARAK")
         {
               $_SESSION['admin']=$volmob->level;
@@ -35,13 +29,6 @@ class Homec extends CI_Controller {
     }   
     }
     } 
-
-    
-
-
-
-
-
     public function logout(){
         if(isset($_SESSION['admin'])){
             unset($_SESSION['admin']);
@@ -241,34 +228,6 @@ class Homec extends CI_Controller {
         $this->load->view('uploadTempleDocuments',$data);
         }
     }
-/*
-    public function uploadtotempledocuments()
-{
-        $templedata=$this->input->post('temple');
-        echo $templedata;
-        $temple=explode("|-|",$templedata);
-        $config['upload_path']   ="./assets/temples/".$temple[0]."/documents/"; 
-        echo $config['upload_path'] ;
-        $config['allowed_types'] = 'gif|jpg|png|jpeg|pdf|docx';
-        $this->load->library('upload');  
-	$this->load->helper("url"); 
-	$this->upload->initialize($config); 
-	if ( ! $this->upload->do_upload('userfile')) 
-         {
-	    $error = array('error' => $this->upload->display_errors()); 
-	    echo $error["error"]; 
-	    //echo base_url()."assets//";
-	 }			   
-	else 
-         { 
-			       $data =$this->upload->data();
-			       $data["file_name"];
-                               $data["file_path"];
-                               echo $data["file_name"];
-         }
-
-    }
-*/
 
     public function uploadtotempledocuments()
 	{
@@ -284,29 +243,21 @@ class Homec extends CI_Controller {
                 $_FILES['file']['error']     = $_FILES['files']['error'][$i];
                 $_FILES['file']['size']     = $_FILES['files']['size'][$i];
                 
-                // File upload configuration
                 $templedata=$this->input->post('temple');
                 $temple=explode("|-|",$templedata);
                 $config['upload_path']   ="./assets/temples/".$temple[0]."/documents/";         
                 $config['allowed_types'] = 'gif|jpg|png|jpeg|pdf|docx';
 		
-                // Load and initialize upload library
                 $this->load->library('upload', $config);
                 $this->upload->initialize($config);
                 
-                // Upload file to server
                 if($this->upload->do_upload('file')){
-					// Uploaded file data
+					
 					echo "not";
                     $fileData = $this->upload->data();
                     $uploadData[$i]['file_name'] = $fileData['file_name'];
 					$uploadData[$i]['uploaded_on'] = date("Y-m-d H:i:s");
-					/*$this->load->database();
-					$data=array(
-						"imagepath" => "./assets/temples/".$temple[0]."/documents/".$uploadData[$i]['file_name']
-					);
-					$this->db->insert("slider",$data);
-					$flag++;*/
+					
 				}
 				else{
 					echo "err";
@@ -685,15 +636,7 @@ $this->db->set($data);
 $this->db->where('tid', $templeid);
 $this->db->update('temple');
        echo "hai";
-/*      if($volmob)
-      {      
-        echo "Temple updated succesfully.............";           
-      }
-      else
-      {
-          echo "Temple updationn Failed";
-      } 
-*/  
+
     }
 }
 
@@ -741,81 +684,7 @@ public function file_upload()
 
 
 
-
-/*
-        $templedata=$this->input->post('sub1');
-        echo $templedata;
-        //$temple=explode("|-|",$templedata);
-       $config['upload_path']="./assets/temples/496/documents/";//$templedata;
-
-  //$config['upload_path']=base_url('assets/')."/temples/496/documents/";//$templedata;
-
-        echo $config['upload_path'] ;
-        $config['allowed_types'] = 'gif|jpg|png|jpeg|pdf|docx';
-        $config['file_name']= $this->input->post('uploadedfile');
-
-        $this->load->library('upload');  
-	$this->load->helper("url"); 
-	$this->upload->initialize($config); 
-	if ( ! $this->upload->do_upload($config['file_name'])) 
-         {
-	    $error = array('error' => $this->upload->display_errors()); 
-	    echo $error["error"]; 
-	    //echo base_url()."assets//";
-	 }			   
-	else 
-         { 
-			       $data =$this->upload->data();
-			       $data["file_name"];
-                               $data["file_path"];
-                               echo $data["file_name"];
-         }
-*/
-  /*
-    if( !empty($_FILES['uploadedfile']['name']))
-    {
-	   $flag=0;
-            $filesCount = count($_FILES['uploadedfile']['name']);
-            for($i = 0; $i < $filesCount; $i++)
-            {
-				echo $filesCount;
-                $_FILES['file']['name']     = $_FILES['uploadedfile']['name'][$i];
-                $_FILES['file']['type']     = $_FILES['uploadedfile']['type'][$i];
-                $_FILES['file']['tmp_name'] = $_FILES['uploadedfile']['tmp_name'][$i];
-                $_FILES['file']['error']     = $_FILES['uploadedfile']['error'][$i];
-                $_FILES['file']['size']     = $_FILES['uploadedfile']['size'][$i];
-                
-                // File upload configuration
-                $templedata=$this->input->post('sub1');
-                //$temple=explode("|-|",$templedata);
-                //$config['upload_path']   ="./assets/temples/".$temple[0]."/documents/";
-                $config['upload_path']   ="./assets/temples/".$templedata;         
-                $config['allowed_types'] = 'gif|jpg|png|jpeg|pdf|docx';
-		
-                // Load and initialize upload library
-                $this->load->library('upload', $config);
-                $this->upload->initialize($config);
-                
-                // Upload file to server
-                if($this->upload->do_upload('file'))
-                 {
-		   // Uploaded file data
-		    echo "not";
-                    $fileData = $this->upload->data();
-                    $uploadData[$i]['file_name'] = $fileData['file_name'];
-		     $uploadData[$i]['uploaded_on'] = date("Y-m-d H:i:s");
-		    
-		  }
-		 else
-                   {
-		           echo "err";
-		   }			
-	      }
-
-      }
-   */
 }
-
 
     public function dropdowndata()
 	{

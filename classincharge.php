@@ -283,9 +283,6 @@ session_start();
   </div>
   <script src="mainl.js"></script>
   <script>
-    // Combined Year + Branch filter.
-    // If a dropdown is left on its placeholder ("Year" / "Branch"),
-    // that filter is ignored so the other filter still works alone.
     function filterTable() {
       var yearInput = document.getElementById("year");
       var branchInput = document.getElementById("year1");

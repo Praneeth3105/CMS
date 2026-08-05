@@ -445,7 +445,6 @@
             }
             echo '</tr>';
 
-            // Map CSV columns by index (0-based, matches CSV header order)
             $academic_year   = isset($data[1]) ? trim($data[1]) : '';
             $month           = isset($data[2]) ? trim($data[2]) : '';
             $faculty_name    = isset($data[3]) ? trim($data[3]) : '';
@@ -460,7 +459,6 @@
             $proof_link      = isset($data[12]) ? trim($data[12]) : '';
             $faculty_id      = isset($data[0]) ? trim($data[0]) : '';
 
-            // Skip completely blank rows (e.g. trailing empty lines in the CSV)
             if ($academic_year === '' && $faculty_name === '' && $title === '') {
                 continue;
             }

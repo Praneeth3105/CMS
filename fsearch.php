@@ -1008,8 +1008,6 @@ $id = $_SESSION['id'];
       </div>
     </div>
 
-    <!-- ============ NPTEL -> nptel ============ -->
-    <!-- No faculty_id column in this table, filtered by faculty_name -->
     <div id="nptelDiv" class="optionDiv">
       <h1>NPTEL</h1>
       <div class="search-wrap">
@@ -1065,8 +1063,6 @@ $id = $_SESSION['id'];
       </div>
     </div>
 
-    <!-- ============ ACHIEVEMENTS -> achievements ============ -->
-    <!-- No faculty_id column in this table, filtered by faculty_name -->
     <div id="achievementsDiv" class="optionDiv">
       <h1>Achievements</h1>
       <div class="search-wrap">
@@ -1116,8 +1112,6 @@ $id = $_SESSION['id'];
       </div>
     </div>
 
-    <!-- ============ OUTSIDE PARTICIPATIONS -> outside_participations ============ -->
-    <!-- No faculty_id column in this table, filtered by faculty_name -->
     <div id="outsideparticipationsDiv" class="optionDiv">
       <h1>Outside Participations</h1>
       <div class="search-wrap">
@@ -1168,9 +1162,6 @@ $id = $_SESSION['id'];
         </table>
       </div>
     </div>
-
-    <!-- ============ REVIEWER ACTIVITIES -> reviewer_activities ============ -->
-    <!-- No faculty_id column in this table, filtered by faculty_name -->
     <div id="revieweractivitiesDiv" class="optionDiv">
       <h1>Reviewer Activities</h1>
       <div class="search-wrap">
@@ -1222,8 +1213,6 @@ $id = $_SESSION['id'];
       </div>
     </div>
 
-    <!-- ============ PROFESSIONAL MEMBERSHIP -> professional_membership ============ -->
-    <!-- No faculty_id column in this table, filtered by faculty_name -->
     <div id="professionalmembershipDiv" class="optionDiv">
       <h1>Professional Membership</h1>
       <div class="search-wrap">
@@ -1273,8 +1262,6 @@ $id = $_SESSION['id'];
       </div>
     </div>
 
-    <!-- ============ PHD DETAILS -> phd_details ============ -->
-    <!-- No faculty_id column in this table, filtered by faculty_name -->
     <div id="phddetailsDiv" class="optionDiv">
       <h1>PhD Details</h1>
       <div class="search-wrap">
@@ -1324,12 +1311,6 @@ $id = $_SESSION['id'];
       </div>
     </div>
 
-    <!-- ============ CONSULTANCY WORK -> consultancy_work ============ -->
-    <!-- WARNING: this table has NO faculty_id / faculty_name column at all in your schema.
-         There is no way to filter this to "only this logged-in faculty's records" —
-         this will show EVERY consultancy record from EVERY faculty member.
-         You need to add a faculty identifier column to this table (and to add_consultancy_work.php)
-         before this can be scoped per-user. Shown here unfiltered so you can see the issue. -->
     <div id="consultancyworkDiv" class="optionDiv">
       <h1>Consultancy Work <span style="color:var(--danger);font-size:.7rem;text-transform:none;">(showing ALL faculty — see note in code)</span></h1>
       <div class="search-wrap">
@@ -1383,9 +1364,6 @@ $id = $_SESSION['id'];
       </div>
     </div>
 
-    <!-- ============ WORKING MODELS -> working_models ============ -->
-    <!-- WARNING: same issue as consultancy_work — no faculty_id / faculty_name column
-         exists in this table either. Shown unfiltered until the schema is fixed. -->
     <div id="workingmodelsDiv" class="optionDiv">
       <h1>Working Models <span style="color:var(--danger);font-size:.7rem;text-transform:none;">(showing ALL faculty — see note in code)</span></h1>
       <div class="search-wrap">
@@ -1433,8 +1411,6 @@ $id = $_SESSION['id'];
       </div>
     </div>
 
-    <!-- ============ FUNDING PROJECTS -> funding_projects ============ -->
-    <!-- No faculty_id column in this table, filtered by faculty_name -->
     <div id="fundingprojectsDiv" class="optionDiv">
       <h1>Funding Projects</h1>
       <div class="search-wrap">
@@ -1507,61 +1483,61 @@ $id = $_SESSION['id'];
   <script>
     function myFunction2() {
       filterTable("myInput2", "myTable2", 1);
-    } // fdp: FDP Name
+    } 
     function myFunctionfo() {
       filterTable("myInputfo", "myTablefo", 2);
-    } // fdporg: FDP Name
+    } 
     function myFunctionev() {
       filterTable("myInputev", "myTableev", 2);
-    } // ffworkshop: Type
+    } 
     function myFunction1() {
       filterTable("myInput1", "myTable1", 2);
-    } // certificates: Certificate
+    } 
     function myFunction3() {
       filterTable("myInput3", "myTable3", 1);
-    } // paperpublications: Title
+    } 
     function myFunctionconf() {
       filterTable("myInputconf", "myTableconf", 4);
-    } // conferences: Paper Title
+    } 
     function myFunction4() {
       filterTable("myInput4", "myTable4", 5);
-    } // bookpublish: Title
+    }
     function myFunction5() {
       filterTable("myInput5", "myTable5", 2);
-    } // bookedited: Book Name
+    } 
     function myFunctiontb() {
       filterTable("myInputtb", "myTabletb", 4);
-    } // textbook: Textbook Name
+    } 
     function myFunctionpt() {
       filterTable("myInputpt", "myTablept", 3);
-    } // patents: Patent Details
+    } 
     function myFunctionnp() {
       filterTable("myInputnp", "myTablenp", 2);
-    } // nptel: Course Name
+    } 
     function myFunctionach() {
       filterTable("myInputach", "myTableach", 2);
-    } // achievements: Award Name
+    } 
     function myFunctionop() {
       filterTable("myInputop", "myTableop", 4);
-    } // outside_participations: Organization
+    } 
     function myFunctionra() {
       filterTable("myInputra", "myTablera", 4);
-    } // reviewer_activities: Organization
+    } 
     function myFunctionpm() {
       filterTable("myInputpm", "myTablepm", 1);
-    } // professional_membership: Membership Name
+    } 
     function myFunctionphd() {
       filterTable("myInputphd", "myTablephd", 1);
-    } // phd_details: University
+    } 
     function myFunctioncw() {
       filterTable("myInputcw", "myTablecw", 2);
-    } // consultancy_work: Organization
+    } 
     function myFunctionwm() {
       filterTable("myInputwm", "myTablewm", 1);
-    } // working_models: Model Name
+    } 
     function myFunctionfp() {
       filterTable("myInputfp", "myTablefp", 2);
-    } // funding_projects: Title
+    } 
 
     function filterTable(inputId, tableId, colIndex) {
       var input, filter, table, tr, td, i, txtValue;

@@ -340,9 +340,6 @@
                 }
 
                 echo "</tr>";
-
-
-
                 $name       = mysqli_real_escape_string($conn, isset($data[1]) ? $data[1] : "");
                 $department = mysqli_real_escape_string($conn, isset($data[2]) ? $data[2] : "");
                 $fdpname    = mysqli_real_escape_string($conn, isset($data[3]) ? $data[3] : "");

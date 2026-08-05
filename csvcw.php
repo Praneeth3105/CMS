@@ -405,10 +405,6 @@
         $failed = 0;
 
         while (($data = fgetcsv($handle, 1000, ",")) !== false) {
-
-            // 0 Faculty ID | 1 Academic Year | 2 Description | 3 Organization Name | 4 Amount
-            // 5 Start Date | 6 End Date | 7 Duration | 8 No. of Students Involved | 9 Proof Link
-
             $rowIsEmpty = count(array_filter($data, fn($v) => trim($v) !== '')) === 0;
             if ($rowIsEmpty) {
                 continue;

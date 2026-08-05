@@ -227,18 +227,6 @@ session_start();
 		<h1>Faculty Details</h1>
 
 		<?php
-		/*
-		 * Every faculty activity table (fdp, fdporg, ffworkshop, paperpublications,
-		 * conferences, certificates, bookpublish, bookedited, textbook, patents,
-		 * nptel, achievements, outside_participations, reviewer_activities,
-		 * professional_membership, phd_details, consultancy_work, working_models,
-		 * funding_projects) carries a `faculty_id` column, so that is used as the
-		 * join key instead of matching on `name` (which is fragile).
-		 *
-		 * Only tables that store real DATE columns can be filtered by the
-		 * From/To range above. The others only store academic_year/month as
-		 * text, so their counts are shown as totals regardless of the filter.
-		 */
 		$categories = array(
 			'fdp'                      => array('label' => 'FDP Attended',            'date_cols' => array('startdate', 'enddate')),
 			'fdporg'                   => array('label' => 'FDP Organized',           'date_cols' => array('start_date', 'end_date')),
@@ -454,10 +442,7 @@ session_start();
 
 						</tr>
 						<?php
-						#session_start();
-						#$name=$_SESSION['name'];
-						#$year=$_POST['year'];
-						#$branch=$_POST['department'];
+			
 						$query = "SELECT * FROM studentdetails";
 						$result = mysqli_query($conn, $query);
 						while ($rows = mysqli_fetch_assoc($result)) {

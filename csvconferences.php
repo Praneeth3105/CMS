@@ -376,16 +376,11 @@
             $failed = 0;
 
             while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
-
                 echo "<tr>";
-
                 foreach ($data as $value) {
                     echo "<td>" . htmlspecialchars($value) . "</td>";
                 }
-
                 echo "</tr>";
-
-
                 $faculty_id             = mysqli_real_escape_string($conn, isset($data[0]) ? trim($data[0]) : "");
                 $academicYear           = mysqli_real_escape_string($conn, isset($data[1]) ? trim($data[1]) : "");
                 $facultyName            = mysqli_real_escape_string($conn, isset($data[2]) ? trim($data[2]) : "");

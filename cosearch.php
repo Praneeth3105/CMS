@@ -216,7 +216,6 @@ include_once('db_conn.php');
 			vertical-align: middle;
 		}
 
-		/* ---------- Search inputs ---------- */
 		#myInput,
 		#myInput1,
 		#myInput2,
@@ -273,14 +272,6 @@ include_once('db_conn.php');
 			float: none !important;
 		}
 
-		/*
-			FIX: table-layout: fixed makes the browser respect the % widths
-			set on the <th> elements instead of auto-sizing columns based on
-			content. This is what was causing columns to blow out of the
-			page or wrap into extremely tall rows. Combined with word-wrap
-			below, text now wraps neatly INSIDE its column instead of
-			stretching it.
-		*/
 		#myTable,
 		#myTable1,
 		#myTable2,
@@ -327,9 +318,7 @@ include_once('db_conn.php');
 			color: #4a4030;
 			vertical-align: middle;
 			text-align: left;
-			/* FIX: with table-layout:fixed, long unbroken text needs to
-			   wrap inside the cell rather than forcing the column wider
-			   than its assigned %. */
+
 			word-wrap: break-word;
 			overflow-wrap: break-word;
 		}
@@ -384,14 +373,6 @@ include_once('db_conn.php');
 			border: 1px solid var(--border);
 			display: block;
 		}
-
-		/* Fixed-size clipping box for every file preview (image or PDF
-		   embed). <embed> elements render as native plugin surfaces in
-		   most browsers and can ignore a parent's overflow:hidden/auto,
-		   which is what was causing the PDF preview to spill out of its
-		   row. Wrapping it in a relatively-positioned box and forcing the
-		   embed/img to fill that box with position:absolute keeps it
-		   correctly clipped no matter what. */
 		.file-cell {
 			position: relative;
 			width: 100%;

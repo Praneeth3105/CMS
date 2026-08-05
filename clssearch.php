@@ -17,7 +17,6 @@ include_once('db_conn.php');
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<style>
 		@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap');
-
 		:root {
 			--dark: #1a120b;
 			--dark-2: #2b1d13;
@@ -258,8 +257,6 @@ include_once('db_conn.php');
 		#myInput5::placeholder {
 			color: var(--muted);
 		}
-
-		/* ---------- Scroll wrapper / tables ---------- */
 		html body .scroll {
 			height: auto;
 			max-height: 420px;

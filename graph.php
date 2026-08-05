@@ -251,11 +251,8 @@ foreach ($facultyOrder as $fid) {
 
     const grid = document.getElementById('chartGrid');
 
-    // One row per faculty member so every name gets its own bar and label —
-    // no auto-skipped x-axis labels like a vertical bar chart would produce
-    // once there are more than a handful of people.
-    const rowHeight = 30; // px per faculty row
-    const chartPadding = 70; // room for title + axis
+    const rowHeight = 30; 
+    const chartPadding = 70;
     const cardHeight = Math.max(320, facultyLabels.length * rowHeight + chartPadding);
 
     chartData.forEach(function(cat, idx) {

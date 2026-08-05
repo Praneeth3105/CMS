@@ -2,7 +2,6 @@
 include "db_conn.php";
 session_start();
 ?>
-
 <!DOCTYPE html>
 <html>
 
@@ -195,15 +194,10 @@ session_start();
 
 </html>
 <?php
-
-
 if (isset($_POST['submit'])) {
-
     $uname = $_SESSION['username'];
     $npsw = $_POST['psw'];
-
     $sql = "UPDATE studentdetails SET password='$npsw' WHERE username='$uname'";
-
     $reso = mysqli_query($conn, $sql);
 
     if ($reso) {

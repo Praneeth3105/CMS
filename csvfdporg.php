@@ -328,11 +328,6 @@
     <?php
     include "db_conn.php";
 
-    /**
-     * Parse a single date string in many possible formats into 'Y-m-d'.
-     * Returns null if it cannot be understood.
-     * Assumes day-first (DD/MM/YYYY) for ambiguous numeric dates.
-     */
     function parseFlexibleDate($dateStr)
     {
         $dateStr = trim((string) $dateStr);
