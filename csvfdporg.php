@@ -400,13 +400,6 @@
         return null;
     }
 
-    /**
-     * Parse a "Date(s)" field that might be:
-     *  - a single date:            "20/06/2025"
-     *  - a range with " to "/"–":  "20/06/2025 to 22/06/2025", "20 Jun 2025 – 22 Jun 2025"
-     *  - a compact day range:      "20-22 Jan 2026"
-     * Returns [start_date, end_date] each as 'Y-m-d' or null.
-     */
     function parseDateOrRange($raw)
     {
         $raw = trim((string) $raw);
@@ -414,7 +407,6 @@
             return [null, null];
         }
 
-        // Compact day-range: "20-22 Jan 2026" or "20-22 January 2026"
         if (preg_match('/^(\d{1,2})-(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})$/', $raw, $m)) {
             $start = parseFlexibleDate($m[1] . ' ' . $m[3] . ' ' . $m[4]);
             $end = parseFlexibleDate($m[2] . ' ' . $m[3] . ' ' . $m[4]);
@@ -423,8 +415,6 @@
             }
         }
 
-        // Range separated by "to", en dash, em dash, or a spaced hyphen
-        // (spaced hyphen only — a tight hyphen like 08-06-2026 is a single date, not a range)
         $parts = preg_split('/\s+(?:to|–|—)\s+|\s+-\s+/i', $raw);
         if (count($parts) === 2) {
             $start = parseFlexibleDate($parts[0]);
@@ -433,13 +423,10 @@
                 return [$start, $end];
             }
         }
-
-        // Otherwise treat as a single date, used for both start and end
         $single = parseFlexibleDate($raw);
         return [$single, $single];
     }
 
-    // Check if a file is uploaded
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
         $file = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
@@ -454,12 +441,6 @@
             echo '<th>' . htmlspecialchars($column) . '</th>';
         }
         echo '</tr>';
-
-        // CSV column order:
-        // 0 Academic Year | 1 Name of the Faculty | 2 Name of the FDP |
-        // 3 In Association with | 4 Mode | 5 Date(s) | 6 Duration | 7 Certificate Link |
-        // 8 Faculty ID  <-- NEW: add this as the last column in your CSV.
-        // Must match the same value used everywhere else as faculty_id (rollno).
         $stmt = $conn->prepare(
             "INSERT INTO fdporg
                 (academic_year, faculty_name, fdp_name, association, mode,
@@ -482,7 +463,7 @@
         );
 
         $rowCount = 0;
-        $rowNum = 1; // header is row 1
+        $rowNum = 1; 
         $unparsedDates = [];
 
         while (($data = fgetcsv($handle, 1000, ",")) !== false) {
@@ -498,7 +479,6 @@
             $certificate_link = isset($data[8]) ? trim($data[8]) : '';
             $faculty_id       = isset($data[0]) ? trim($data[0]) : '';
 
-            // Skip fully blank rows
             if ($academic_year === '' && $faculty_name === '' && $fdp_name === '') {
                 continue;
             }

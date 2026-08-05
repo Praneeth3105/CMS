@@ -336,24 +336,18 @@
             return null;
         }
 
-        // Remove ordinal suffixes: "10th" -> "10", "21st" -> "21"
         $dateStr = preg_replace('/(\d+)(st|nd|rd|th)\b/i', '$1', $dateStr);
 
-        // Normalize spaced-out dashes: "19 -Dec-23" -> "19-Dec-23"
         $dateStr = preg_replace('/\s*-\s*/', '-', $dateStr);
 
-        // Trim stray leading/trailing dashes, spaces
         $dateStr = trim($dateStr, "- \t\n\r\0\x0B");
 
-        // Collapse repeated whitespace
         $dateStr = preg_replace('/\s+/', ' ', $dateStr);
 
         if ($dateStr === '') {
             return null;
         }
 
-        // Explicit formats to try, in priority order.
-        // Day-first numeric formats are listed before month-first ones.
         $formats = [
             'Y-m-d',
             'Y/m/d',
@@ -382,7 +376,6 @@
             }
         }
 
-        // Handle "Month Year" with no day, e.g. "June 2025" -> 1st of that month
         if (preg_match('/^[A-Za-z]+ \d{4}$/', $dateStr)) {
             $d = DateTime::createFromFormat('F Y', $dateStr);
             if ($d !== false) {
@@ -395,10 +388,9 @@
             return date('Y-m-d', $timestamp);
         }
 
-        return null; // Could not understand this date at all
+        return null; 
     }
 
-    // Check if a file is uploaded
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
         $file = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
@@ -454,7 +446,6 @@
             $certificate_link = isset($data[8]) ? trim($data[8]) : '';
             $faculty_id       = isset($data[0]) ? trim($data[0]) : '';
 
-            // Skip fully blank rows (e.g. trailing empty lines in the CSV)
             if ($academic_year === '' && $name === '' && $workshop === '') {
                 continue;
             }

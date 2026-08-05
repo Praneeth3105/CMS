@@ -398,7 +398,6 @@
     <?php
     include "db_conn.php";
 
-    // Check if a file is uploaded
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
         $file = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
@@ -414,13 +413,6 @@
         }
         echo '</tr>';
 
-        // Prepared statement — matches the 13 columns in your CSV,
-        // in the exact order they appear:
-        // Academic Year | MONTH | Name of the Faculty | No of Authors |
-        // Main Author/Other | Title of the Book Chapter | Name of the Publisher |
-        // SCOPUS/SCI | URL | ISBN | DOI | Proof Link | Faculty ID
-        // Faculty ID is NEW — add it as the last column in your CSV.
-        // Must match the same value used everywhere else as faculty_id (rollno).
         $stmt = $conn->prepare(
             "INSERT INTO bookpublish
                 (academic_year, month, faculty_name, no_of_authors, author_position,

@@ -1,11 +1,5 @@
 <?php
-// ============================================================
-// This is an admin bulk-upload page (no logged-in faculty session
-// involved). faculty_id now comes straight from a column in the CSV
-// itself — see the $faculty_id line inside the row-parsing loop below.
-// Everything else — the CSV parsing, date handling, preview table,
-// styling — is untouched.
-// ============================================================
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -430,7 +424,7 @@
             fclose($handle);
 
             echo "</table>";
-            echo "</div>"; // .table-scroll
+            echo "</div>"; 
 
             echo "<br>";
 

@@ -385,9 +385,6 @@
 
                 echo "</tr>";
 
-                // 0 Faculty ID | 1 Academic Year | 2 Name of the Faculty | 3 No of Co-Authors
-                // 4 Main Author/Others | 5 Title of the Paper | 6 Conference Proceedings
-                // 7 UGC/Scopus | 8 URL | 9 DOI | 10 Proof Link
 
                 $faculty_id             = mysqli_real_escape_string($conn, isset($data[0]) ? trim($data[0]) : "");
                 $academicYear           = mysqli_real_escape_string($conn, isset($data[1]) ? trim($data[1]) : "");
@@ -443,7 +440,7 @@
             fclose($handle);
 
             echo "</table>";
-            echo "</div>"; // .table-scroll
+            echo "</div>"; 
 
             echo "<br>";
 
@@ -452,7 +449,7 @@
                 echo "<p class='status-error'>Failed : $failed</p>";
             }
 
-            echo '</div>'; // .preview-wrap
+            echo '</div>'; 
         } else {
             echo '<div class="preview-wrap"><p class="status-error">Unable to open CSV file.</p></div>';
         }

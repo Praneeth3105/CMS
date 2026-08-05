@@ -378,7 +378,6 @@
             $proof_link      = isset($data[9]) ? $data[9] : '';
             $faculty_id      = isset($data[0]) ? $data[0] : '';
 
-            // Escape values before inserting
             $academic_year   = $conn->real_escape_string($academic_year);
             $month           = $conn->real_escape_string($month);
             $faculty_name    = $conn->real_escape_string($faculty_name);

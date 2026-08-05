@@ -516,7 +516,6 @@
             $certificate_link = isset($data[9]) ? trim($data[9]) : '';
             $faculty_id       = isset($data[0]) ? trim($data[0]) : '';
 
-            // Skip fully blank rows (e.g. trailing empty lines in the CSV)
             if ($academic_year === '' && $name === '' && $certificate === '') {
                 continue;
             }
