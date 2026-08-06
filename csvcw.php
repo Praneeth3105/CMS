@@ -346,20 +346,102 @@
     <?php
     include "db_conn.php";
 
-    $createTableSql = "CREATE TABLE IF NOT EXISTS consultancy_work (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    academic_year VARCHAR(20) NOT NULL,
-    description VARCHAR(255),
-    organization VARCHAR(255),
-    amount VARCHAR(50),
-    start_date VARCHAR(50),
-    end_date VARCHAR(50),
-    duration VARCHAR(50),
-    students_involved VARCHAR(50),
-    proof_link TEXT,
-    faculty_id VARCHAR(100) NOT NULL
-)";
-    $conn->query($createTableSql);
+    function parseFlexibleDate($dateStr)
+    {
+        $dateStr = (string) $dateStr;
+
+        // Strip invisible/problematic characters Excel/CSV exports sometimes leave behind:
+        // BOM, non-breaking spaces, zero-width spaces, stray control chars.
+        $dateStr = str_replace(["\xC2\xA0", "\xEF\xBB\xBF", "\xE2\x80\x8B"], ' ', $dateStr);
+        $dateStr = preg_replace('/[\x00-\x1F\x7F]/', '', $dateStr);
+        $dateStr = trim($dateStr);
+
+        if ($dateStr === '') {
+            return null;
+        }
+
+        // Remove ordinal suffixes: "10th" -> "10"
+        $dateStr = preg_replace('/(\d+)(st|nd|rd|th)\b/i', '$1', $dateStr);
+
+        // Normalize dot and spaced-out dash separators to a single dash:
+        // "19 -Dec-23" -> "19-Dec-23", "12.06.2024" -> "12-06-2024"
+        $dateStr = preg_replace('/\s*-\s*/', '-', $dateStr);
+        $dateStr = preg_replace('/(\d)\s*\.\s*(\d)/', '$1-$2', $dateStr);
+
+        // Trim stray leading/trailing dashes, spaces
+        $dateStr = trim($dateStr, "- \t\n\r\0\x0B");
+        $dateStr = preg_replace('/\s+/', ' ', $dateStr);
+
+        if ($dateStr === '') {
+            return null;
+        }
+
+        $formats = [
+            'Y-m-d',
+            'Y/m/d',
+            'Y.m.d',
+            'd/m/Y',
+            'd-m-Y',
+            'd/m/y',
+            'd-m-y',
+            'd-M-y',
+            'd-M-Y',
+            'd M Y',
+            'd M y',
+            'm/d/Y',
+            'm-d-Y',
+            'M-d-Y',
+            'M d Y',
+            'M d, Y',
+            'j F Y',
+            'd F Y',
+            'd-F-Y',
+            'd.m.Y',
+            'd.m.y',
+        ];
+
+        foreach ($formats as $fmt) {
+            $d = DateTime::createFromFormat($fmt, $dateStr);
+            if ($d !== false) {
+                $errors = DateTime::getLastErrors();
+                if ($errors === false || ($errors['warning_count'] === 0 && $errors['error_count'] === 0)) {
+                    return $d->format('Y-m-d');
+                }
+            }
+        }
+
+        // "Month Year" only, e.g. "June 2025" -> 1st of that month
+        if (preg_match('/^[A-Za-z]+ \d{4}$/', $dateStr)) {
+            $d = DateTime::createFromFormat('F Y', $dateStr);
+            if ($d !== false) {
+                return $d->format('Y-m-01');
+            }
+        }
+
+        // Excel serial date number, e.g. "45458" (days since 1899-12-30)
+        if (preg_match('/^\d{5}$/', $dateStr)) {
+            $unixTimestamp = ((int) $dateStr - 25569) * 86400;
+            $converted = gmdate('Y-m-d', $unixTimestamp);
+            if ($converted !== false) {
+                return $converted;
+            }
+        }
+
+        // Last resort: PHP's own guesser
+        $timestamp = strtotime($dateStr);
+        if ($timestamp !== false) {
+            return date('Y-m-d', $timestamp);
+        }
+
+        return null;
+    }
+
+    // Returns a hex dump of a string so hidden/invisible characters are visible for debugging.
+    function debugRawBytes($str)
+    {
+        $hex = bin2hex((string) $str);
+        return implode(' ', str_split($hex, 2));
+    }
 
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
         $file = $_FILES['csvFile']['tmp_name'];
@@ -401,51 +483,98 @@
         }
         echo '</tr>';
 
+        $stmt = $conn->prepare(
+            "INSERT INTO consultancy_work
+                (faculty_id, academic_year, description, organization, amount,
+                 start_date, end_date, start_date_raw, end_date_raw,
+                 duration, students_involved, proof_link)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        );
+
+        if (!$stmt) {
+            echo "<p class='status-error'>Prepare failed: " . htmlspecialchars($conn->error) . "</p>";
+            echo '</table></div></div>';
+            $conn->close();
+            exit;
+        }
+
+        $stmt->bind_param(
+            "ssssssssssss",
+            $facultyId,
+            $academicYear,
+            $description,
+            $organization,
+            $amount,
+            $startDateSql,
+            $endDateSql,
+            $startDateRaw,
+            $endDateRaw,
+            $duration,
+            $studentsInvolved,
+            $proofLink
+        );
+
         $success = 0;
         $failed = 0;
+        $unparsedDates = [];
+        $rowNum = 1;
 
         while (($data = fgetcsv($handle, 1000, ",")) !== false) {
+            $rowNum++;
+
+            // 0 Faculty ID | 1 Academic Year | 2 Description | 3 Organization Name | 4 Amount
+            // 5 Start Date | 6 End Date | 7 Duration | 8 No. of Students Involved | 9 Proof Link
+
             $rowIsEmpty = count(array_filter($data, fn($v) => trim($v) !== '')) === 0;
             if ($rowIsEmpty) {
                 continue;
             }
 
+            $facultyId        = isset($data[0]) ? trim($data[0]) : "";
+            $academicYear     = isset($data[1]) ? trim($data[1]) : "";
+            $description      = isset($data[2]) ? trim($data[2]) : "";
+            $organization     = isset($data[3]) ? trim($data[3]) : "";
+            $amount           = isset($data[4]) ? trim($data[4]) : "";
+            $startDateRaw     = isset($data[5]) ? trim($data[5]) : "";
+            $endDateRaw       = isset($data[6]) ? trim($data[6]) : "";
+            $duration         = isset($data[7]) ? trim($data[7]) : "";
+            $studentsInvolved = isset($data[8]) ? trim($data[8]) : "";
+            $proofLink        = isset($data[9]) ? trim($data[9]) : "";
+
+            $startDate = parseFlexibleDate($startDateRaw);
+            $endDate   = parseFlexibleDate($endDateRaw);
+            $startDateSql = $startDate; // null -> stored as NULL via bind_param
+            $endDateSql   = $endDate;
+
+            $rowHasBadDate = false;
+            if ($startDateRaw !== '' && $startDate === null) {
+                $unparsedDates[] = "Row $rowNum, Start Date: \"$startDateRaw\" (bytes: " . debugRawBytes($startDateRaw) . ")";
+                $rowHasBadDate = true;
+            }
+            if ($endDateRaw !== '' && $endDate === null) {
+                $unparsedDates[] = "Row $rowNum, End Date: \"$endDateRaw\" (bytes: " . debugRawBytes($endDateRaw) . ")";
+                $rowHasBadDate = true;
+            }
+
             echo '<tr>';
-            foreach ($data as $value) {
-                echo '<td>' . htmlspecialchars($value) . '</td>';
+            foreach ($data as $colIndex => $value) {
+                $cellClass = '';
+                if ($rowHasBadDate && ($colIndex === 5 || $colIndex === 6)) {
+                    $cellClass = ' class="bad-date"';
+                }
+                echo '<td' . $cellClass . '>' . htmlspecialchars($value) . '</td>';
             }
             echo '</tr>';
 
-            $facultyId        = mysqli_real_escape_string($conn, isset($data[0]) ? trim($data[0]) : "");
-            $academicYear      = mysqli_real_escape_string($conn, isset($data[1]) ? trim($data[1]) : "");
-            $description       = mysqli_real_escape_string($conn, isset($data[2]) ? trim($data[2]) : "");
-            $organization      = mysqli_real_escape_string($conn, isset($data[3]) ? trim($data[3]) : "");
-            $amount            = mysqli_real_escape_string($conn, isset($data[4]) ? trim($data[4]) : "");
-            $startDate         = mysqli_real_escape_string($conn, isset($data[5]) ? trim($data[5]) : "");
-            $endDate           = mysqli_real_escape_string($conn, isset($data[6]) ? trim($data[6]) : "");
-            $duration          = mysqli_real_escape_string($conn, isset($data[7]) ? trim($data[7]) : "");
-            $studentsInvolved  = mysqli_real_escape_string($conn, isset($data[8]) ? trim($data[8]) : "");
-            $proofLink         = mysqli_real_escape_string($conn, isset($data[9]) ? trim($data[9]) : "");
-
-            $sql = "INSERT INTO consultancy_work
-    (
-        faculty_id, academic_year, description, organization, amount,
-        start_date, end_date, duration, students_involved, proof_link
-    )
-    VALUES
-    (
-        '$facultyId', '$academicYear', '$description', '$organization', '$amount',
-        '$startDate', '$endDate', '$duration', '$studentsInvolved', '$proofLink'
-    )";
-
-            if (mysqli_query($conn, $sql)) {
+            if ($stmt->execute()) {
                 $success++;
             } else {
                 $failed++;
-                echo "<p class='status-error'>MySQL Error : " . mysqli_error($conn) . "</p>";
+                echo "<p class='status-error'>MySQL Error : " . htmlspecialchars($stmt->error) . "</p>";
             }
         }
 
+        $stmt->close();
         fclose($handle);
 
         echo '</table>';
@@ -453,9 +582,23 @@
 
         echo "<br>";
 
-        echo '<p class="status-success"><i class="fa fa-check-circle"></i> CSV Data Uploaded Successfully.</p>';
+        if ($success > 0) {
+            echo '<p class="status-success"><i class="fa fa-check-circle"></i> CSV Data Uploaded Successfully. Inserted: ' . $success . '</p>';
+        } else {
+            echo '<p class="status-error"><i class="fa fa-times-circle"></i> No valid rows found in the CSV.</p>';
+        }
         if ($failed > 0) {
             echo "<p class='status-error'>Failed : $failed</p>";
+        }
+
+        if (!empty($unparsedDates)) {
+            echo '<div class="status-warning"><i class="fa fa-exclamation-triangle"></i> ';
+            echo count($unparsedDates) . ' date value(s) could not be understood and were saved as empty (highlighted above). The original text is still kept in start_date_raw / end_date_raw in the database, so nothing is lost — you can fix these manually:';
+            echo '<ul>';
+            foreach ($unparsedDates as $issue) {
+                echo '<li>' . htmlspecialchars($issue) . '</li>';
+            }
+            echo '</ul></div>';
         }
 
         echo '</div>';
