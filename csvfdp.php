@@ -493,7 +493,6 @@
                     $unparsedDates[] = "Row $rowNum, End Date: \"$endRaw\" (bytes: " . debugRawBytes($endRaw) . ")";
                     $rowHasBadDate = true;
                 }
-
                 echo "<tr>";
                 foreach ($data as $colIndex => $value) {
                     $cellClass = '';
