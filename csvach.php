@@ -338,6 +338,105 @@
     <?php
     include "db_conn.php";
 
+    function parseFlexibleDate($dateStr)
+    {
+        $dateStr = trim((string) $dateStr);
+
+        if ($dateStr === '') {
+            return null;
+        }
+
+        // Remove ordinal suffixes: "10th" -> "10"
+        $dateStr = preg_replace('/(\d+)(st|nd|rd|th)\b/i', '$1', $dateStr);
+
+        // Normalize spaced-out dashes: "19 -Dec-23" -> "19-Dec-23"
+        $dateStr = preg_replace('/\s*-\s*/', '-', $dateStr);
+
+        // Trim stray leading/trailing dashes, spaces
+        $dateStr = trim($dateStr, "- \t\n\r\0\x0B");
+        $dateStr = preg_replace('/\s+/', ' ', $dateStr);
+
+        if ($dateStr === '') {
+            return null;
+        }
+
+        $formats = [
+            'Y-m-d',
+            'Y/m/d',
+            'd/m/Y',
+            'd-m-Y',
+            'd/m/y',
+            'd-m-y',
+            'd-M-y',
+            'd-M-Y',
+            'd M Y',
+            'd M y',
+            'M-d-Y',
+            'M d Y',
+            'M d, Y',
+            'j F Y',
+            'd F Y',
+            'd-F-Y',
+        ];
+
+        foreach ($formats as $fmt) {
+            $d = DateTime::createFromFormat($fmt, $dateStr);
+            if ($d !== false) {
+                $errors = DateTime::getLastErrors();
+                if ($errors === false || ($errors['warning_count'] === 0 && $errors['error_count'] === 0)) {
+                    return $d->format('Y-m-d');
+                }
+            }
+        }
+
+        // "Month Year" only, e.g. "June 2025" -> 1st of that month
+        if (preg_match('/^[A-Za-z]+ \d{4}$/', $dateStr)) {
+            $d = DateTime::createFromFormat('F Y', $dateStr);
+            if ($d !== false) {
+                return $d->format('Y-m-01');
+            }
+        }
+
+        // Last resort: PHP's own guesser
+        $timestamp = strtotime($dateStr);
+        if ($timestamp !== false) {
+            return date('Y-m-d', $timestamp);
+        }
+
+        return null;
+    }
+
+    function parseDateOrRange($raw)
+    {
+        $raw = trim((string) $raw);
+        if ($raw === '') {
+            return [null, null];
+        }
+
+        // "15-19 June 2025" style: shared month/year, two day numbers
+        if (preg_match('/^(\d{1,2})-(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})$/', $raw, $m)) {
+            $start = parseFlexibleDate($m[1] . ' ' . $m[3] . ' ' . $m[4]);
+            $end = parseFlexibleDate($m[2] . ' ' . $m[3] . ' ' . $m[4]);
+            if ($start !== null && $end !== null) {
+                return [$start, $end];
+            }
+        }
+
+        // "15-06-2026 to 19-06-2026" / "01-July-2025 to 05-07-2025" style
+        $parts = preg_split('/\s+(?:to|–|—)\s+|\s+-\s+/i', $raw);
+        if (count($parts) === 2) {
+            $start = parseFlexibleDate($parts[0]);
+            $end = parseFlexibleDate($parts[1]);
+            if ($start !== null && $end !== null) {
+                return [$start, $end];
+            }
+        }
+
+        // Single date, no range
+        $single = parseFlexibleDate($raw);
+        return [$single, $single];
+    }
+
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
         $file = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
@@ -374,10 +473,42 @@
         }
         echo '</tr>';
 
+        $stmt = $conn->prepare(
+            "INSERT INTO achievements
+                (faculty_id, academic_year, faculty_name, award_name, description,
+                 achievement_date, achievement_end_date, achievement_date_raw,
+                 organization, achievement_link)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        );
+
+        if (!$stmt) {
+            echo "<p class='status-error'>Prepare failed: " . htmlspecialchars($conn->error) . "</p>";
+            echo '</table></div></div>';
+            $conn->close();
+            exit;
+        }
+
+        $stmt->bind_param(
+            "ssssssssss",
+            $facultyId,
+            $academicYear,
+            $facultyName,
+            $awardName,
+            $description,
+            $achievementDateSql,
+            $achievementEndDateSql,
+            $achievementDateRaw,
+            $organization,
+            $achievementLink
+        );
+
         $success = 0;
         $failed = 0;
+        $unparsedDates = [];
+        $rowNum = 1;
 
         while (($data = fgetcsv($handle, 1000, ",")) !== false) {
+            $rowNum++;
 
             // 0 Faculty ID | 1 Academic Year | 2 Faculty Name | 3 Award Name
             // 4 Description | 5 Date | 6 Organization | 7 Link for Achievement
@@ -387,40 +518,44 @@
                 continue;
             }
 
+            $facultyId       = isset($data[0]) ? trim($data[0]) : "";
+            $academicYear    = isset($data[1]) ? trim($data[1]) : "";
+            $facultyName     = isset($data[2]) ? trim($data[2]) : "";
+            $awardName       = isset($data[3]) ? trim($data[3]) : "";
+            $description     = isset($data[4]) ? trim($data[4]) : "";
+            $achievementDateRaw = isset($data[5]) ? trim($data[5]) : "";
+            $organization    = isset($data[6]) ? trim($data[6]) : "";
+            $achievementLink = isset($data[7]) ? trim($data[7]) : "";
+
+            [$achievementDate, $achievementEndDate] = parseDateOrRange($achievementDateRaw);
+            $achievementDateSql    = $achievementDate;    // null -> NULL via bind_param
+            $achievementEndDateSql = $achievementEndDate;
+
+            $rowHasBadDate = false;
+            if ($achievementDateRaw !== '' && $achievementDate === null) {
+                $unparsedDates[] = "Row $rowNum, Date: \"$achievementDateRaw\"";
+                $rowHasBadDate = true;
+            }
+
             echo '<tr>';
-            foreach ($data as $value) {
-                echo '<td>' . htmlspecialchars($value) . '</td>';
+            foreach ($data as $colIndex => $value) {
+                $cellClass = '';
+                if ($rowHasBadDate && $colIndex === 5) {
+                    $cellClass = ' class="bad-date"';
+                }
+                echo '<td' . $cellClass . '>' . htmlspecialchars($value) . '</td>';
             }
             echo '</tr>';
 
-            $facultyId       = mysqli_real_escape_string($conn, isset($data[0]) ? trim($data[0]) : "");
-            $academicYear    = mysqli_real_escape_string($conn, isset($data[1]) ? trim($data[1]) : "");
-            $facultyName     = mysqli_real_escape_string($conn, isset($data[2]) ? trim($data[2]) : "");
-            $awardName       = mysqli_real_escape_string($conn, isset($data[3]) ? trim($data[3]) : "");
-            $description     = mysqli_real_escape_string($conn, isset($data[4]) ? trim($data[4]) : "");
-            $achievementDate = mysqli_real_escape_string($conn, isset($data[5]) ? trim($data[5]) : "");
-            $organization    = mysqli_real_escape_string($conn, isset($data[6]) ? trim($data[6]) : "");
-            $achievementLink = mysqli_real_escape_string($conn, isset($data[7]) ? trim($data[7]) : "");
-
-            $sql = "INSERT INTO achievements
-    (
-        faculty_id, academic_year, faculty_name, award_name,
-        description, achievement_date, organization, achievement_link
-    )
-    VALUES
-    (
-        '$facultyId', '$academicYear', '$facultyName', '$awardName',
-        '$description', '$achievementDate', '$organization', '$achievementLink'
-    )";
-
-            if (mysqli_query($conn, $sql)) {
+            if ($stmt->execute()) {
                 $success++;
             } else {
                 $failed++;
-                echo "<p class='status-error'>MySQL Error : " . mysqli_error($conn) . "</p>";
+                echo "<p class='status-error'>MySQL Error : " . htmlspecialchars($stmt->error) . "</p>";
             }
         }
 
+        $stmt->close();
         fclose($handle);
 
         echo '</table>';
@@ -428,9 +563,23 @@
 
         echo "<br>";
 
-        echo '<p class="status-success"><i class="fa fa-check-circle"></i> CSV Data Uploaded Successfully.</p>';
+        if ($success > 0) {
+            echo '<p class="status-success"><i class="fa fa-check-circle"></i> CSV Data Uploaded Successfully. Inserted: ' . $success . '</p>';
+        } else {
+            echo '<p class="status-error"><i class="fa fa-times-circle"></i> No valid rows found in the CSV.</p>';
+        }
         if ($failed > 0) {
             echo "<p class='status-error'>Failed : $failed</p>";
+        }
+
+        if (!empty($unparsedDates)) {
+            echo '<div class="status-warning"><i class="fa fa-exclamation-triangle"></i> ';
+            echo count($unparsedDates) . ' date value(s) could not be understood and were saved as empty (highlighted above). The original text is still kept in achievement_date_raw in the database, so nothing is lost — you can fix these manually:';
+            echo '<ul>';
+            foreach ($unparsedDates as $issue) {
+                echo '<li>' . htmlspecialchars($issue) . '</li>';
+            }
+            echo '</ul></div>';
         }
 
         echo '</div>';
