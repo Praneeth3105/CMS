@@ -505,7 +505,7 @@ if (!isset($_SESSION['id'])) {
                         <div class="option-grid">
                             <label class="option-chip"><input type="radio" id="fdp" name="option"><span>FDP Attended</span></label>
                             <label class="option-chip"><input type="radio" id="fdporg" name="option"><span>FDP Organized</span></label>
-                            <label class="option-chip"><input type="radio" id="workshop" name="option"><span>Workshop/Seminar/Conference</span></label>
+                            <label class="option-chip"><input type="radio" id="workshop" name="option"><span>Workshop</span></label>
                             <label class="option-chip"><input type="radio" id="paperpublications" name="option"><span>Paper Publications</span></label>
                             <label class="option-chip"><input type="radio" id="conferences" name="option"><span>Conferences</span></label>
                             <label class="option-chip"><input type="radio" id="certificates" name="option"><span>Certifications</span></label>
