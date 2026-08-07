@@ -188,7 +188,6 @@
   $uname = $_SESSION['username'];
   $name  = $_SESSION['name'];
   ?>
-
   <div class="topbar">
     <h1>Certificate <span>Management</span> System</h1>
     <a href="accer.php" class="n"><button type="button" class="btn btn-dark">&larr; Back</button></a>
@@ -214,7 +213,6 @@
           <option value="semfo">4-1</option>
           <option value="semft">4-2</option>
         </select>
-
         <label for="number">Upload File</label>
         <input type="file" name="file" id="number">
 
