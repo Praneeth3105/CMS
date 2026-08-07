@@ -4,10 +4,8 @@ include "db_conn.php";
 if (isset($_POST['submit'])) {
 
 	session_start();
-
 	$uname = mysqli_real_escape_string($conn, $_POST['username']);
 	$pass  = mysqli_real_escape_string($conn, $_POST['password']);
-
 	$query  = "SELECT * FROM faculty WHERE id='$uname' AND password='$pass'";
 	$result = mysqli_query($conn, $query);
 

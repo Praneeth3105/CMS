@@ -190,11 +190,9 @@
 			.login-card {
 				padding: 30px 20px;
 			}
-
 			h2 {
 				font-size: 1.8rem;
 			}
-
 		}
 	</style>
 </head>
@@ -248,7 +246,6 @@
 				</button>
 
 			</form>
-
 			<a href="index.php" class="back">
 				← Back to Home
 			</a>

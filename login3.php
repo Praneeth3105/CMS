@@ -10,9 +10,7 @@ if (isset($_POST['submit'])) {
 	$result = mysqli_query($conn, $query);
 	$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
 	$count = mysqli_num_rows($result);
-
 	if ($count == 1) {
-
 		echo "<script>window.location='admin.php';</script>";
 	} else {
 		echo "<script>alert('Invalid username or password');window.location='login3.php';</script>";
@@ -58,8 +56,6 @@ if (isset($_POST['submit'])) {
 			align-items: center;
 			overflow-x: hidden;
 		}
-
-		/* Background */
 
 		body::before {
 			content: '';

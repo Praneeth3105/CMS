@@ -4,7 +4,6 @@
 ?>
 <!DOCTYPE html>
 <html>
-
 <head>
   <meta charset="UTF-8">
   <title>CERTIFICATE MAINTENANCE SYSTEM</title>
@@ -34,8 +33,6 @@
       color: var(--text-dark);
       overflow-y: auto;
     }
-
-    /* ---------- Top bar ---------- */
     .topbar {
       background: linear-gradient(180deg, var(--dark) 0%, var(--dark-2) 100%);
       padding: 18px 32px;
@@ -98,7 +95,6 @@
       gap: 12px;
     }
 
-    /* ---------- Page heading ---------- */
     .page-heading {
       text-align: center;
       margin: 34px 0 22px;
@@ -123,7 +119,7 @@
       color: #a0522d;
     }
 
-    /* ---------- Container / card ---------- */
+
     .container {
       max-width: 1300px;
       margin: 0 auto 60px;
@@ -137,7 +133,6 @@
       padding: 24px;
     }
 
-    /* ---------- Search box (no external image) ---------- */
     .search-wrap {
       position: relative;
       margin-bottom: 18px;
@@ -179,7 +174,6 @@
       border-color: var(--gold);
     }
 
-    /* ---------- Table ---------- */
     .scroll {
       overflow-x: auto;
       width: 100%;
@@ -266,7 +260,6 @@
       object-fit: cover;
     }
 
-    /* ---------- Bottom update button ---------- */
     .update-wrap {
       text-align: center;
       margin-top: 24px;
