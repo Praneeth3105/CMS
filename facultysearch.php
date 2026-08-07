@@ -518,8 +518,6 @@ $allowedTables = array_column($config, 'table');
         $columns = $cfg['columns'];
         $linkCol = $cfg['link'] ?? null;
 
-        // Safety: only ever query a table name that came out of our own
-        // whitelist above, never anything derived from user input.
         if (!in_array($table, $allowedTables, true)) {
           continue;
         }
