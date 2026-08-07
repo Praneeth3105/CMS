@@ -11,7 +11,6 @@ if (isset($_POST['submit'])) {
     $department = $_POST['department'];
     $email = $_POST['email'];
 
-    // Check duplicate faculty ID
     $check = mysqli_query($conn, "SELECT * FROM faculty WHERE id='$un'");
 
     if (mysqli_num_rows($check) > 0) {

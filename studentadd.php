@@ -100,7 +100,6 @@ session_start();
             transform: translateY(-1px);
         }
 
-        /* =================== PAGE WRAPPER =================== */
         .page-wrap {
             max-width: 1000px;
             margin: 40px auto 60px;
@@ -115,7 +114,6 @@ session_start();
             padding: 40px 48px;
         }
 
-        /* =================== STUDENT PROFILE =================== */
         .profile-row {
             display: flex;
             align-items: center;
@@ -179,8 +177,6 @@ session_start();
             border-top: 1px dashed var(--border);
             margin: 30px 0;
         }
-
-        /* =================== SECTION HEADING =================== */
         .section-title {
             text-align: center;
             margin-bottom: 6px;
@@ -204,7 +200,6 @@ session_start();
             margin-bottom: 30px;
         }
 
-        /* =================== RADIO SELECTION AREA =================== */
         #quick-book {
             width: 100%;
         }
@@ -301,7 +296,6 @@ session_start();
             width: 100%;
         }
 
-        /* =================== DYNAMICALLY INJECTED FORM =================== */
         #note1 {
             margin: 30px auto 0;
             max-width: 620px;
