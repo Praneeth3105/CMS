@@ -341,9 +341,6 @@
     function parseFlexibleDate($dateStr)
     {
         $dateStr = (string) $dateStr;
-
-        // Strip invisible/problematic characters Excel/CSV exports sometimes leave behind:
-        // BOM, non-breaking spaces, zero-width spaces, stray control chars.
         $dateStr = str_replace(["\xC2\xA0", "\xEF\xBB\xBF", "\xE2\x80\x8B"], ' ', $dateStr);
         $dateStr = preg_replace('/[\x00-\x1F\x7F]/', '', $dateStr);
         $dateStr = trim($dateStr);
@@ -352,15 +349,11 @@
             return null;
         }
 
-        // Remove ordinal suffixes: "10th" -> "10"
         $dateStr = preg_replace('/(\d+)(st|nd|rd|th)\b/i', '$1', $dateStr);
 
-        // Normalize dot and spaced-out dash separators to a single dash:
-        // "19 -Dec-23" -> "19-Dec-23", "12.06.2024" -> "12-06-2024"
         $dateStr = preg_replace('/\s*-\s*/', '-', $dateStr);
         $dateStr = preg_replace('/(\d)\s*\.\s*(\d)/', '$1-$2', $dateStr);
 
-        // Trim stray leading/trailing dashes, spaces
         $dateStr = trim($dateStr, "- \t\n\r\0\x0B");
         $dateStr = preg_replace('/\s+/', ' ', $dateStr);
 
@@ -402,7 +395,6 @@
             }
         }
 
-        // "Month Year" only, e.g. "June 2025" -> 1st of that month
         if (preg_match('/^[A-Za-z]+ \d{4}$/', $dateStr)) {
             $d = DateTime::createFromFormat('F Y', $dateStr);
             if ($d !== false) {
@@ -410,7 +402,6 @@
             }
         }
 
-        // Excel serial date number, e.g. "45458" (days since 1899-12-30)
         if (preg_match('/^\d{5}$/', $dateStr)) {
             $unixTimestamp = ((int) $dateStr - 25569) * 86400;
             $converted = gmdate('Y-m-d', $unixTimestamp);
@@ -418,8 +409,6 @@
                 return $converted;
             }
         }
-
-        // Last resort: PHP's own guesser
         $timestamp = strtotime($dateStr);
         if ($timestamp !== false) {
             return date('Y-m-d', $timestamp);
@@ -428,7 +417,6 @@
         return null;
     }
 
-    // Returns a hex dump of a string so hidden/invisible characters are visible for debugging.
     function debugRawBytes($str)
     {
         $hex = bin2hex((string) $str);
@@ -507,9 +495,6 @@
 
         while (($data = fgetcsv($handle, 1000, ",")) !== false) {
             $rowNum++;
-
-            // 0 Faculty ID | 1 Faculty Name | 2 Membership Name | 3 Membership ID
-            // 4 Membership Type | 5 Start Date | 6 End Date | 7 Proof Link
 
             $rowIsEmpty = count(array_filter($data, fn($v) => trim($v) !== '')) === 0;
             if ($rowIsEmpty) {
