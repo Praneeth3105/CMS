@@ -338,19 +338,6 @@
     <?php
     include "db_conn.php";
 
-    $createTableSql = "CREATE TABLE IF NOT EXISTS phd_details (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    faculty_name VARCHAR(150) NOT NULL,
-    university_name VARCHAR(255),
-    status VARCHAR(50),
-    domain_name VARCHAR(150),
-    date_of_completion VARCHAR(50),
-    pursuing_year VARCHAR(20),
-    proof_link TEXT,
-    faculty_id VARCHAR(100) NOT NULL
-)";
-    $conn->query($createTableSql);
-
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
         $file = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
@@ -391,9 +378,6 @@
         $failed = 0;
 
         while (($data = fgetcsv($handle, 1000, ",")) !== false) {
-
-            // 0 Faculty ID | 1 Faculty Name | 2 University Name | 3 Pursuing/Completed
-            // 4 Domain Name | 5 Date of Completion | 6 Pursuing Year | 7 Link Proof
 
             $rowIsEmpty = count(array_filter($data, fn($v) => trim($v) !== '')) === 0;
             if ($rowIsEmpty) {
