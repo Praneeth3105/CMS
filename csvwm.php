@@ -334,18 +334,6 @@
     <?php
     include "db_conn.php";
 
-    $createTableSql = "CREATE TABLE IF NOT EXISTS working_models (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    academic_year VARCHAR(20) NOT NULL,
-    model_name VARCHAR(255),
-    duration VARCHAR(50),
-    students_count VARCHAR(50),
-    domain_name VARCHAR(150),
-    proof_link TEXT,
-    faculty_id VARCHAR(100) NOT NULL
-)";
-    $conn->query($createTableSql);
-
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
         $file = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
