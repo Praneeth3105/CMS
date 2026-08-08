@@ -342,19 +342,6 @@
     <?php
     include "db_conn.php";
 
-    // Ensure the textbook table exists (safe to run every load)
-    $createTableSql = "CREATE TABLE IF NOT EXISTS textbook (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    academic_year VARCHAR(20) NOT NULL,
-    month VARCHAR(20),
-    faculty_name VARCHAR(150) NOT NULL,
-    main_editor VARCHAR(100),
-    textbook_name VARCHAR(255) NOT NULL,
-    publisher_name VARCHAR(200),
-    url TEXT,
-    faculty_id VARCHAR(100) NOT NULL
-)";
-    $conn->query($createTableSql);
 
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
 
