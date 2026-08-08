@@ -342,21 +342,6 @@
     <?php
     include "db_conn.php";
 
-    // Ensure the table exists (safe to run every load)
-    $createTableSql = "CREATE TABLE IF NOT EXISTS outside_participations (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    academic_year VARCHAR(20) NOT NULL,
-    month VARCHAR(20),
-    faculty_name VARCHAR(150) NOT NULL,
-    date_attended DATE NULL,
-    organization VARCHAR(255),
-    conference_journal_name VARCHAR(255),
-    type VARCHAR(50),
-    proof_link TEXT,
-    faculty_id VARCHAR(100) NOT NULL
-)";
-    $conn->query($createTableSql);
-
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
         $file = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
