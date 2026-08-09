@@ -102,7 +102,6 @@ text-align: center;
 
 if(isset($_POST['submit'])){
     $sql = "UPDATE ffworkshop SET workshopn='$wn', org='$org', place='$place', startdate='$sd', enddate='$ed', duration='$durt', file='$filename', type='$q1'  WHERE id='$uname' and  workshopn='$wnn'";
-    // Execute query
     $res=mysqli_query($conn, $sql);
     if($res and move_uploaded_file($tempname, $folder)) {
         
