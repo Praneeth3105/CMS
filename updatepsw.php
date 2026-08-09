@@ -88,7 +88,6 @@ include "db_conn.php" ;
                 color: var(--gold);
             }
 
-            /* ---------- Buttons ---------- */
             .btn,
             button,
             input[type="submit"] {
@@ -300,7 +299,7 @@ include "db_conn.php" ;
     if (isset($_POST['submit'])) {
         $npsw = $_POST['psw'];
         $sql = "UPDATE faculty SET password='$npsw' WHERE id='$uname'";
-        // Execute query
+     
         $reso = mysqli_query($conn, $sql);
         if ($reso) {
             echo "<script>alert('Data Updated Successfully');window.location='facultydat.php';</script>";
