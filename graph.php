@@ -1,11 +1,6 @@
 <?php
 include('db_conn.php');
 
-/*
- * Same 19 categories used on analysis.php, keyed by faculty_id (not name).
- * One grouped COUNT query per category instead of one query per faculty
- * per category — this is O(19) queries total instead of O(19 * faculty_count).
- */
 $categories = array(
   'fdp'                      => 'FDP Attended',
   'fdporg'                   => 'FDP Organized',
