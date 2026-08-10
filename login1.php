@@ -1,3 +1,33 @@
+<?php
+include "db_conn.php";
+
+if (isset($_POST['submit'])) {
+
+	session_start();
+	$uname = mysqli_real_escape_string($conn, $_POST['username']);
+	$pass  = mysqli_real_escape_string($conn, $_POST['password']);
+	$query  = "SELECT * FROM studentdetails WHERE username='$uname' AND password='$pass'";
+	$result = mysqli_query($conn, $query);
+
+	if ($result && mysqli_num_rows($result) == 1) {
+
+		$row = mysqli_fetch_assoc($result);
+
+		$_SESSION['username'] = $uname;
+		$_SESSION['id']        = $row['id'];
+		$_SESSION['name']      = $row['name'];
+		// add any other student fields you need, e.g. $_SESSION['course'] = $row['course'];
+
+		header("Location: studentdat.php");
+		exit();
+	} else {
+
+		header("Location: login1.php?error=Invalid username or password");
+		exit();
+	}
+}
+?>
+
 <!DOCTYPE html>
 <html>
 
@@ -36,9 +66,6 @@
 			align-items: center;
 			overflow-x: hidden;
 		}
-
-		/* Background */
-
 
 		body::before {
 			content: '';
@@ -190,9 +217,11 @@
 			.login-card {
 				padding: 30px 20px;
 			}
+
 			h2 {
 				font-size: 1.8rem;
 			}
+
 		}
 	</style>
 </head>
@@ -203,21 +232,21 @@
 
 		<div class="login-card">
 
-			<div class="logo">
-				<span class="material-icons">school</span>
-			</div>
+			<form method="POST" action="">
 
-			<h2>Student Login</h2>
+				<div class="logo">
+					<span class="material-icons">school</span>
+				</div>
 
-			<p class="subtitle">
-				Certificate Management System
-			</p>
+				<h2>Student Login</h2>
 
-			<form method="post" action="1.php">
+				<p class="subtitle">
+					Certificate Management System
+				</p>
 
 				<?php if (isset($_GET['error'])) { ?>
 					<div class="error">
-						<?php echo $_GET['error']; ?>
+						<?php echo htmlspecialchars($_GET['error']); ?>
 					</div>
 				<?php } ?>
 
@@ -226,9 +255,12 @@
 
 					<div class="input-box">
 						<i class="fas fa-user"></i>
-						<input type="text" name="username" required>
+						<input
+							type="text"
+							name="username"
+							placeholder="Enter Username"
+							required>
 					</div>
-
 				</div>
 
 				<div class="input-group">
@@ -236,16 +268,20 @@
 
 					<div class="input-box">
 						<i class="fas fa-lock"></i>
-						<input type="password" name="password" required>
+						<input
+							type="password"
+							name="password"
+							placeholder="Enter Password"
+							required>
 					</div>
-
 				</div>
 
-				<button class="btn-login" name="submit">
+				<button type="submit" class="btn-login" name="submit">
 					Login
 				</button>
 
 			</form>
+
 			<a href="index.php" class="back">
 				← Back to Home
 			</a>
@@ -253,8 +289,6 @@
 		</div>
 
 	</div>
-
-</body>
 
 </body>
 
