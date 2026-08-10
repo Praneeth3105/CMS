@@ -85,7 +85,6 @@
       background: radial-gradient(circle, rgba(184, 76, 44, 0.12) 0%, transparent 70%);
     }
 
-    /* circular badge/icon at the top of the page */
     .badge-circle {
       position: relative;
       z-index: 2;
