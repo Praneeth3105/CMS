@@ -1,25 +1,33 @@
 <?php
 include "db_conn.php";
+
 if (isset($_POST['submit'])) {
+
 	session_start();
-	$_SESSION['username'] = $_POST['username'];
-	$_SESSION['password'] = $_POST['password'];
-	$uname = $_SESSION['username'];
-	$pass = $_SESSION['password'];
-	$query = "select * from login where username='$uname' and password='$pass'";
+	$uname = mysqli_real_escape_string($conn, $_POST['username']);
+	$pass  = mysqli_real_escape_string($conn, $_POST['password']);
+	$query  = "SELECT * FROM login WHERE username='$uname' AND password='$pass'";
 	$result = mysqli_query($conn, $query);
-	$row = mysqli_fetch_array($result, MYSQLI_ASSOC);
-	$count = mysqli_num_rows($result);
-	if ($count == 1) {
-		echo "<script>window.location='admin.php';</script>";
+
+	if ($result && mysqli_num_rows($result) == 1) {
+
+		$row = mysqli_fetch_assoc($result);
+
+		$_SESSION['username'] = $uname;
+		// add any other admin fields you need, e.g. $_SESSION['id'] = $row['id'];
+
+		header("Location: admin.php");
+		exit();
 	} else {
-		echo "<script>alert('Invalid username or password');window.location='login3.php';</script>";
+
+		header("Location: login3.php?error=Invalid username or password");
+		exit();
 	}
 }
 ?>
+
 <!DOCTYPE html>
 <html>
-
 
 <head>
 	<meta charset="UTF-8">
