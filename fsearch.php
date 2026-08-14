@@ -562,13 +562,8 @@ $id = $_SESSION['id'];
         </table>
       </div>
     </div>
-
-    <!-- ============ WORKSHOP / SEMINAR / CONFERENCE -> ffworkshop ============ -->
-    <!-- Your schema has ONE table for all three; the "workshop" column holds
-         whatever text was typed for "Type (Workshop/Seminar/Conference)".
-         There's no separate table for "attended" vs "organized". -->
     <div id="eventsDiv" class="optionDiv">
-      <h1>Workshop / Seminar / Conference</h1>
+      <h1>Workshop </h1>
       <div class="search-wrap">
         <svg viewBox="0 0 24 24" fill="none" stroke-width="2">
           <circle cx="11" cy="11" r="7" />
