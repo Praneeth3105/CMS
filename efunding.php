@@ -12,7 +12,7 @@ $errorMsg = "";
 
 function fetch_row($conn, $id)
 {
-    $stmt = mysqli_prepare($conn, "SELECT * FROM `ffworkshop` WHERE id = ?");
+    $stmt = mysqli_prepare($conn, "SELECT * FROM `funding_projects` WHERE id = ?");
     mysqli_stmt_bind_param($stmt, "s", $id);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
@@ -30,38 +30,20 @@ if (!$row) {
 // Handle update submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $academic_year = trim($_POST['academic_year'] ?? '');
-    $name = trim($_POST['name'] ?? '');
-    $workshop = trim($_POST['workshop'] ?? '');
-    $org = trim($_POST['org'] ?? '');
+    $faculty_name = trim($_POST['faculty_name'] ?? '');
+    $title = trim($_POST['title'] ?? '');
+    $agency_name = trim($_POST['agency_name'] ?? '');
+    $amount = trim($_POST['amount'] ?? '');
     $start_date = trim($_POST['start_date'] ?? '');
-    $start_date_raw = trim($_POST['start_date_raw'] ?? '');
     $end_date = trim($_POST['end_date'] ?? '');
-    $end_date_raw = trim($_POST['end_date_raw'] ?? '');
     $duration = trim($_POST['duration'] ?? '');
-    $mode = trim($_POST['mode'] ?? '');
-
-    // Handle optional file re-upload for certificate_link
-    $certificate_link = $row['certificate_link']; // keep existing by default
-    if (isset($_FILES['upload_file']) && $_FILES['upload_file']['error'] === UPLOAD_ERR_OK) {
-        $uploadDir = __DIR__ . '/images/';
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
-        }
-        $origName = basename($_FILES['upload_file']['name']);
-        $safeName = time() . '_' . preg_replace('/[^A-Za-z0-9._-]/', '_', $origName);
-        $destPath = $uploadDir . $safeName;
-        if (move_uploaded_file($_FILES['upload_file']['tmp_name'], $destPath)) {
-            $certificate_link = $safeName;
-        } else {
-            $errorMsg = "File upload failed, keeping the existing file.";
-        }
-    }
+    $funding_type = trim($_POST['funding_type'] ?? '');
 
     if (empty($errorMsg)) {
-        $sql = "UPDATE `ffworkshop` SET `academic_year` = ?, `name` = ?, `workshop` = ?, `org` = ?, `start_date` = ?, `start_date_raw` = ?, `end_date` = ?, `end_date_raw` = ?, `duration` = ?, `mode` = ?, `certificate_link` = ? WHERE id = ?";
+        $sql = "UPDATE `funding_projects` SET `academic_year` = ?, `faculty_name` = ?, `title` = ?, `agency_name` = ?, `amount` = ?, `start_date` = ?, `end_date` = ?, `duration` = ?, `funding_type` = ? WHERE id = ?";
         $stmt = mysqli_prepare($conn, $sql);
         if ($stmt) {
-            mysqli_stmt_bind_param($stmt, "ssssssssssss", $academic_year, $name, $workshop, $org, $start_date, $start_date_raw, $end_date, $end_date_raw, $duration, $mode, $certificate_link, $id);
+            mysqli_stmt_bind_param($stmt, "ssssssssss", $academic_year, $faculty_name, $title, $agency_name, $amount, $start_date, $end_date, $duration, $funding_type, $id);
             if (mysqli_stmt_execute($stmt)) {
                 $successMsg = "Record updated successfully.";
                 $row = fetch_row($conn, $id); // refresh with latest saved values
@@ -80,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <head>
     <meta charset="UTF-8">
-    <title>Edit Workshop / Seminar / Conference</title>
+    <title>Edit Funding Project</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -275,8 +257,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <a href="fsearch.php" class="back-link">&larr; Back</a>
         </div>
 
-        <h1>Edit Workshop / Seminar / Conference</h1>
-        <div class="subtitle">Table: ffworkshop &middot; Record ID: <?php echo htmlspecialchars($id); ?></div>
+        <h1>Edit Funding Project</h1>
+        <div class="subtitle">Table: funding_projects &middot; Record ID: <?php echo htmlspecialchars($id); ?></div>
 
         <div class="card">
             <?php if ($successMsg): ?>
@@ -295,38 +277,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <div class="field">
-                    <label for="name">Name</label>
-                    <input type="text" name="name" id="name" value="<?php echo htmlspecialchars($row['name'] ?? ''); ?>">
+                    <label for="faculty_name">Faculty Name</label>
+                    <input type="text" name="faculty_name" id="faculty_name" value="<?php echo htmlspecialchars($row['faculty_name'] ?? ''); ?>">
                 </div>
 
                 <div class="field">
-                    <label for="workshop">Workshop/Event Name</label>
-                    <input type="text" name="workshop" id="workshop" value="<?php echo htmlspecialchars($row['workshop'] ?? ''); ?>">
+                    <label for="title">Title</label>
+                    <input type="text" name="title" id="title" value="<?php echo htmlspecialchars($row['title'] ?? ''); ?>">
                 </div>
 
                 <div class="field">
-                    <label for="org">Organisation</label>
-                    <input type="text" name="org" id="org" value="<?php echo htmlspecialchars($row['org'] ?? ''); ?>">
+                    <label for="agency_name">Agency Name</label>
+                    <input type="text" name="agency_name" id="agency_name" value="<?php echo htmlspecialchars($row['agency_name'] ?? ''); ?>">
+                </div>
+
+                <div class="field">
+                    <label for="amount">Amount</label>
+                    <input type="text" name="amount" id="amount" value="<?php echo htmlspecialchars($row['amount'] ?? ''); ?>">
                 </div>
 
                 <div class="field">
                     <label for="start_date">Start Date</label>
-                    <input type="date" name="start_date" id="start_date" value="<?php echo htmlspecialchars($row['start_date'] ?? ''); ?>">
-                </div>
-
-                <div class="field">
-                    <label for="start_date_raw">Start Date (Raw)</label>
-                    <input type="text" name="start_date_raw" id="start_date_raw" value="<?php echo htmlspecialchars($row['start_date_raw'] ?? ''); ?>">
+                    <input type="text" name="start_date" id="start_date" value="<?php echo htmlspecialchars($row['start_date'] ?? ''); ?>">
                 </div>
 
                 <div class="field">
                     <label for="end_date">End Date</label>
-                    <input type="date" name="end_date" id="end_date" value="<?php echo htmlspecialchars($row['end_date'] ?? ''); ?>">
-                </div>
-
-                <div class="field">
-                    <label for="end_date_raw">End Date (Raw)</label>
-                    <input type="text" name="end_date_raw" id="end_date_raw" value="<?php echo htmlspecialchars($row['end_date_raw'] ?? ''); ?>">
+                    <input type="text" name="end_date" id="end_date" value="<?php echo htmlspecialchars($row['end_date'] ?? ''); ?>">
                 </div>
 
                 <div class="field">
@@ -335,17 +312,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <div class="field">
-                    <label for="mode">Mode</label>
-                    <input type="text" name="mode" id="mode" value="<?php echo htmlspecialchars($row['mode'] ?? ''); ?>">
+                    <label for="funding_type">Funding Type</label>
+                    <input type="text" name="funding_type" id="funding_type" value="<?php echo htmlspecialchars($row['funding_type'] ?? ''); ?>">
                 </div>
 
-                <div class="field full">
-                    <label for="upload_file">Proof / Certificate File (leave empty to keep current file)</label>
-                    <input type="file" name="upload_file" id="upload_file">
-                    <?php if (!empty($row['certificate_link'])): ?>
-                        <div class="current-file">Current file: <a href="images/<?php echo htmlspecialchars($row['certificate_link']); ?>" target="_blank"><?php echo htmlspecialchars($row['certificate_link']); ?></a></div>
-                    <?php endif; ?>
-                </div>
+
 
                 <div class="actions">
                     <button type="submit" class="save">Save Changes</button>

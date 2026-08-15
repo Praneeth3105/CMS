@@ -12,7 +12,7 @@ $errorMsg = "";
 
 function fetch_row($conn, $id)
 {
-    $stmt = mysqli_prepare($conn, "SELECT * FROM `ffworkshop` WHERE id = ?");
+    $stmt = mysqli_prepare($conn, "SELECT * FROM `fdporg` WHERE id = ?");
     mysqli_stmt_bind_param($stmt, "s", $id);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
@@ -30,15 +30,14 @@ if (!$row) {
 // Handle update submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $academic_year = trim($_POST['academic_year'] ?? '');
-    $name = trim($_POST['name'] ?? '');
-    $workshop = trim($_POST['workshop'] ?? '');
-    $org = trim($_POST['org'] ?? '');
-    $start_date = trim($_POST['start_date'] ?? '');
-    $start_date_raw = trim($_POST['start_date_raw'] ?? '');
-    $end_date = trim($_POST['end_date'] ?? '');
-    $end_date_raw = trim($_POST['end_date_raw'] ?? '');
-    $duration = trim($_POST['duration'] ?? '');
+    $faculty_name = trim($_POST['faculty_name'] ?? '');
+    $fdp_name = trim($_POST['fdp_name'] ?? '');
+    $association = trim($_POST['association'] ?? '');
     $mode = trim($_POST['mode'] ?? '');
+    $start_date = trim($_POST['start_date'] ?? '');
+    $end_date = trim($_POST['end_date'] ?? '');
+    $dates_raw = trim($_POST['dates_raw'] ?? '');
+    $duration = trim($_POST['duration'] ?? '');
 
     // Handle optional file re-upload for certificate_link
     $certificate_link = $row['certificate_link']; // keep existing by default
@@ -58,10 +57,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($errorMsg)) {
-        $sql = "UPDATE `ffworkshop` SET `academic_year` = ?, `name` = ?, `workshop` = ?, `org` = ?, `start_date` = ?, `start_date_raw` = ?, `end_date` = ?, `end_date_raw` = ?, `duration` = ?, `mode` = ?, `certificate_link` = ? WHERE id = ?";
+        $sql = "UPDATE `fdporg` SET `academic_year` = ?, `faculty_name` = ?, `fdp_name` = ?, `association` = ?, `mode` = ?, `start_date` = ?, `end_date` = ?, `dates_raw` = ?, `duration` = ?, `certificate_link` = ? WHERE id = ?";
         $stmt = mysqli_prepare($conn, $sql);
         if ($stmt) {
-            mysqli_stmt_bind_param($stmt, "ssssssssssss", $academic_year, $name, $workshop, $org, $start_date, $start_date_raw, $end_date, $end_date_raw, $duration, $mode, $certificate_link, $id);
+            mysqli_stmt_bind_param($stmt, "sssssssssss", $academic_year, $faculty_name, $fdp_name, $association, $mode, $start_date, $end_date, $dates_raw, $duration, $certificate_link, $id);
             if (mysqli_stmt_execute($stmt)) {
                 $successMsg = "Record updated successfully.";
                 $row = fetch_row($conn, $id); // refresh with latest saved values
@@ -80,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <head>
     <meta charset="UTF-8">
-    <title>Edit Workshop / Seminar / Conference</title>
+    <title>Edit FDP</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -275,8 +274,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <a href="fsearch.php" class="back-link">&larr; Back</a>
         </div>
 
-        <h1>Edit Workshop / Seminar / Conference</h1>
-        <div class="subtitle">Table: ffworkshop &middot; Record ID: <?php echo htmlspecialchars($id); ?></div>
+        <h1>Edit FDP</h1>
+        <div class="subtitle">Table: fdporg &middot; Record ID: <?php echo htmlspecialchars($id); ?></div>
 
         <div class="card">
             <?php if ($successMsg): ?>
@@ -295,18 +294,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <div class="field">
-                    <label for="name">Name</label>
-                    <input type="text" name="name" id="name" value="<?php echo htmlspecialchars($row['name'] ?? ''); ?>">
+                    <label for="faculty_name">Faculty Name</label>
+                    <input type="text" name="faculty_name" id="faculty_name" value="<?php echo htmlspecialchars($row['faculty_name'] ?? ''); ?>">
                 </div>
 
                 <div class="field">
-                    <label for="workshop">Workshop/Event Name</label>
-                    <input type="text" name="workshop" id="workshop" value="<?php echo htmlspecialchars($row['workshop'] ?? ''); ?>">
+                    <label for="fdp_name">FDP Name</label>
+                    <input type="text" name="fdp_name" id="fdp_name" value="<?php echo htmlspecialchars($row['fdp_name'] ?? ''); ?>">
                 </div>
 
                 <div class="field">
-                    <label for="org">Organisation</label>
-                    <input type="text" name="org" id="org" value="<?php echo htmlspecialchars($row['org'] ?? ''); ?>">
+                    <label for="association">Association</label>
+                    <input type="text" name="association" id="association" value="<?php echo htmlspecialchars($row['association'] ?? ''); ?>">
+                </div>
+
+                <div class="field">
+                    <label for="mode">Mode</label>
+                    <input type="text" name="mode" id="mode" value="<?php echo htmlspecialchars($row['mode'] ?? ''); ?>">
                 </div>
 
                 <div class="field">
@@ -315,28 +319,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <div class="field">
-                    <label for="start_date_raw">Start Date (Raw)</label>
-                    <input type="text" name="start_date_raw" id="start_date_raw" value="<?php echo htmlspecialchars($row['start_date_raw'] ?? ''); ?>">
-                </div>
-
-                <div class="field">
                     <label for="end_date">End Date</label>
                     <input type="date" name="end_date" id="end_date" value="<?php echo htmlspecialchars($row['end_date'] ?? ''); ?>">
                 </div>
 
                 <div class="field">
-                    <label for="end_date_raw">End Date (Raw)</label>
-                    <input type="text" name="end_date_raw" id="end_date_raw" value="<?php echo htmlspecialchars($row['end_date_raw'] ?? ''); ?>">
+                    <label for="dates_raw">Dates (Raw)</label>
+                    <input type="text" name="dates_raw" id="dates_raw" value="<?php echo htmlspecialchars($row['dates_raw'] ?? ''); ?>">
                 </div>
 
                 <div class="field">
                     <label for="duration">Duration</label>
                     <input type="text" name="duration" id="duration" value="<?php echo htmlspecialchars($row['duration'] ?? ''); ?>">
-                </div>
-
-                <div class="field">
-                    <label for="mode">Mode</label>
-                    <input type="text" name="mode" id="mode" value="<?php echo htmlspecialchars($row['mode'] ?? ''); ?>">
                 </div>
 
                 <div class="field full">

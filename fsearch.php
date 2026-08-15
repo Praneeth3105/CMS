@@ -1478,61 +1478,79 @@ $id = $_SESSION['id'];
   <script>
     function myFunction2() {
       filterTable("myInput2", "myTable2", 1);
-    } 
+    }
+
     function myFunctionfo() {
       filterTable("myInputfo", "myTablefo", 2);
-    } 
+    }
+
     function myFunctionev() {
       filterTable("myInputev", "myTableev", 2);
-    } 
+    }
+
     function myFunction1() {
       filterTable("myInput1", "myTable1", 2);
-    } 
+    }
+
     function myFunction3() {
       filterTable("myInput3", "myTable3", 1);
-    } 
+    }
+
     function myFunctionconf() {
       filterTable("myInputconf", "myTableconf", 4);
-    } 
+    }
+
     function myFunction4() {
       filterTable("myInput4", "myTable4", 5);
     }
+
     function myFunction5() {
       filterTable("myInput5", "myTable5", 2);
-    } 
+    }
+
     function myFunctiontb() {
       filterTable("myInputtb", "myTabletb", 4);
-    } 
+    }
+
     function myFunctionpt() {
       filterTable("myInputpt", "myTablept", 3);
-    } 
+    }
+
     function myFunctionnp() {
       filterTable("myInputnp", "myTablenp", 2);
-    } 
+    }
+
     function myFunctionach() {
       filterTable("myInputach", "myTableach", 2);
-    } 
+    }
+
     function myFunctionop() {
       filterTable("myInputop", "myTableop", 4);
-    } 
+    }
+
     function myFunctionra() {
       filterTable("myInputra", "myTablera", 4);
-    } 
+    }
+
     function myFunctionpm() {
       filterTable("myInputpm", "myTablepm", 1);
-    } 
+    }
+
     function myFunctionphd() {
       filterTable("myInputphd", "myTablephd", 1);
-    } 
+    }
+
     function myFunctioncw() {
       filterTable("myInputcw", "myTablecw", 2);
-    } 
+    }
+
     function myFunctionwm() {
       filterTable("myInputwm", "myTablewm", 1);
-    } 
+    }
+
     function myFunctionfp() {
       filterTable("myInputfp", "myTablefp", 2);
-    } 
+    }
 
     function filterTable(inputId, tableId, colIndex) {
       var input, filter, table, tr, td, i, txtValue;

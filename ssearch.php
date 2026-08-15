@@ -523,7 +523,7 @@ $rollno = $_SESSION['username'];
               <th>File</th>
               <th>Counsellor</th>
               <th>Class Teacher</th>
-              <th>Download</th>
+              <th>Download</th> 
               <th>Edit</th>
               <th>Delete</th>
             </tr>

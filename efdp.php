@@ -1,110 +1,345 @@
 <?php
 session_start();
-include_once('db_conn.php');
+include "db_conn.php";
 
-// Get the ID from the URL
-$id = $_GET['id'] ?? null;
+$id = isset($_GET['id']) ? $_GET['id'] : (isset($_POST['id']) ? $_POST['id'] : null);
 if (!$id) {
-    die("No ID provided.");
+    die("No record id provided.");
 }
 
-// Fetch the existing record so the form can be pre-filled
-$query = "SELECT * FROM fdp WHERE id='$id'";
-$result = mysqli_query($conn, $query);
-$row = mysqli_fetch_assoc($result);
+$successMsg = "";
+$errorMsg = "";
 
+function fetch_row($conn, $id)
+{
+    $stmt = mysqli_prepare($conn, "SELECT * FROM `fdp` WHERE id = ?");
+    mysqli_stmt_bind_param($stmt, "s", $id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $r = mysqli_fetch_assoc($result);
+    mysqli_stmt_close($stmt);
+    return $r;
+}
+
+// Fetch current record first, so POST handling can fall back to existing file values
+$row = fetch_row($conn, $id);
 if (!$row) {
-    die("Record not found.");
+    die("Record not found for id: " . htmlspecialchars($id));
 }
 
-// Handle the UPDATE when the form is submitted
+// Handle update submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name              = mysqli_real_escape_string($conn, $_POST['name']);
-    $department        = mysqli_real_escape_string($conn, $_POST['department']);
-    $fdpname           = mysqli_real_escape_string($conn, $_POST['fdpname']);
-    $org               = mysqli_real_escape_string($conn, $_POST['org']);
-    $mode              = mysqli_real_escape_string($conn, $_POST['mode']);
-    $duration          = mysqli_real_escape_string($conn, $_POST['duration']);
-    $startdate         = mysqli_real_escape_string($conn, $_POST['startdate']);
-    $enddate           = mysqli_real_escape_string($conn, $_POST['enddate']);
-    $certificate_link  = mysqli_real_escape_string($conn, $_POST['certificate_link']);
+    $name = trim($_POST['name'] ?? '');
+    $department = trim($_POST['department'] ?? '');
+    $fdpname = trim($_POST['fdpname'] ?? '');
+    $org = trim($_POST['org'] ?? '');
+    $mode = trim($_POST['mode'] ?? '');
+    $duration = trim($_POST['duration'] ?? '');
+    $startdate = trim($_POST['startdate'] ?? '');
+    $enddate = trim($_POST['enddate'] ?? '');
 
-    $update = "UPDATE fdp SET 
-                name='$name', 
-                department='$department', 
-                fdpname='$fdpname', 
-                org='$org', 
-                mode='$mode', 
-                duration='$duration', 
-                startdate='$startdate', 
-                enddate='$enddate', 
-                certificate_link='$certificate_link'
-               WHERE id='$id'";
+    // Handle optional file re-upload for certificate_link
+    $certificate_link = $row['certificate_link']; // keep existing by default
+    if (isset($_FILES['upload_file']) && $_FILES['upload_file']['error'] === UPLOAD_ERR_OK) {
+        $uploadDir = __DIR__ . '/images/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+        $origName = basename($_FILES['upload_file']['name']);
+        $safeName = time() . '_' . preg_replace('/[^A-Za-z0-9._-]/', '_', $origName);
+        $destPath = $uploadDir . $safeName;
+        if (move_uploaded_file($_FILES['upload_file']['tmp_name'], $destPath)) {
+            $certificate_link = $safeName;
+        } else {
+            $errorMsg = "File upload failed, keeping the existing file.";
+        }
+    }
 
-    if (mysqli_query($conn, $update)) {
-        header("Location: facultydat.php?updated=1");
-        exit();
-    } else {
-        $error = "Update failed: " . mysqli_error($conn);
+    if (empty($errorMsg)) {
+        $sql = "UPDATE `fdp` SET `name` = ?, `department` = ?, `fdpname` = ?, `org` = ?, `mode` = ?, `duration` = ?, `startdate` = ?, `enddate` = ?, `certificate_link` = ? WHERE id = ?";
+        $stmt = mysqli_prepare($conn, $sql);
+        if ($stmt) {
+            mysqli_stmt_bind_param($stmt, "ssssssssss", $name, $department, $fdpname, $org, $mode, $duration, $startdate, $enddate, $certificate_link, $id);
+            if (mysqli_stmt_execute($stmt)) {
+                $successMsg = "Record updated successfully.";
+                $row = fetch_row($conn, $id); // refresh with latest saved values
+            } else {
+                $errorMsg = "Update failed: " . mysqli_error($conn);
+            }
+            mysqli_stmt_close($stmt);
+        } else {
+            $errorMsg = "Query preparation failed: " . mysqli_error($conn);
+        }
     }
 }
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>Edit FDP Attended</title>
-    <link rel="stylesheet" href="edit-style.css">
+    <meta charset="UTF-8">
+    <title>Edit FDP (Old)</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: #16130f;
+            background-image: radial-gradient(circle at top, #221c14 0%, #16130f 60%);
+            font-family: 'Poppins', sans-serif;
+            color: #f5f0e6;
+            min-height: 100vh;
+        }
+
+        .wrap {
+            max-width: 760px;
+            margin: 40px auto;
+            padding: 0 20px 60px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .back-link {
+            color: #d4af37;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            border: 1px solid #d4af37;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: .2s;
+        }
+
+        .back-link:hover {
+            background: #d4af37;
+            color: #16130f;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            color: #d4af37;
+            font-size: 30px;
+            margin: 0 0 4px;
+            border-bottom: 1px solid #3a3225;
+            padding-bottom: 14px;
+        }
+
+        .subtitle {
+            color: #b8ad95;
+            font-size: 13px;
+            margin-bottom: 28px;
+        }
+
+        .card {
+            background: #1f1a13;
+            border: 1px solid #3a3225;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+        }
+
+        .msg {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .msg.success {
+            background: #22331f;
+            color: #9fe08a;
+            border: 1px solid #3f6b32;
+        }
+
+        .msg.error {
+            background: #331f1f;
+            color: #e08a8a;
+            border: 1px solid #6b3232;
+        }
+
+        form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px 22px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .field.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-size: 12.5px;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            color: #d4af37;
+            font-weight: 600;
+        }
+
+        input[type=text],
+        input[type=date],
+        input[type=number],
+        textarea,
+        select {
+            background: #14110c;
+            border: 1px solid #443a29;
+            color: #f5f0e6;
+            padding: 11px 12px;
+            border-radius: 7px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            outline: none;
+            transition: border-color .2s;
+        }
+
+        input:focus,
+        textarea:focus {
+            border-color: #d4af37;
+        }
+
+        textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .current-file {
+            font-size: 12.5px;
+            color: #b8ad95;
+            margin-top: 4px;
+        }
+
+        .current-file a {
+            color: #d4af37;
+        }
+
+        input[type=file] {
+            color: #b8ad95;
+            font-size: 13px;
+        }
+
+        .actions {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        button.save {
+            background: linear-gradient(135deg, #d4af37, #b8912b);
+            border: none;
+            color: #16130f;
+            font-weight: 700;
+            padding: 13px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14.5px;
+            transition: transform .15s, box-shadow .15s;
+        }
+
+        button.save:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(212, 175, 55, .35);
+        }
+
+        @media (max-width: 640px) {
+            form {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
 </head>
 
 <body>
-
-    <div class="topbar">
-        <h1 class="brand">Certificate <span>Management</span> System</h1>
-        <div class="topbar-actions">
-            <a href="facultydat.php" class="n"><button type="button" class="btn">Back</button></a>
+    <div class="wrap">
+        <div class="topbar">
+            <a href="fsearch.php" class="back-link">&larr; Back</a>
         </div>
-    </div>
-    <div class="page-head">
-        <h1>Edit <span>FDP</span></h1>
-    </div>
-    <div class="form-box">
-        <a href="facultydat.php" class="back-link">&larr; Back to list</a>
-        <h2>Edit FDP Attended</h2>
-        <?php if (isset($error)) echo "<p class='error'>$error</p>"; ?>
-        <form method="POST">
-            <label>Name</label>
-            <input type="text" name="name" value="<?php echo htmlspecialchars($row['name']); ?>" required>
 
-            <label>Department</label>
-            <input type="text" name="department" value="<?php echo htmlspecialchars($row['department']); ?>">
+        <h1>Edit FDP (Old)</h1>
+        <div class="subtitle">Table: fdp &middot; Record ID: <?php echo htmlspecialchars($id); ?></div>
 
-            <label>FDP Name</label>
-            <input type="text" name="fdpname" value="<?php echo htmlspecialchars($row['fdpname']); ?>" required>
+        <div class="card">
+            <?php if ($successMsg): ?>
+                <div class="msg success"><?php echo htmlspecialchars($successMsg); ?></div>
+            <?php endif; ?>
+            <?php if ($errorMsg): ?>
+                <div class="msg error"><?php echo htmlspecialchars($errorMsg); ?></div>
+            <?php endif; ?>
 
-            <label>Organisation</label>
-            <input type="text" name="org" value="<?php echo htmlspecialchars($row['org']); ?>" required>
+            <form method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="id" value="<?php echo htmlspecialchars($id); ?>">
 
-            <label>Mode</label>
-            <select name="mode" required>
-                <option value="Online" <?php if ($row['mode'] === 'Online') echo 'selected'; ?>>Online</option>
-                <option value="Offline" <?php if ($row['mode'] === 'Offline') echo 'selected'; ?>>Offline</option>
-            </select>
+                <div class="field">
+                    <label for="name">Name</label>
+                    <input type="text" name="name" id="name" value="<?php echo htmlspecialchars($row['name'] ?? ''); ?>">
+                </div>
 
-            <label>Duration</label>
-            <input type="text" name="duration" value="<?php echo htmlspecialchars($row['duration']); ?>">
+                <div class="field">
+                    <label for="department">Department</label>
+                    <input type="text" name="department" id="department" value="<?php echo htmlspecialchars($row['department'] ?? ''); ?>">
+                </div>
 
-            <label>Start Date</label>
-            <input type="date" name="startdate" value="<?php echo htmlspecialchars($row['startdate']); ?>" required>
+                <div class="field">
+                    <label for="fdpname">FDP Name</label>
+                    <input type="text" name="fdpname" id="fdpname" value="<?php echo htmlspecialchars($row['fdpname'] ?? ''); ?>">
+                </div>
 
-            <label>End Date</label>
-            <input type="date" name="enddate" value="<?php echo htmlspecialchars($row['enddate']); ?>" required>
+                <div class="field">
+                    <label for="org">Organisation</label>
+                    <input type="text" name="org" id="org" value="<?php echo htmlspecialchars($row['org'] ?? ''); ?>">
+                </div>
 
-            <label>Certificate Link</label>
-            <input type="text" name="certificate_link" value="<?php echo htmlspecialchars($row['certificate_link']); ?>">
+                <div class="field">
+                    <label for="mode">Mode</label>
+                    <input type="text" name="mode" id="mode" value="<?php echo htmlspecialchars($row['mode'] ?? ''); ?>">
+                </div>
 
-            <button type="submit">Update</button>
-        </form>
+                <div class="field">
+                    <label for="duration">Duration</label>
+                    <input type="text" name="duration" id="duration" value="<?php echo htmlspecialchars($row['duration'] ?? ''); ?>">
+                </div>
+
+                <div class="field">
+                    <label for="startdate">Start Date</label>
+                    <input type="date" name="startdate" id="startdate" value="<?php echo htmlspecialchars($row['startdate'] ?? ''); ?>">
+                </div>
+
+                <div class="field">
+                    <label for="enddate">End Date</label>
+                    <input type="date" name="enddate" id="enddate" value="<?php echo htmlspecialchars($row['enddate'] ?? ''); ?>">
+                </div>
+
+                <div class="field full">
+                    <label for="upload_file">Proof / Certificate File (leave empty to keep current file)</label>
+                    <input type="file" name="upload_file" id="upload_file">
+                    <?php if (!empty($row['certificate_link'])): ?>
+                        <div class="current-file">Current file: <a href="images/<?php echo htmlspecialchars($row['certificate_link']); ?>" target="_blank"><?php echo htmlspecialchars($row['certificate_link']); ?></a></div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="actions">
+                    <button type="submit" class="save">Save Changes</button>
+                </div>
+            </form>
+        </div>
     </div>
 </body>
 

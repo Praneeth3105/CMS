@@ -12,7 +12,7 @@ $errorMsg = "";
 
 function fetch_row($conn, $id)
 {
-    $stmt = mysqli_prepare($conn, "SELECT * FROM `ffworkshop` WHERE id = ?");
+    $stmt = mysqli_prepare($conn, "SELECT * FROM `conferences` WHERE id = ?");
     mysqli_stmt_bind_param($stmt, "s", $id);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
@@ -30,18 +30,17 @@ if (!$row) {
 // Handle update submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $academic_year = trim($_POST['academic_year'] ?? '');
-    $name = trim($_POST['name'] ?? '');
-    $workshop = trim($_POST['workshop'] ?? '');
-    $org = trim($_POST['org'] ?? '');
-    $start_date = trim($_POST['start_date'] ?? '');
-    $start_date_raw = trim($_POST['start_date_raw'] ?? '');
-    $end_date = trim($_POST['end_date'] ?? '');
-    $end_date_raw = trim($_POST['end_date_raw'] ?? '');
-    $duration = trim($_POST['duration'] ?? '');
-    $mode = trim($_POST['mode'] ?? '');
+    $faculty_name = trim($_POST['faculty_name'] ?? '');
+    $co_authors_count = trim($_POST['co_authors_count'] ?? '');
+    $author_type = trim($_POST['author_type'] ?? '');
+    $paper_title = trim($_POST['paper_title'] ?? '');
+    $conference_proceedings = trim($_POST['conference_proceedings'] ?? '');
+    $ugc_scopus = trim($_POST['ugc_scopus'] ?? '');
+    $url = trim($_POST['url'] ?? '');
+    $doi = trim($_POST['doi'] ?? '');
 
-    // Handle optional file re-upload for certificate_link
-    $certificate_link = $row['certificate_link']; // keep existing by default
+    // Handle optional file re-upload for proof_link
+    $proof_link = $row['proof_link']; // keep existing by default
     if (isset($_FILES['upload_file']) && $_FILES['upload_file']['error'] === UPLOAD_ERR_OK) {
         $uploadDir = __DIR__ . '/images/';
         if (!is_dir($uploadDir)) {
@@ -51,17 +50,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $safeName = time() . '_' . preg_replace('/[^A-Za-z0-9._-]/', '_', $origName);
         $destPath = $uploadDir . $safeName;
         if (move_uploaded_file($_FILES['upload_file']['tmp_name'], $destPath)) {
-            $certificate_link = $safeName;
+            $proof_link = $safeName;
         } else {
             $errorMsg = "File upload failed, keeping the existing file.";
         }
     }
 
     if (empty($errorMsg)) {
-        $sql = "UPDATE `ffworkshop` SET `academic_year` = ?, `name` = ?, `workshop` = ?, `org` = ?, `start_date` = ?, `start_date_raw` = ?, `end_date` = ?, `end_date_raw` = ?, `duration` = ?, `mode` = ?, `certificate_link` = ? WHERE id = ?";
+        $sql = "UPDATE `conferences` SET `academic_year` = ?, `faculty_name` = ?, `co_authors_count` = ?, `author_type` = ?, `paper_title` = ?, `conference_proceedings` = ?, `ugc_scopus` = ?, `url` = ?, `doi` = ?, `proof_link` = ? WHERE id = ?";
         $stmt = mysqli_prepare($conn, $sql);
         if ($stmt) {
-            mysqli_stmt_bind_param($stmt, "ssssssssssss", $academic_year, $name, $workshop, $org, $start_date, $start_date_raw, $end_date, $end_date_raw, $duration, $mode, $certificate_link, $id);
+            mysqli_stmt_bind_param($stmt, "sssssssssss", $academic_year, $faculty_name, $co_authors_count, $author_type, $paper_title, $conference_proceedings, $ugc_scopus, $url, $doi, $proof_link, $id);
             if (mysqli_stmt_execute($stmt)) {
                 $successMsg = "Record updated successfully.";
                 $row = fetch_row($conn, $id); // refresh with latest saved values
@@ -80,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <head>
     <meta charset="UTF-8">
-    <title>Edit Workshop / Seminar / Conference</title>
+    <title>Edit Conference Paper</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -275,8 +274,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <a href="fsearch.php" class="back-link">&larr; Back</a>
         </div>
 
-        <h1>Edit Workshop / Seminar / Conference</h1>
-        <div class="subtitle">Table: ffworkshop &middot; Record ID: <?php echo htmlspecialchars($id); ?></div>
+        <h1>Edit Conference Paper</h1>
+        <div class="subtitle">Table: conferences &middot; Record ID: <?php echo htmlspecialchars($id); ?></div>
 
         <div class="card">
             <?php if ($successMsg): ?>
@@ -295,55 +294,50 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <div class="field">
-                    <label for="name">Name</label>
-                    <input type="text" name="name" id="name" value="<?php echo htmlspecialchars($row['name'] ?? ''); ?>">
+                    <label for="faculty_name">Faculty Name</label>
+                    <input type="text" name="faculty_name" id="faculty_name" value="<?php echo htmlspecialchars($row['faculty_name'] ?? ''); ?>">
                 </div>
 
                 <div class="field">
-                    <label for="workshop">Workshop/Event Name</label>
-                    <input type="text" name="workshop" id="workshop" value="<?php echo htmlspecialchars($row['workshop'] ?? ''); ?>">
+                    <label for="co_authors_count">Co-authors Count</label>
+                    <input type="number" name="co_authors_count" id="co_authors_count" value="<?php echo htmlspecialchars($row['co_authors_count'] ?? ''); ?>">
                 </div>
 
                 <div class="field">
-                    <label for="org">Organisation</label>
-                    <input type="text" name="org" id="org" value="<?php echo htmlspecialchars($row['org'] ?? ''); ?>">
+                    <label for="author_type">Author Type</label>
+                    <input type="text" name="author_type" id="author_type" value="<?php echo htmlspecialchars($row['author_type'] ?? ''); ?>">
                 </div>
 
                 <div class="field">
-                    <label for="start_date">Start Date</label>
-                    <input type="date" name="start_date" id="start_date" value="<?php echo htmlspecialchars($row['start_date'] ?? ''); ?>">
+                    <label for="paper_title">Paper Title</label>
+                    <input type="text" name="paper_title" id="paper_title" value="<?php echo htmlspecialchars($row['paper_title'] ?? ''); ?>">
                 </div>
 
                 <div class="field">
-                    <label for="start_date_raw">Start Date (Raw)</label>
-                    <input type="text" name="start_date_raw" id="start_date_raw" value="<?php echo htmlspecialchars($row['start_date_raw'] ?? ''); ?>">
+                    <label for="conference_proceedings">Conference / Proceedings</label>
+                    <input type="text" name="conference_proceedings" id="conference_proceedings" value="<?php echo htmlspecialchars($row['conference_proceedings'] ?? ''); ?>">
                 </div>
 
                 <div class="field">
-                    <label for="end_date">End Date</label>
-                    <input type="date" name="end_date" id="end_date" value="<?php echo htmlspecialchars($row['end_date'] ?? ''); ?>">
+                    <label for="ugc_scopus">UGC / Scopus</label>
+                    <input type="text" name="ugc_scopus" id="ugc_scopus" value="<?php echo htmlspecialchars($row['ugc_scopus'] ?? ''); ?>">
                 </div>
 
                 <div class="field">
-                    <label for="end_date_raw">End Date (Raw)</label>
-                    <input type="text" name="end_date_raw" id="end_date_raw" value="<?php echo htmlspecialchars($row['end_date_raw'] ?? ''); ?>">
+                    <label for="url">URL</label>
+                    <input type="text" name="url" id="url" value="<?php echo htmlspecialchars($row['url'] ?? ''); ?>">
                 </div>
 
                 <div class="field">
-                    <label for="duration">Duration</label>
-                    <input type="text" name="duration" id="duration" value="<?php echo htmlspecialchars($row['duration'] ?? ''); ?>">
-                </div>
-
-                <div class="field">
-                    <label for="mode">Mode</label>
-                    <input type="text" name="mode" id="mode" value="<?php echo htmlspecialchars($row['mode'] ?? ''); ?>">
+                    <label for="doi">DOI</label>
+                    <input type="text" name="doi" id="doi" value="<?php echo htmlspecialchars($row['doi'] ?? ''); ?>">
                 </div>
 
                 <div class="field full">
                     <label for="upload_file">Proof / Certificate File (leave empty to keep current file)</label>
                     <input type="file" name="upload_file" id="upload_file">
-                    <?php if (!empty($row['certificate_link'])): ?>
-                        <div class="current-file">Current file: <a href="images/<?php echo htmlspecialchars($row['certificate_link']); ?>" target="_blank"><?php echo htmlspecialchars($row['certificate_link']); ?></a></div>
+                    <?php if (!empty($row['proof_link'])): ?>
+                        <div class="current-file">Current file: <a href="images/<?php echo htmlspecialchars($row['proof_link']); ?>" target="_blank"><?php echo htmlspecialchars($row['proof_link']); ?></a></div>
                     <?php endif; ?>
                 </div>
 

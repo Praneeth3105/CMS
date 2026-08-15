@@ -1,110 +1,358 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<link rel="icon" type="image/x-icon" href="icon2.png">
-	<title>CERTIFICATE MAINTANCE SYSTEM</title>
-	<link rel="stylesheet" href="style2.css">
-	<link rel="stylesheet" href="style1.css">
-	<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-	<link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet">
-	<script src="https://kit.fontawesome.com/a81368914c.js"></script>
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<style>
-.n{
-    text-decoration: none;
-}
-#btn1{
-	float: right;
- 
-}
-#btn1{
-    width: 10%;
-}
-#btn2{
-    width: 10%;
-    float: left;
-}
-h3{
-    display: inline-block;
-    margin-top: 1%;
-}
-.info{
-    margin-left: 30%;
-}
-body{
-    overflow-y: scroll;
-  
-}
-.note {
-  width: 100%;
-}
-#note1 {
- margin-left:40%;
-text-align: center;
-}
-@media only screen and (max-width: 900px) {
-   #btn1, #btn2{
-    width: 30%;
-   } 
-   .info{
-    margin-left: 20%;
+<?php
+session_start();
+include "db_conn.php";
+
+$id = isset($_GET['id']) ? $_GET['id'] : (isset($_POST['id']) ? $_POST['id'] : null);
+if (!$id) {
+    die("No record id provided.");
 }
 
-}
-	</style>
-</head>
-<body>
-    <a href="logout.php" class="n" ><button type="button" class="btn" id="btn1" >Logout</button></a>
-    <a href="fsearch.php" class="n" ><button type="button" class="btn" id="btn2" >Back</button></a>
-<?php
-		 include "db_conn.php";
-         session_start();
-         $uname=$_SESSION['username'];
-         $wnn=$_GET['editwn'];
-         $query="select * from certificates where id='$uname' and event='$wnn'";
-         $result=mysqli_query($conn,$query);
-         while($row=mysqli_fetch_array($result)){
-		?>
-  <form method='post' action='' id='note1' class='w3-container' enctype='multipart/form-data'><h4><p><label>Name of Event: </label><input class='w3-input' type='text' name='en' value='<?php echo $row['event'];?>' required></p><br><p><label>Organisation: </label><input class='w3-input'type='text' name='org' value='<?php echo $row['org'];?>' required></p><br><p><label>Place:</label><input class='w3-input' type='text' name='place' value='<?php echo $row['place'];?>' required><br><p><label>Start Date:</label><input class='w3-input' type='date' name='sd' value='<?php echo $row['startdate'];?>' required><br><p><label>End Date:</label><input class='w3-input' type='date' name='ed' value='<?php echo $row['enddate'];?>' required><br><input type='file' name='file' required><input type='hidden' name='oldimage' value='<?php echo $row['file'];?>'><br><input type='submit' class='btn' value='submit' name='submit'></h4></form>
-<?php } ?>
-</body>
-</html>
+$successMsg = "";
+$errorMsg = "";
 
-<?php
-    include "db_conn.php";
-    session_start();
-    $_SESSION['en'] = $_POST['en'];
-    $_SESSION['org'] = $_POST['org'];
-    $_SESSION['sd'] = $_POST['sd'];
-    $_SESSION['ed'] = $_POST['ed'];
-    $_SESSION['place'] = $_POST['place'];
-    $filename = $_FILES["file"]["name"];
-    $tempname = $_FILES["file"]["tmp_name"];
-    $folder = "images/".$filename;  
-    $name=$_SESSION['name'];
-    $id=$_SESSION['id'];
-    $year=$_SESSION['year'];	
-    $department=$_SESSION['department'];
-    $en=$_SESSION['en'];
-    $org=$_SESSION['org'];
-    $sd=$_SESSION['sd'];
-    $ed=$_SESSION['ed'];
-$oldimage=$_POST['oldimage'];
-    $place=$_SESSION['place'];
-    $datetime1 = date_create($sd);
-$datetime2 = date_create($ed);
-$durt = date_diff($datetime1, $datetime2);
-$durt=$durt->format('%m months');
-if(isset($_POST['submit'])){
-    $sql = "UPDATE certificates SET event='$en', org='$org', place='$place', startdate='$sd', enddate='$ed', duration='$durt', file='$filename'  WHERE id='$uname' and  event='$wnn'";
-    // Execute query
-    $res=mysqli_query($conn, $sql);
-    if($res and move_uploaded_file($tempname, $folder)) {
-        echo "<script>alert('Data Uploaded Successfully');window.location='fsearch.php';</script>";
-           unlink("images/".$oldimage);
-    }else{
-        echo "<script>alert('Data not Uploaded')</script>";
+function fetch_row($conn, $id)
+{
+    $stmt = mysqli_prepare($conn, "SELECT * FROM `certificates` WHERE id = ?");
+    mysqli_stmt_bind_param($stmt, "s", $id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $r = mysqli_fetch_assoc($result);
+    mysqli_stmt_close($stmt);
+    return $r;
+}
+
+// Fetch current record first, so POST handling can fall back to existing file values
+$row = fetch_row($conn, $id);
+if (!$row) {
+    die("Record not found for id: " . htmlspecialchars($id));
+}
+
+// Handle update submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $academic_year = trim($_POST['academic_year'] ?? '');
+    $name = trim($_POST['name'] ?? '');
+    $certificate = trim($_POST['certificate'] ?? '');
+    $org = trim($_POST['org'] ?? '');
+    $start_date = trim($_POST['start_date'] ?? '');
+    $start_date_raw = trim($_POST['start_date_raw'] ?? '');
+    $end_date = trim($_POST['end_date'] ?? '');
+    $end_date_raw = trim($_POST['end_date_raw'] ?? '');
+    $duration = trim($_POST['duration'] ?? '');
+    $mode = trim($_POST['mode'] ?? '');
+
+    // Handle optional file re-upload for certificate_link
+    $certificate_link = $row['certificate_link']; // keep existing by default
+    if (isset($_FILES['upload_file']) && $_FILES['upload_file']['error'] === UPLOAD_ERR_OK) {
+        $uploadDir = __DIR__ . '/images/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+        $origName = basename($_FILES['upload_file']['name']);
+        $safeName = time() . '_' . preg_replace('/[^A-Za-z0-9._-]/', '_', $origName);
+        $destPath = $uploadDir . $safeName;
+        if (move_uploaded_file($_FILES['upload_file']['tmp_name'], $destPath)) {
+            $certificate_link = $safeName;
+        } else {
+            $errorMsg = "File upload failed, keeping the existing file.";
+        }
     }
-      
+
+    if (empty($errorMsg)) {
+        $sql = "UPDATE `certificates` SET `academic_year` = ?, `name` = ?, `certificate` = ?, `org` = ?, `start_date` = ?, `start_date_raw` = ?, `end_date` = ?, `end_date_raw` = ?, `duration` = ?, `mode` = ?, `certificate_link` = ? WHERE id = ?";
+        $stmt = mysqli_prepare($conn, $sql);
+        if ($stmt) {
+            mysqli_stmt_bind_param($stmt, "ssssssssssss", $academic_year, $name, $certificate, $org, $start_date, $start_date_raw, $end_date, $end_date_raw, $duration, $mode, $certificate_link, $id);
+            if (mysqli_stmt_execute($stmt)) {
+                $successMsg = "Record updated successfully.";
+                $row = fetch_row($conn, $id); // refresh with latest saved values
+            } else {
+                $errorMsg = "Update failed: " . mysqli_error($conn);
+            }
+            mysqli_stmt_close($stmt);
+        } else {
+            $errorMsg = "Query preparation failed: " . mysqli_error($conn);
+        }
+    }
 }
 ?>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Certificate</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: #16130f;
+            background-image: radial-gradient(circle at top, #221c14 0%, #16130f 60%);
+            font-family: 'Poppins', sans-serif;
+            color: #f5f0e6;
+            min-height: 100vh;
+        }
+
+        .wrap {
+            max-width: 760px;
+            margin: 40px auto;
+            padding: 0 20px 60px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .back-link {
+            color: #d4af37;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            border: 1px solid #d4af37;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: .2s;
+        }
+
+        .back-link:hover {
+            background: #d4af37;
+            color: #16130f;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            color: #d4af37;
+            font-size: 30px;
+            margin: 0 0 4px;
+            border-bottom: 1px solid #3a3225;
+            padding-bottom: 14px;
+        }
+
+        .subtitle {
+            color: #b8ad95;
+            font-size: 13px;
+            margin-bottom: 28px;
+        }
+
+        .card {
+            background: #1f1a13;
+            border: 1px solid #3a3225;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+        }
+
+        .msg {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .msg.success {
+            background: #22331f;
+            color: #9fe08a;
+            border: 1px solid #3f6b32;
+        }
+
+        .msg.error {
+            background: #331f1f;
+            color: #e08a8a;
+            border: 1px solid #6b3232;
+        }
+
+        form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px 22px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .field.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-size: 12.5px;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            color: #d4af37;
+            font-weight: 600;
+        }
+
+        input[type=text],
+        input[type=date],
+        input[type=number],
+        textarea,
+        select {
+            background: #14110c;
+            border: 1px solid #443a29;
+            color: #f5f0e6;
+            padding: 11px 12px;
+            border-radius: 7px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            outline: none;
+            transition: border-color .2s;
+        }
+
+        input:focus,
+        textarea:focus {
+            border-color: #d4af37;
+        }
+
+        textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .current-file {
+            font-size: 12.5px;
+            color: #b8ad95;
+            margin-top: 4px;
+        }
+
+        .current-file a {
+            color: #d4af37;
+        }
+
+        input[type=file] {
+            color: #b8ad95;
+            font-size: 13px;
+        }
+
+        .actions {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        button.save {
+            background: linear-gradient(135deg, #d4af37, #b8912b);
+            border: none;
+            color: #16130f;
+            font-weight: 700;
+            padding: 13px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14.5px;
+            transition: transform .15s, box-shadow .15s;
+        }
+
+        button.save:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(212, 175, 55, .35);
+        }
+
+        @media (max-width: 640px) {
+            form {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="wrap">
+        <div class="topbar">
+            <a href="fsearch.php" class="back-link">&larr; Back</a>
+        </div>
+
+        <h1>Edit Certificate</h1>
+        <div class="subtitle">Table: certificates &middot; Record ID: <?php echo htmlspecialchars($id); ?></div>
+
+        <div class="card">
+            <?php if ($successMsg): ?>
+                <div class="msg success"><?php echo htmlspecialchars($successMsg); ?></div>
+            <?php endif; ?>
+            <?php if ($errorMsg): ?>
+                <div class="msg error"><?php echo htmlspecialchars($errorMsg); ?></div>
+            <?php endif; ?>
+
+            <form method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="id" value="<?php echo htmlspecialchars($id); ?>">
+
+                <div class="field">
+                    <label for="academic_year">Academic Year</label>
+                    <input type="text" name="academic_year" id="academic_year" value="<?php echo htmlspecialchars($row['academic_year'] ?? ''); ?>">
+                </div>
+
+                <div class="field">
+                    <label for="name">Name</label>
+                    <input type="text" name="name" id="name" value="<?php echo htmlspecialchars($row['name'] ?? ''); ?>">
+                </div>
+
+                <div class="field">
+                    <label for="certificate">Certificate Name</label>
+                    <input type="text" name="certificate" id="certificate" value="<?php echo htmlspecialchars($row['certificate'] ?? ''); ?>">
+                </div>
+
+                <div class="field">
+                    <label for="org">Organisation</label>
+                    <input type="text" name="org" id="org" value="<?php echo htmlspecialchars($row['org'] ?? ''); ?>">
+                </div>
+
+                <div class="field">
+                    <label for="start_date">Start Date</label>
+                    <input type="date" name="start_date" id="start_date" value="<?php echo htmlspecialchars($row['start_date'] ?? ''); ?>">
+                </div>
+
+                <div class="field">
+                    <label for="start_date_raw">Start Date (Raw)</label>
+                    <input type="text" name="start_date_raw" id="start_date_raw" value="<?php echo htmlspecialchars($row['start_date_raw'] ?? ''); ?>">
+                </div>
+
+                <div class="field">
+                    <label for="end_date">End Date</label>
+                    <input type="date" name="end_date" id="end_date" value="<?php echo htmlspecialchars($row['end_date'] ?? ''); ?>">
+                </div>
+
+                <div class="field">
+                    <label for="end_date_raw">End Date (Raw)</label>
+                    <input type="text" name="end_date_raw" id="end_date_raw" value="<?php echo htmlspecialchars($row['end_date_raw'] ?? ''); ?>">
+                </div>
+
+                <div class="field">
+                    <label for="duration">Duration</label>
+                    <input type="text" name="duration" id="duration" value="<?php echo htmlspecialchars($row['duration'] ?? ''); ?>">
+                </div>
+
+                <div class="field">
+                    <label for="mode">Mode</label>
+                    <input type="text" name="mode" id="mode" value="<?php echo htmlspecialchars($row['mode'] ?? ''); ?>">
+                </div>
+
+                <div class="field full">
+                    <label for="upload_file">Proof / Certificate File (leave empty to keep current file)</label>
+                    <input type="file" name="upload_file" id="upload_file">
+                    <?php if (!empty($row['certificate_link'])): ?>
+                        <div class="current-file">Current file: <a href="images/<?php echo htmlspecialchars($row['certificate_link']); ?>" target="_blank"><?php echo htmlspecialchars($row['certificate_link']); ?></a></div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="actions">
+                    <button type="submit" class="save">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

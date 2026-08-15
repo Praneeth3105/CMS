@@ -12,7 +12,7 @@ $errorMsg = "";
 
 function fetch_row($conn, $id)
 {
-    $stmt = mysqli_prepare($conn, "SELECT * FROM `ffworkshop` WHERE id = ?");
+    $stmt = mysqli_prepare($conn, "SELECT * FROM `nptel` WHERE id = ?");
     mysqli_stmt_bind_param($stmt, "s", $id);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
@@ -30,15 +30,14 @@ if (!$row) {
 // Handle update submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $academic_year = trim($_POST['academic_year'] ?? '');
-    $name = trim($_POST['name'] ?? '');
-    $workshop = trim($_POST['workshop'] ?? '');
-    $org = trim($_POST['org'] ?? '');
-    $start_date = trim($_POST['start_date'] ?? '');
-    $start_date_raw = trim($_POST['start_date_raw'] ?? '');
-    $end_date = trim($_POST['end_date'] ?? '');
-    $end_date_raw = trim($_POST['end_date_raw'] ?? '');
+    $faculty_name = trim($_POST['faculty_name'] ?? '');
+    $course_name = trim($_POST['course_name'] ?? '');
     $duration = trim($_POST['duration'] ?? '');
-    $mode = trim($_POST['mode'] ?? '');
+    $start_date = trim($_POST['start_date'] ?? '');
+    $end_date = trim($_POST['end_date'] ?? '');
+    $percentage = trim($_POST['percentage'] ?? '');
+    $top_percentage = trim($_POST['top_percentage'] ?? '');
+    $remarks = trim($_POST['remarks'] ?? '');
 
     // Handle optional file re-upload for certificate_link
     $certificate_link = $row['certificate_link']; // keep existing by default
@@ -58,10 +57,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($errorMsg)) {
-        $sql = "UPDATE `ffworkshop` SET `academic_year` = ?, `name` = ?, `workshop` = ?, `org` = ?, `start_date` = ?, `start_date_raw` = ?, `end_date` = ?, `end_date_raw` = ?, `duration` = ?, `mode` = ?, `certificate_link` = ? WHERE id = ?";
+        $sql = "UPDATE `nptel` SET `academic_year` = ?, `faculty_name` = ?, `course_name` = ?, `duration` = ?, `start_date` = ?, `end_date` = ?, `percentage` = ?, `top_percentage` = ?, `remarks` = ?, `certificate_link` = ? WHERE id = ?";
         $stmt = mysqli_prepare($conn, $sql);
         if ($stmt) {
-            mysqli_stmt_bind_param($stmt, "ssssssssssss", $academic_year, $name, $workshop, $org, $start_date, $start_date_raw, $end_date, $end_date_raw, $duration, $mode, $certificate_link, $id);
+            mysqli_stmt_bind_param($stmt, "sssssssssss", $academic_year, $faculty_name, $course_name, $duration, $start_date, $end_date, $percentage, $top_percentage, $remarks, $certificate_link, $id);
             if (mysqli_stmt_execute($stmt)) {
                 $successMsg = "Record updated successfully.";
                 $row = fetch_row($conn, $id); // refresh with latest saved values
@@ -80,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <head>
     <meta charset="UTF-8">
-    <title>Edit Workshop / Seminar / Conference</title>
+    <title>Edit NPTEL Course</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -275,8 +274,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <a href="fsearch.php" class="back-link">&larr; Back</a>
         </div>
 
-        <h1>Edit Workshop / Seminar / Conference</h1>
-        <div class="subtitle">Table: ffworkshop &middot; Record ID: <?php echo htmlspecialchars($id); ?></div>
+        <h1>Edit NPTEL Course</h1>
+        <div class="subtitle">Table: nptel &middot; Record ID: <?php echo htmlspecialchars($id); ?></div>
 
         <div class="card">
             <?php if ($successMsg): ?>
@@ -295,38 +294,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <div class="field">
-                    <label for="name">Name</label>
-                    <input type="text" name="name" id="name" value="<?php echo htmlspecialchars($row['name'] ?? ''); ?>">
+                    <label for="faculty_name">Faculty Name</label>
+                    <input type="text" name="faculty_name" id="faculty_name" value="<?php echo htmlspecialchars($row['faculty_name'] ?? ''); ?>">
                 </div>
 
                 <div class="field">
-                    <label for="workshop">Workshop/Event Name</label>
-                    <input type="text" name="workshop" id="workshop" value="<?php echo htmlspecialchars($row['workshop'] ?? ''); ?>">
-                </div>
-
-                <div class="field">
-                    <label for="org">Organisation</label>
-                    <input type="text" name="org" id="org" value="<?php echo htmlspecialchars($row['org'] ?? ''); ?>">
-                </div>
-
-                <div class="field">
-                    <label for="start_date">Start Date</label>
-                    <input type="date" name="start_date" id="start_date" value="<?php echo htmlspecialchars($row['start_date'] ?? ''); ?>">
-                </div>
-
-                <div class="field">
-                    <label for="start_date_raw">Start Date (Raw)</label>
-                    <input type="text" name="start_date_raw" id="start_date_raw" value="<?php echo htmlspecialchars($row['start_date_raw'] ?? ''); ?>">
-                </div>
-
-                <div class="field">
-                    <label for="end_date">End Date</label>
-                    <input type="date" name="end_date" id="end_date" value="<?php echo htmlspecialchars($row['end_date'] ?? ''); ?>">
-                </div>
-
-                <div class="field">
-                    <label for="end_date_raw">End Date (Raw)</label>
-                    <input type="text" name="end_date_raw" id="end_date_raw" value="<?php echo htmlspecialchars($row['end_date_raw'] ?? ''); ?>">
+                    <label for="course_name">Course Name</label>
+                    <input type="text" name="course_name" id="course_name" value="<?php echo htmlspecialchars($row['course_name'] ?? ''); ?>">
                 </div>
 
                 <div class="field">
@@ -335,8 +309,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <div class="field">
-                    <label for="mode">Mode</label>
-                    <input type="text" name="mode" id="mode" value="<?php echo htmlspecialchars($row['mode'] ?? ''); ?>">
+                    <label for="start_date">Start Date</label>
+                    <input type="date" name="start_date" id="start_date" value="<?php echo htmlspecialchars($row['start_date'] ?? ''); ?>">
+                </div>
+
+                <div class="field">
+                    <label for="end_date">End Date</label>
+                    <input type="date" name="end_date" id="end_date" value="<?php echo htmlspecialchars($row['end_date'] ?? ''); ?>">
+                </div>
+
+                <div class="field">
+                    <label for="percentage">Percentage</label>
+                    <input type="text" name="percentage" id="percentage" value="<?php echo htmlspecialchars($row['percentage'] ?? ''); ?>">
+                </div>
+
+                <div class="field">
+                    <label for="top_percentage">Top Percentage</label>
+                    <input type="text" name="top_percentage" id="top_percentage" value="<?php echo htmlspecialchars($row['top_percentage'] ?? ''); ?>">
+                </div>
+
+                <div class="field">
+                    <label for="remarks">Remarks</label>
+                    <input type="text" name="remarks" id="remarks" value="<?php echo htmlspecialchars($row['remarks'] ?? ''); ?>">
                 </div>
 
                 <div class="field full">

@@ -1,121 +1,352 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<link rel="icon" type="image/x-icon" href="icon2.png">
-	<title>CERTIFICATE MAINTANCE SYSTEM</title>
-	<link rel="stylesheet" href="style2.css">
-	<link rel="stylesheet" href="style1.css">
-	<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-	<link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet">
-	<script src="https://kit.fontawesome.com/a81368914c.js"></script>
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<style>
-.n{
-    text-decoration: none;
-}
-#btn1{
-	float: right;
- 
-}
-#btn1{
-    width: 10%;
-}
-#btn2{
-    width: 10%;
-    float: left;
-}
-h3{
-    display: inline-block;
-    margin-top: 1%;
-}
-.info{
-    margin-left: 30%;
-}
-body{
-    overflow-y: scroll;
-  
-}
-.note {
-  width: 100%;
-}
-#note1 {
- margin-left:40%;
-text-align: center;
-}
-@media only screen and (max-width: 900px) {
-   #btn1, #btn2{
-    width: 30%;
-   } 
-   .info{
-    margin-left: 20%;
-}
-
-}
-	</style>
-</head>
-<body>
-    <a href="logout.php" class="n" ><button type="button" class="btn" id="btn1" >Logout</button></a>
-    <a href="fsearch.php" class="n" ><button type="button" class="btn" id="btn2" >Back</button></a>
 <?php
-		 include "db_conn.php";
-         session_start();
-         $uname=$_SESSION['username'];
-          $wnn=$_GET['editwn'];
-         $query="select * from paperpublications where id='$uname' and title='$wnn'";
-         $result=mysqli_query($conn,$query);
-         while($row=mysqli_fetch_array($result)){
-		?>
-   <form method='post' action='' enctype='multipart/form-data' id='note1' class='w3-container'><h4><p><label>Authorship Position:</label><br><input type='radio' name='q1' value='1' />1 &nbsp;&nbsp;<input type='radio' name='q1' value='2' />2 &nbsp;&nbsp;<input type='radio' name='q1' value='3' />3 &nbsp;&nbsp;<input type='radio' name='q1' value='4' />4 &nbsp;&nbsp;<input type='radio' name='q1' value='5' />5 &nbsp;&nbsp;<input type='radio' name='q1' value='6' />6 &nbsp;&nbsp;</p><br><p><label>Title of the Paper:</label><input class='w3-input' type='text' name='n' value='<?php echo $row['title'];?>' required></p><br><p><label>Name of the Journal:</label><input class='w3-input' type='text' name='m' value='<?php echo $row['journal'];?>' required></p><br><p><label>Type of Journal: </label><br><input type='radio' name='t' value='ugc' />ugc &nbsp;&nbsp;<input type='radio' name='t' value='ugc care' />ugc care &nbsp;&nbsp;<input type='radio' name='t' value='scopus' />scopus &nbsp;&nbsp;<input type='radio' name='t' value='wos' />wos &nbsp;&nbsp;<input type='radio' name='t' value='scopus&wos' />scopus & wos &nbsp;&nbsp;<input type='radio' name='t' value='sci' />sci &nbsp;&nbsp;<input type='radio' name='t' value='others' />others</p><br><p><label>Publication Type:</label><br><input type='radio' name='f' value='free' />Free &nbsp;&nbsp;<input type='radio' name='f' value='Paid' />Paid</p><br><p><label>ISSN Number:</label><input class='w3-input' type='text' name='iss' value='<?php echo $row['issn'];?>' required></p><br><p><label>Publication Date:</label><input class='w3-input' type='date' name='d' value='<?php echo $row['date'];?>' required></p><br><p><label>Volume:</label><input class='w3-input' type='text' name='v' value='<?php echo $row['volume'];?>' required></p><br><p><label>Issue:</label><input class='w3-input' type='text' name='in' value='<?php echo $row['issue'];?>' required></p><br><p><label>URL:</label><input class='w3-input' type='text' name='u' value='<?php echo $row['url'];?>' required></p><br><p><label>Upload First Page of Paper (only pdf format is acceptable):</label><input class='w3-input' type='file' name='file' required></p><input type='hidden' name='oldimage' value='<?php echo $row['file'];?>'><br><input type='submit' class='btn' value='submit' name='submit'></h4></form>
-<?php } ?>
-</body>
-</html>
+session_start();
+include "db_conn.php";
 
-<?php
-    include "db_conn.php";
-    session_start();
-    $_SESSION['q1'] = $_POST['q1'];
-    $_SESSION['n'] = $_POST['n'];
-    $_SESSION['m'] = $_POST['m'];
-    $_SESSION['t'] = $_POST['t'];
-    $_SESSION['f'] = $_POST['f'];
-    $_SESSION['iss'] = $_POST['iss']; 
-    $_SESSION['d'] = $_POST['d'];
-    $_SESSION['v'] = $_POST['v'];
-    $_SESSION['in'] = $_POST['in'];
-    $_SESSION['u'] = $_POST['u'];
-    $_SESSION['i'] = $_POST['i'];
+$id = isset($_GET['id']) ? $_GET['id'] : (isset($_POST['id']) ? $_POST['id'] : null);
+if (!$id) {
+    die("No record id provided.");
+}
 
+$successMsg = "";
+$errorMsg = "";
 
-    $name=$_SESSION['name'];
-    $rollno=$_SESSION['rollno'];
-    $department=$_SESSION['department'];
-    $id=$_SESSION['id'];	
-    $q1=$_SESSION['q1'];
-    $n=$_SESSION['n'];
-    $m=$_SESSION['m'];
-    $t=$_SESSION['t'];
-    $f=$_SESSION['f'];
-    $i=$_SESSION['i'];
-    $v=$_SESSION['v'];
-    $in=$_SESSION['in'];
- $oldimage=$_POST['oldimage'];
-    $u=$_SESSION['u'];
-    $iss=$_SESSION['iss'];
-    $d=$_SESSION['d'];
- $filename = $_FILES["file"]["name"];
-    $tempname = $_FILES["file"]["tmp_name"];
-    $folder = "images/".$filename;  
+function fetch_row($conn, $id)
+{
+    $stmt = mysqli_prepare($conn, "SELECT * FROM `paperpublications` WHERE id = ?");
+    mysqli_stmt_bind_param($stmt, "s", $id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $r = mysqli_fetch_assoc($result);
+    mysqli_stmt_close($stmt);
+    return $r;
+}
 
-if(isset($_POST['submit'])){
-    $sql = "UPDATE paperpublications SET authorship_position='$q1',title='$n',journal='$m',type='$t',publication_type='$f',issn='$iss',date='$d',volume='$v',issue='$in',url='$u',file='$filename'  WHERE id='$uname' and  title='$wnn'";
-    // Execute query
-    $res=mysqli_query($conn, $sql);
-    if($res and move_uploaded_file($tempname, $folder)) {
-        echo "<script>alert('Data Uploaded Successfully');window.location='fsearch.php';</script>";
-        unlink("images/".$oldimage);
-    }else{
-        echo "<script>alert('Data not Uploaded')</script>";
+// Fetch current record first, so POST handling can fall back to existing file values
+$row = fetch_row($conn, $id);
+if (!$row) {
+    die("Record not found for id: " . htmlspecialchars($id));
+}
+
+// Handle update submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $faculty_name = trim($_POST['faculty_name'] ?? '');
+    $title = trim($_POST['title'] ?? '');
+    $journal = trim($_POST['journal'] ?? '');
+    $indexing_type = trim($_POST['indexing_type'] ?? '');
+    $volume = trim($_POST['volume'] ?? '');
+    $number = trim($_POST['number'] ?? '');
+    $url_doi = trim($_POST['url_doi'] ?? '');
+    $academic_year = trim($_POST['academic_year'] ?? '');
+    $month = trim($_POST['month'] ?? '');
+
+    // Handle optional file re-upload for proof_link
+    $proof_link = $row['proof_link']; // keep existing by default
+    if (isset($_FILES['upload_file']) && $_FILES['upload_file']['error'] === UPLOAD_ERR_OK) {
+        $uploadDir = __DIR__ . '/images/';
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+        $origName = basename($_FILES['upload_file']['name']);
+        $safeName = time() . '_' . preg_replace('/[^A-Za-z0-9._-]/', '_', $origName);
+        $destPath = $uploadDir . $safeName;
+        if (move_uploaded_file($_FILES['upload_file']['tmp_name'], $destPath)) {
+            $proof_link = $safeName;
+        } else {
+            $errorMsg = "File upload failed, keeping the existing file.";
+        }
     }
-      
+
+    if (empty($errorMsg)) {
+        $sql = "UPDATE `paperpublications` SET `faculty_name` = ?, `title` = ?, `journal` = ?, `indexing_type` = ?, `volume` = ?, `number` = ?, `url_doi` = ?, `academic_year` = ?, `month` = ?, `proof_link` = ? WHERE id = ?";
+        $stmt = mysqli_prepare($conn, $sql);
+        if ($stmt) {
+            mysqli_stmt_bind_param($stmt, "sssssssssss", $faculty_name, $title, $journal, $indexing_type, $volume, $number, $url_doi, $academic_year, $month, $proof_link, $id);
+            if (mysqli_stmt_execute($stmt)) {
+                $successMsg = "Record updated successfully.";
+                $row = fetch_row($conn, $id); // refresh with latest saved values
+            } else {
+                $errorMsg = "Update failed: " . mysqli_error($conn);
+            }
+            mysqli_stmt_close($stmt);
+        } else {
+            $errorMsg = "Query preparation failed: " . mysqli_error($conn);
+        }
+    }
 }
 ?>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Paper Publication</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: #16130f;
+            background-image: radial-gradient(circle at top, #221c14 0%, #16130f 60%);
+            font-family: 'Poppins', sans-serif;
+            color: #f5f0e6;
+            min-height: 100vh;
+        }
+
+        .wrap {
+            max-width: 760px;
+            margin: 40px auto;
+            padding: 0 20px 60px;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .back-link {
+            color: #d4af37;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            border: 1px solid #d4af37;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: .2s;
+        }
+
+        .back-link:hover {
+            background: #d4af37;
+            color: #16130f;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            color: #d4af37;
+            font-size: 30px;
+            margin: 0 0 4px;
+            border-bottom: 1px solid #3a3225;
+            padding-bottom: 14px;
+        }
+
+        .subtitle {
+            color: #b8ad95;
+            font-size: 13px;
+            margin-bottom: 28px;
+        }
+
+        .card {
+            background: #1f1a13;
+            border: 1px solid #3a3225;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+        }
+
+        .msg {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .msg.success {
+            background: #22331f;
+            color: #9fe08a;
+            border: 1px solid #3f6b32;
+        }
+
+        .msg.error {
+            background: #331f1f;
+            color: #e08a8a;
+            border: 1px solid #6b3232;
+        }
+
+        form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px 22px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .field.full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            font-size: 12.5px;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            color: #d4af37;
+            font-weight: 600;
+        }
+
+        input[type=text],
+        input[type=date],
+        input[type=number],
+        textarea,
+        select {
+            background: #14110c;
+            border: 1px solid #443a29;
+            color: #f5f0e6;
+            padding: 11px 12px;
+            border-radius: 7px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            outline: none;
+            transition: border-color .2s;
+        }
+
+        input:focus,
+        textarea:focus {
+            border-color: #d4af37;
+        }
+
+        textarea {
+            min-height: 90px;
+            resize: vertical;
+        }
+
+        .current-file {
+            font-size: 12.5px;
+            color: #b8ad95;
+            margin-top: 4px;
+        }
+
+        .current-file a {
+            color: #d4af37;
+        }
+
+        input[type=file] {
+            color: #b8ad95;
+            font-size: 13px;
+        }
+
+        .actions {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        button.save {
+            background: linear-gradient(135deg, #d4af37, #b8912b);
+            border: none;
+            color: #16130f;
+            font-weight: 700;
+            padding: 13px 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14.5px;
+            transition: transform .15s, box-shadow .15s;
+        }
+
+        button.save:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(212, 175, 55, .35);
+        }
+
+        @media (max-width: 640px) {
+            form {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="wrap">
+        <div class="topbar">
+            <a href="fsearch.php" class="back-link">&larr; Back</a>
+        </div>
+
+        <h1>Edit Paper Publication</h1>
+        <div class="subtitle">Table: paperpublications &middot; Record ID: <?php echo htmlspecialchars($id); ?></div>
+
+        <div class="card">
+            <?php if ($successMsg): ?>
+                <div class="msg success"><?php echo htmlspecialchars($successMsg); ?></div>
+            <?php endif; ?>
+            <?php if ($errorMsg): ?>
+                <div class="msg error"><?php echo htmlspecialchars($errorMsg); ?></div>
+            <?php endif; ?>
+
+            <form method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="id" value="<?php echo htmlspecialchars($id); ?>">
+
+                <div class="field">
+                    <label for="faculty_name">Faculty Name</label>
+                    <input type="text" name="faculty_name" id="faculty_name" value="<?php echo htmlspecialchars($row['faculty_name'] ?? ''); ?>">
+                </div>
+
+                <div class="field">
+                    <label for="title">Title</label>
+                    <input type="text" name="title" id="title" value="<?php echo htmlspecialchars($row['title'] ?? ''); ?>">
+                </div>
+
+                <div class="field">
+                    <label for="journal">Journal</label>
+                    <input type="text" name="journal" id="journal" value="<?php echo htmlspecialchars($row['journal'] ?? ''); ?>">
+                </div>
+
+                <div class="field">
+                    <label for="indexing_type">Indexing Type</label>
+                    <input type="text" name="indexing_type" id="indexing_type" value="<?php echo htmlspecialchars($row['indexing_type'] ?? ''); ?>">
+                </div>
+
+                <div class="field">
+                    <label for="volume">Volume</label>
+                    <input type="text" name="volume" id="volume" value="<?php echo htmlspecialchars($row['volume'] ?? ''); ?>">
+                </div>
+
+                <div class="field">
+                    <label for="number">Number</label>
+                    <input type="text" name="number" id="number" value="<?php echo htmlspecialchars($row['number'] ?? ''); ?>">
+                </div>
+
+                <div class="field">
+                    <label for="url_doi">URL / DOI</label>
+                    <input type="text" name="url_doi" id="url_doi" value="<?php echo htmlspecialchars($row['url_doi'] ?? ''); ?>">
+                </div>
+
+                <div class="field">
+                    <label for="academic_year">Academic Year</label>
+                    <input type="text" name="academic_year" id="academic_year" value="<?php echo htmlspecialchars($row['academic_year'] ?? ''); ?>">
+                </div>
+
+                <div class="field">
+                    <label for="month">Month</label>
+                    <input type="text" name="month" id="month" value="<?php echo htmlspecialchars($row['month'] ?? ''); ?>">
+                </div>
+
+                <div class="field full">
+                    <label for="upload_file">Proof / Certificate File (leave empty to keep current file)</label>
+                    <input type="file" name="upload_file" id="upload_file">
+                    <?php if (!empty($row['proof_link'])): ?>
+                        <div class="current-file">Current file: <a href="images/<?php echo htmlspecialchars($row['proof_link']); ?>" target="_blank"><?php echo htmlspecialchars($row['proof_link']); ?></a></div>
+                    <?php endif; ?>
+                </div>
+
+                <div class="actions">
+                    <button type="submit" class="save">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>
