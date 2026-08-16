@@ -88,6 +88,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
+        :root {
+            --dark: #1a120b;
+            --dark-2: #2b1d13;
+            --gold: #d4af37;
+            --gold-soft: #c9a227;
+            --gold-pale: #f0e2b8;
+            --accent: #c1663b;
+            --cream: #f2ece1;
+            --cream-card: #fffdf9;
+            --box: #f4ecdf;
+            --border: #e8dfc9;
+            --muted: #8a7d6b;
+            --danger: #b6432f;
+            --shadow: 0 10px 28px rgba(120, 100, 60, .10);
+            --shadow-lg: 0 20px 45px rgba(26, 18, 11, .14);
+        }
+
         * {
             box-sizing: border-box;
         }
@@ -95,10 +112,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         body {
             margin: 0;
             padding: 0;
-            background: #16130f;
-            background-image: radial-gradient(circle at top, #221c14 0%, #16130f 60%);
+            background: var(--cream);
             font-family: 'Poppins', sans-serif;
-            color: #f5f0e6;
+            color: var(--dark);
             min-height: 100vh;
         }
 
@@ -116,42 +132,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .back-link {
-            color: #d4af37;
+            color: var(--accent);
             text-decoration: none;
             font-weight: 600;
             font-size: 14px;
-            border: 1px solid #d4af37;
+            border: 1px solid var(--gold-soft);
             padding: 8px 16px;
-            border-radius: 6px;
+            border-radius: 999px;
             transition: .2s;
         }
 
         .back-link:hover {
-            background: #d4af37;
-            color: #16130f;
+            background: var(--gold);
+            color: var(--dark);
+            border-color: var(--gold);
         }
 
         h1 {
             font-family: 'Playfair Display', serif;
-            color: #d4af37;
+            color: var(--dark);
             font-size: 30px;
             margin: 0 0 4px;
-            border-bottom: 1px solid #3a3225;
+            border-bottom: 1px solid var(--border);
             padding-bottom: 14px;
         }
 
         .subtitle {
-            color: #b8ad95;
+            color: var(--muted);
             font-size: 13px;
             margin-bottom: 28px;
         }
 
         .card {
-            background: #1f1a13;
-            border: 1px solid #3a3225;
-            border-radius: 12px;
+            background: var(--cream-card);
+            border: 1px solid var(--border);
+            border-radius: 18px;
             padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--accent), var(--gold) 50%, var(--accent));
         }
 
         .msg {
@@ -163,15 +192,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .msg.success {
-            background: #22331f;
-            color: #9fe08a;
-            border: 1px solid #3f6b32;
+            background: #eaf5e6;
+            color: #2f6b23;
+            border: 1px solid #a9d69c;
         }
 
         .msg.error {
-            background: #331f1f;
-            color: #e08a8a;
-            border: 1px solid #6b3232;
+            background: #fbeae7;
+            color: var(--danger);
+            border: 1px solid #e3b3a7;
         }
 
         form {
@@ -194,8 +223,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-size: 12.5px;
             letter-spacing: .04em;
             text-transform: uppercase;
-            color: #d4af37;
-            font-weight: 600;
+            color: var(--gold-soft);
+            font-weight: 700;
         }
 
         input[type=text],
@@ -203,20 +232,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         input[type=number],
         textarea,
         select {
-            background: #14110c;
-            border: 1px solid #443a29;
-            color: #f5f0e6;
+            background: var(--box);
+            border: 1px solid var(--border);
+            color: var(--dark);
             padding: 11px 12px;
             border-radius: 7px;
             font-family: 'Poppins', sans-serif;
             font-size: 14px;
             outline: none;
-            transition: border-color .2s;
+            transition: border-color .2s, box-shadow .2s;
         }
 
         input:focus,
         textarea:focus {
-            border-color: #d4af37;
+            border-color: var(--gold-soft);
+            background: var(--cream-card);
+            box-shadow: 0 0 0 3px rgba(212, 175, 55, .18);
         }
 
         textarea {
@@ -226,16 +257,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .current-file {
             font-size: 12.5px;
-            color: #b8ad95;
+            color: var(--muted);
             margin-top: 4px;
         }
 
         .current-file a {
-            color: #d4af37;
+            color: var(--accent);
         }
 
         input[type=file] {
-            color: #b8ad95;
+            color: var(--muted);
             font-size: 13px;
         }
 
@@ -247,9 +278,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         button.save {
-            background: linear-gradient(135deg, #d4af37, #b8912b);
+            background: linear-gradient(135deg, var(--gold), var(--gold-soft));
             border: none;
-            color: #16130f;
+            color: var(--dark);
             font-weight: 700;
             padding: 13px 28px;
             border-radius: 8px;
