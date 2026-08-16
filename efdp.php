@@ -21,7 +21,7 @@ function fetch_row($conn, $id)
     return $r;
 }
 
-// Fetch current record first, so POST handling can fall back to existing file values
+// Fetch current record first, so POST handling can fall back to existing values
 $row = fetch_row($conn, $id);
 if (!$row) {
     die("Record not found for id: " . htmlspecialchars($id));
@@ -38,38 +38,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $startdate = trim($_POST['startdate'] ?? '');
     $enddate = trim($_POST['enddate'] ?? '');
 
-    // Handle optional file re-upload for certificate_link
-    $certificate_link = $row['certificate_link']; // keep existing by default
-    if (isset($_FILES['upload_file']) && $_FILES['upload_file']['error'] === UPLOAD_ERR_OK) {
-        $uploadDir = __DIR__ . '/images/';
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
-        }
-        $origName = basename($_FILES['upload_file']['name']);
-        $safeName = time() . '_' . preg_replace('/[^A-Za-z0-9._-]/', '_', $origName);
-        $destPath = $uploadDir . $safeName;
-        if (move_uploaded_file($_FILES['upload_file']['tmp_name'], $destPath)) {
-            $certificate_link = $safeName;
-        } else {
-            $errorMsg = "File upload failed, keeping the existing file.";
-        }
+    // Certificate is now a plain URL/link entered by the user, not an uploaded file.
+    // Keep the existing link if the field is left blank.
+    $certificate_link = trim($_POST['certificate_link'] ?? '');
+    if ($certificate_link === '') {
+        $certificate_link = $row['certificate_link'];
     }
 
-    if (empty($errorMsg)) {
-        $sql = "UPDATE `fdp` SET `name` = ?, `department` = ?, `fdpname` = ?, `org` = ?, `mode` = ?, `duration` = ?, `startdate` = ?, `enddate` = ?, `certificate_link` = ? WHERE id = ?";
-        $stmt = mysqli_prepare($conn, $sql);
-        if ($stmt) {
-            mysqli_stmt_bind_param($stmt, "ssssssssss", $name, $department, $fdpname, $org, $mode, $duration, $startdate, $enddate, $certificate_link, $id);
-            if (mysqli_stmt_execute($stmt)) {
-                $successMsg = "Record updated successfully.";
-                $row = fetch_row($conn, $id); // refresh with latest saved values
-            } else {
-                $errorMsg = "Update failed: " . mysqli_error($conn);
-            }
-            mysqli_stmt_close($stmt);
+    $sql = "UPDATE `fdp` SET `name` = ?, `department` = ?, `fdpname` = ?, `org` = ?, `mode` = ?, `duration` = ?, `startdate` = ?, `enddate` = ?, `certificate_link` = ? WHERE id = ?";
+    $stmt = mysqli_prepare($conn, $sql);
+    if ($stmt) {
+        mysqli_stmt_bind_param($stmt, "ssssssssss", $name, $department, $fdpname, $org, $mode, $duration, $startdate, $enddate, $certificate_link, $id);
+        if (mysqli_stmt_execute($stmt)) {
+            $successMsg = "Record updated successfully.";
+            $row = fetch_row($conn, $id); // refresh with latest saved values
         } else {
-            $errorMsg = "Query preparation failed: " . mysqli_error($conn);
+            $errorMsg = "Update failed: " . mysqli_error($conn);
         }
+        mysqli_stmt_close($stmt);
+    } else {
+        $errorMsg = "Query preparation failed: " . mysqli_error($conn);
     }
 }
 ?>
@@ -223,6 +211,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         input[type=text],
+        input[type=url],
         input[type=date],
         input[type=number],
         textarea,
@@ -250,6 +239,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             resize: vertical;
         }
 
+        .field-hint {
+            font-size: 12.5px;
+            color: var(--muted);
+        }
+
         .current-file {
             font-size: 12.5px;
             color: var(--muted);
@@ -258,11 +252,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .current-file a {
             color: var(--accent);
-        }
-
-        input[type=file] {
-            color: var(--muted);
-            font-size: 13px;
         }
 
         .actions {
@@ -315,7 +304,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="msg error"><?php echo htmlspecialchars($errorMsg); ?></div>
             <?php endif; ?>
 
-            <form method="POST" enctype="multipart/form-data">
+            <form method="POST">
                 <input type="hidden" name="id" value="<?php echo htmlspecialchars($id); ?>">
 
                 <div class="field">
@@ -359,10 +348,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <div class="field full">
-                    <label for="upload_file">Proof / Certificate File (leave empty to keep current file)</label>
-                    <input type="file" name="upload_file" id="upload_file">
+                    <label for="certificate_link">Proof / Certificate Link (paste a URL; leave empty to keep the current link)</label>
+                    <input type="url" name="certificate_link" id="certificate_link" placeholder="https://...">
                     <?php if (!empty($row['certificate_link'])): ?>
-                        <div class="current-file">Current file: <a href="images/<?php echo htmlspecialchars($row['certificate_link']); ?>" target="_blank"><?php echo htmlspecialchars($row['certificate_link']); ?></a></div>
+                        <div class="current-file">Current link: <a href="<?php echo htmlspecialchars($row['certificate_link']); ?>" target="_blank" rel="noopener"><?php echo htmlspecialchars($row['certificate_link']); ?></a></div>
+                    <?php else: ?>
+                        <div class="field-hint">No link saved yet.</div>
                     <?php endif; ?>
                 </div>
 
