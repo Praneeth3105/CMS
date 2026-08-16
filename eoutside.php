@@ -36,6 +36,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $organization = trim($_POST['organization'] ?? '');
     $conference_journal_name = trim($_POST['conference_journal_name'] ?? '');
     $type = trim($_POST['type'] ?? '');
+    $start_date = trim($_POST['start_date'] ?? '');
+    $end_date = trim($_POST['end_date'] ?? '');
 
     // Handle optional file re-upload for proof_link
     $proof_link = $row['proof_link']; // keep existing by default
@@ -55,10 +57,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($errorMsg)) {
-        $sql = "UPDATE `outside_participations` SET `academic_year` = ?, `month` = ?, `faculty_name` = ?, `date_attended` = ?, `organization` = ?, `conference_journal_name` = ?, `type` = ?, `proof_link` = ? WHERE id = ?";
+        $sql = "UPDATE `outside_participations` SET `academic_year` = ?, `month` = ?, `faculty_name` = ?, `date_attended` = ?, `organization` = ?, `conference_journal_name` = ?, `type` = ?, `start_date` = ?, `end_date` = ?, `proof_link` = ? WHERE id = ?";
         $stmt = mysqli_prepare($conn, $sql);
         if ($stmt) {
-            mysqli_stmt_bind_param($stmt, "sssssssss", $academic_year, $month, $faculty_name, $date_attended, $organization, $conference_journal_name, $type, $proof_link, $id);
+            mysqli_stmt_bind_param($stmt, "sssssssssss", $academic_year, $month, $faculty_name, $date_attended, $organization, $conference_journal_name, $type, $start_date, $end_date, $proof_link, $id);
             if (mysqli_stmt_execute($stmt)) {
                 $successMsg = "Record updated successfully.";
                 $row = fetch_row($conn, $id); // refresh with latest saved values
@@ -82,23 +84,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        :root {
-            --dark: #1a120b;
-            --dark-2: #2b1d13;
-            --gold: #d4af37;
-            --gold-soft: #c9a227;
-            --gold-pale: #f0e2b8;
-            --accent: #c1663b;
-            --cream: #f2ece1;
-            --cream-card: #fffdf9;
-            --box: #f4ecdf;
-            --border: #e8dfc9;
-            --muted: #8a7d6b;
-            --danger: #b6432f;
-            --shadow: 0 10px 28px rgba(120, 100, 60, .10);
-            --shadow-lg: 0 20px 45px rgba(26, 18, 11, .14);
-        }
-
         * {
             box-sizing: border-box;
         }
@@ -106,9 +91,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         body {
             margin: 0;
             padding: 0;
-            background: var(--cream);
+            background: #16130f;
+            background-image: radial-gradient(circle at top, #221c14 0%, #16130f 60%);
             font-family: 'Poppins', sans-serif;
-            color: var(--dark);
+            color: #f5f0e6;
             min-height: 100vh;
         }
 
@@ -126,55 +112,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .back-link {
-            color: var(--accent);
+            color: #d4af37;
             text-decoration: none;
             font-weight: 600;
             font-size: 14px;
-            border: 1px solid var(--gold-soft);
+            border: 1px solid #d4af37;
             padding: 8px 16px;
-            border-radius: 999px;
+            border-radius: 6px;
             transition: .2s;
         }
 
         .back-link:hover {
-            background: var(--gold);
-            color: var(--dark);
-            border-color: var(--gold);
+            background: #d4af37;
+            color: #16130f;
         }
 
         h1 {
             font-family: 'Playfair Display', serif;
-            color: var(--dark);
+            color: #d4af37;
             font-size: 30px;
             margin: 0 0 4px;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1px solid #3a3225;
             padding-bottom: 14px;
         }
 
         .subtitle {
-            color: var(--muted);
+            color: #b8ad95;
             font-size: 13px;
             margin-bottom: 28px;
         }
 
         .card {
-            background: var(--cream-card);
-            border: 1px solid var(--border);
-            border-radius: 18px;
+            background: #1f1a13;
+            border: 1px solid #3a3225;
+            border-radius: 12px;
             padding: 30px;
-            box-shadow: var(--shadow-lg);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .card::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 5px;
-            background: linear-gradient(90deg, var(--accent), var(--gold) 50%, var(--accent));
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
         }
 
         .msg {
@@ -186,15 +159,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         .msg.success {
-            background: #eaf5e6;
-            color: #2f6b23;
-            border: 1px solid #a9d69c;
+            background: #22331f;
+            color: #9fe08a;
+            border: 1px solid #3f6b32;
         }
 
         .msg.error {
-            background: #fbeae7;
-            color: var(--danger);
-            border: 1px solid #e3b3a7;
+            background: #331f1f;
+            color: #e08a8a;
+            border: 1px solid #6b3232;
         }
 
         form {
@@ -217,8 +190,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             font-size: 12.5px;
             letter-spacing: .04em;
             text-transform: uppercase;
-            color: var(--gold-soft);
-            font-weight: 700;
+            color: #d4af37;
+            font-weight: 600;
         }
 
         input[type=text],
@@ -226,22 +199,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         input[type=number],
         textarea,
         select {
-            background: var(--box);
-            border: 1px solid var(--border);
-            color: var(--dark);
+            background: #14110c;
+            border: 1px solid #443a29;
+            color: #f5f0e6;
             padding: 11px 12px;
             border-radius: 7px;
             font-family: 'Poppins', sans-serif;
             font-size: 14px;
             outline: none;
-            transition: border-color .2s, box-shadow .2s;
+            transition: border-color .2s;
         }
 
         input:focus,
         textarea:focus {
-            border-color: var(--gold-soft);
-            background: var(--cream-card);
-            box-shadow: 0 0 0 3px rgba(212, 175, 55, .18);
+            border-color: #d4af37;
         }
 
         textarea {
@@ -251,16 +222,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .current-file {
             font-size: 12.5px;
-            color: var(--muted);
+            color: #b8ad95;
             margin-top: 4px;
         }
 
         .current-file a {
-            color: var(--accent);
+            color: #d4af37;
         }
 
         input[type=file] {
-            color: var(--muted);
+            color: #b8ad95;
             font-size: 13px;
         }
 
@@ -272,9 +243,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         button.save {
-            background: linear-gradient(135deg, var(--gold), var(--gold-soft));
+            background: linear-gradient(135deg, #d4af37, #b8912b);
             border: none;
-            color: var(--dark);
+            color: #16130f;
             font-weight: 700;
             padding: 13px 28px;
             border-radius: 8px;
@@ -350,6 +321,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="field">
                     <label for="type">Type</label>
                     <input type="text" name="type" id="type" value="<?php echo htmlspecialchars($row['type'] ?? ''); ?>">
+                </div>
+
+                <div class="field">
+                    <label for="start_date">Start Date</label>
+                    <input type="date" name="start_date" id="start_date" value="<?php echo htmlspecialchars($row['start_date'] ?? ''); ?>">
+                </div>
+
+                <div class="field">
+                    <label for="end_date">End Date</label>
+                    <input type="date" name="end_date" id="end_date" value="<?php echo htmlspecialchars($row['end_date'] ?? ''); ?>">
                 </div>
 
                 <div class="field full">

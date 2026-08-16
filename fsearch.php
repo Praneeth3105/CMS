@@ -12,7 +12,6 @@ $id = $_SESSION['id'];
   <link rel="icon" type="image/x-icon" href="icon2.png">
   <title>CERTIFICATE MANAGEMENT SYSTEM</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Keep your existing <style> block from the original file — unchanged, omitted here for brevity -->
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap');
 
@@ -54,7 +53,6 @@ $id = $_SESSION['id'];
       text-decoration: none;
     }
 
-    /* ---------- Top bar ---------- */
     .topbar {
       background: linear-gradient(135deg, var(--dark) 0%, var(--dark-2) 100%);
       padding: 18px 32px;
@@ -113,7 +111,6 @@ $id = $_SESSION['id'];
       transform: translateY(-1px);
     }
 
-    /* small action buttons inside tables (Edit / Delete / Download) */
     #demo .btn {
       padding: 7px 16px;
       font-size: 0.7rem;
@@ -129,7 +126,6 @@ $id = $_SESSION['id'];
       color: var(--dark);
     }
 
-    /* Download button styled distinctly */
     a[href*="download"] .btn,
     a[download] .btn {
       background: var(--gold-pale);
@@ -142,7 +138,6 @@ $id = $_SESSION['id'];
       background: var(--gold);
     }
 
-    /* Delete button styled distinctly (matches the "Delete" label text) */
     td a[href^="dwa"] .btn {
       color: var(--danger);
       border-color: rgba(182, 67, 47, 0.35);
@@ -155,7 +150,6 @@ $id = $_SESSION['id'];
       color: var(--danger);
     }
 
-    /* CSS-only fix for the Font Awesome download glyph (no external icon font loaded) */
     .btn i.fa {
       font-size: 0 !important;
       display: inline-flex;
@@ -172,7 +166,6 @@ $id = $_SESSION['id'];
       font-style: normal;
     }
 
-    /* ---------- Page heading + selector ---------- */
     .page-head {
       text-align: center;
       padding: 38px 20px 26px;
@@ -239,7 +232,6 @@ $id = $_SESSION['id'];
       box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
     }
 
-    /* ---------- Section containers ---------- */
     #demo {
       max-width: 1300px;
       margin: 0 auto;
@@ -276,7 +268,6 @@ $id = $_SESSION['id'];
       color: var(--dark);
     }
 
-    /* ---------- Search inputs ---------- */
     .optionDiv .search-wrap {
       position: relative;
       max-width: 420px;
@@ -313,7 +304,6 @@ $id = $_SESSION['id'];
       box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.2);
     }
 
-    /* ---------- Tables ---------- */
     .scroll {
       overflow-x: auto;
       width: 100%;
@@ -378,7 +368,6 @@ $id = $_SESSION['id'];
       text-decoration: underline;
     }
 
-    /* ---------- Empty state row ---------- */
     .optionDiv table tr.empty-row td {
       text-align: center;
       padding: 34px 14px;
@@ -690,6 +679,8 @@ $id = $_SESSION['id'];
             <th>Number</th>
             <th>Academic Year</th>
             <th>Month</th>
+            <th>Start Date</th>
+            <th>End Date</th>
             <th>URL/DOI</th>
             <th>Proof</th>
             <th>Edit</th>
@@ -710,6 +701,8 @@ $id = $_SESSION['id'];
                 <td><?php echo $rows['number']; ?></td>
                 <td><?php echo $rows['academic_year']; ?></td>
                 <td><?php echo $rows['month']; ?></td>
+                <td><?php echo !empty($rows['start_date']) ? $rows['start_date'] : "-"; ?></td>
+                <td><?php echo !empty($rows['end_date']) ? $rows['end_date'] : "-"; ?></td>
                 <td><?php echo !empty($rows['url_doi']) ? "<a href='" . htmlspecialchars($rows['url_doi']) . "' target='_blank'>Link</a>" : "—"; ?></td>
                 <td><?php echo !empty($rows['proof_link']) ? "<a href='" . htmlspecialchars($rows['proof_link']) . "' target='_blank'>View</a>" : "—"; ?></td>
                 <td><a href='epp.php?id=<?php echo $rows['id']; ?>'><button class='btn'>Edit</button></a></td>
@@ -718,14 +711,14 @@ $id = $_SESSION['id'];
           <?php
             }
           } else {
-            echo "<tr class='empty-row'><td colspan='12'></td></tr>";
+            echo "<tr class='empty-row'><td colspan='14'></td></tr>";
           }
           ?>
         </table>
       </div>
     </div>
 
-    <!-- ============ CONFERENCES -> conferences (this section was missing before) ============ -->
+    <!-- ============ CONFERENCES -> conferences ============ -->
     <div id="conferencepapersDiv" class="optionDiv">
       <h1>Conferences</h1>
       <div class="search-wrap">
@@ -745,6 +738,8 @@ $id = $_SESSION['id'];
             <th>Paper Title</th>
             <th>Conference Proceedings</th>
             <th>UGC/Scopus</th>
+            <th>Start Date</th>
+            <th>End Date</th>
             <th>URL</th>
             <th>DOI</th>
             <th>Proof</th>
@@ -765,6 +760,8 @@ $id = $_SESSION['id'];
                 <td><?php echo $rows['paper_title']; ?></td>
                 <td><?php echo $rows['conference_proceedings']; ?></td>
                 <td><?php echo $rows['ugc_scopus']; ?></td>
+                <td><?php echo !empty($rows['start_date']) ? $rows['start_date'] : "-"; ?></td>
+                <td><?php echo !empty($rows['end_date']) ? $rows['end_date'] : "-"; ?></td>
                 <td><?php echo !empty($rows['url']) ? "<a href='" . htmlspecialchars($rows['url']) . "' target='_blank'>Link</a>" : "—"; ?></td>
                 <td><?php echo $rows['doi']; ?></td>
                 <td><?php echo !empty($rows['proof_link']) ? "<a href='" . htmlspecialchars($rows['proof_link']) . "' target='_blank'>View</a>" : "—"; ?></td>
@@ -774,7 +771,7 @@ $id = $_SESSION['id'];
           <?php
             }
           } else {
-            echo "<tr class='empty-row'><td colspan='12'>No conference records found yet.</td></tr>";
+            echo "<tr class='empty-row'><td colspan='14'>No conference records found yet.</td></tr>";
           }
           ?>
         </table>
@@ -804,6 +801,8 @@ $id = $_SESSION['id'];
             <th>Scopus/SCI</th>
             <th>ISBN</th>
             <th>DOI</th>
+            <th>Start Date</th>
+            <th>End Date</th>
             <th>URL</th>
             <th>Proof</th>
             <th>Edit</th>
@@ -826,6 +825,8 @@ $id = $_SESSION['id'];
                 <td><?php echo $rows['scopus_sci']; ?></td>
                 <td><?php echo $rows['isbn']; ?></td>
                 <td><?php echo $rows['doi']; ?></td>
+                <td><?php echo !empty($rows['start_date']) ? $rows['start_date'] : "-"; ?></td>
+                <td><?php echo !empty($rows['end_date']) ? $rows['end_date'] : "-"; ?></td>
                 <td><?php echo !empty($rows['url']) ? "<a href='" . htmlspecialchars($rows['url']) . "' target='_blank'>Link</a>" : "—"; ?></td>
                 <td><?php echo !empty($rows['proof_link']) ? "<a href='" . htmlspecialchars($rows['proof_link']) . "' target='_blank'>View</a>" : "—"; ?></td>
                 <td><a href='ebp.php?id=<?php echo $rows['id']; ?>'><button class='btn'>Edit</button></a></td>
@@ -834,7 +835,7 @@ $id = $_SESSION['id'];
           <?php
             }
           } else {
-            echo "<tr class='empty-row'><td colspan='14'>No book publication records found yet.</td></tr>";
+            echo "<tr class='empty-row'><td colspan='16'>No book publication records found yet.</td></tr>";
           }
           ?>
         </table>
@@ -862,6 +863,8 @@ $id = $_SESSION['id'];
             <th>URL</th>
             <th>Academic Year</th>
             <th>Month</th>
+            <th>Start Date</th>
+            <th>End Date</th>
             <th>Proof</th>
             <th>Edit</th>
             <th>Delete</th>
@@ -881,6 +884,8 @@ $id = $_SESSION['id'];
                 <td><?php echo !empty($rows['url']) ? "<a href='" . htmlspecialchars($rows['url']) . "' target='_blank'>Link</a>" : "—"; ?></td>
                 <td><?php echo $rows['academic_year']; ?></td>
                 <td><?php echo $rows['month']; ?></td>
+                <td><?php echo !empty($rows['start_date']) ? $rows['start_date'] : "-"; ?></td>
+                <td><?php echo !empty($rows['end_date']) ? $rows['end_date'] : "-"; ?></td>
                 <td><?php echo !empty($rows['proof_link']) ? "<a href='" . htmlspecialchars($rows['proof_link']) . "' target='_blank'>View</a>" : "—"; ?></td>
                 <td><a href='ebe.php?id=<?php echo $rows['id']; ?>'><button class='btn'>Edit</button></a></td>
                 <td><a href='dwa.php?table=bookedited&id=<?php echo $rows['id']; ?>'><button class='btn'>Delete</button></a></td>
@@ -888,7 +893,7 @@ $id = $_SESSION['id'];
           <?php
             }
           } else {
-            echo "<tr class='empty-row'><td colspan='11'>No book-edited records found yet.</td></tr>";
+            echo "<tr class='empty-row'><td colspan='13'>No book-edited records found yet.</td></tr>";
           }
           ?>
         </table>
@@ -896,7 +901,6 @@ $id = $_SESSION['id'];
     </div>
 
     <!-- ============ TEXTBOOK -> textbook ============ -->
-    <!-- No faculty_id column in this table, filtered by faculty_name -->
     <div id="textbookDiv" class="optionDiv">
       <h1>Textbook</h1>
       <div class="search-wrap">
@@ -915,6 +919,8 @@ $id = $_SESSION['id'];
             <th>Main Editor</th>
             <th>Textbook Name</th>
             <th>Publisher</th>
+            <th>Start Date</th>
+            <th>End Date</th>
             <th>URL</th>
             <th>Edit</th>
             <th>Delete</th>
@@ -932,6 +938,8 @@ $id = $_SESSION['id'];
                 <td><?php echo $rows['main_editor']; ?></td>
                 <td><?php echo $rows['textbook_name']; ?></td>
                 <td><?php echo $rows['publisher_name']; ?></td>
+                <td><?php echo !empty($rows['start_date']) ? $rows['start_date'] : "-"; ?></td>
+                <td><?php echo !empty($rows['end_date']) ? $rows['end_date'] : "-"; ?></td>
                 <td><?php echo !empty($rows['url']) ? "<a href='" . htmlspecialchars($rows['url']) . "' target='_blank'>Link</a>" : "—"; ?></td>
                 <td><a href='etextbook.php?id=<?php echo $rows['id']; ?>'><button class='btn'>Edit</button></a></td>
                 <td><a href='dwa.php?table=textbook&id=<?php echo $rows['id']; ?>'><button class='btn'>Delete</button></a></td>
@@ -939,7 +947,7 @@ $id = $_SESSION['id'];
           <?php
             }
           } else {
-            echo "<tr class='empty-row'><td colspan='9'>No textbook records found yet.</td></tr>";
+            echo "<tr class='empty-row'><td colspan='11'>No textbook records found yet.</td></tr>";
           }
           ?>
         </table>
@@ -947,7 +955,6 @@ $id = $_SESSION['id'];
     </div>
 
     <!-- ============ PATENTS -> patents ============ -->
-    <!-- No faculty_id column in this table, filtered by faculty_name -->
     <div id="patentsDiv" class="optionDiv">
       <h1>Patents</h1>
       <div class="search-wrap">
@@ -969,6 +976,8 @@ $id = $_SESSION['id'];
             <th>Status</th>
             <th>Type</th>
             <th>Filing Agency</th>
+            <th>Start Date</th>
+            <th>End Date</th>
             <th>Proof</th>
             <th>Edit</th>
             <th>Delete</th>
@@ -989,6 +998,8 @@ $id = $_SESSION['id'];
                 <td><?php echo $rows['status']; ?></td>
                 <td><?php echo $rows['patent_type']; ?></td>
                 <td><?php echo $rows['filing_agency']; ?></td>
+                <td><?php echo !empty($rows['start_date']) ? $rows['start_date'] : "-"; ?></td>
+                <td><?php echo !empty($rows['end_date']) ? $rows['end_date'] : "-"; ?></td>
                 <td><?php echo !empty($rows['proof_link']) ? "<a href='" . htmlspecialchars($rows['proof_link']) . "' target='_blank'>View</a>" : "—"; ?></td>
                 <td><a href='epatents.php?id=<?php echo $rows['id']; ?>'><button class='btn'>Edit</button></a></td>
                 <td><a href='dwa.php?table=patents&id=<?php echo $rows['id']; ?>'><button class='btn'>Delete</button></a></td>
@@ -996,7 +1007,7 @@ $id = $_SESSION['id'];
           <?php
             }
           } else {
-            echo "<tr class='empty-row'><td colspan='12'>No patent records found yet.</td></tr>";
+            echo "<tr class='empty-row'><td colspan='14'>No patent records found yet.</td></tr>";
           }
           ?>
         </table>
@@ -1123,6 +1134,8 @@ $id = $_SESSION['id'];
             <th>Academic Year</th>
             <th>Month</th>
             <th>Date Attended</th>
+            <th>Start Date</th>
+            <th>End Date</th>
             <th>Organization</th>
             <th>Conference/Journal</th>
             <th>Type</th>
@@ -1141,6 +1154,8 @@ $id = $_SESSION['id'];
                 <td><?php echo $rows['academic_year']; ?></td>
                 <td><?php echo $rows['month']; ?></td>
                 <td><?php echo $rows['date_attended']; ?></td>
+                <td><?php echo !empty($rows['start_date']) ? $rows['start_date'] : "-"; ?></td>
+                <td><?php echo !empty($rows['end_date']) ? $rows['end_date'] : "-"; ?></td>
                 <td><?php echo $rows['organization']; ?></td>
                 <td><?php echo $rows['conference_journal_name']; ?></td>
                 <td><?php echo $rows['type']; ?></td>
@@ -1151,7 +1166,7 @@ $id = $_SESSION['id'];
           <?php
             }
           } else {
-            echo "<tr class='empty-row'><td colspan='10'>No outside-participation records found yet.</td></tr>";
+            echo "<tr class='empty-row'><td colspan='12'>No outside-participation records found yet.</td></tr>";
           }
           ?>
         </table>
@@ -1173,6 +1188,8 @@ $id = $_SESSION['id'];
             <th>Academic Year</th>
             <th>Month</th>
             <th>Date Attended</th>
+            <th>Start Date</th>
+            <th>End Date</th>
             <th>Organization</th>
             <th>Conference/Journal</th>
             <th>Type</th>
@@ -1191,6 +1208,8 @@ $id = $_SESSION['id'];
                 <td><?php echo $rows['academic_year']; ?></td>
                 <td><?php echo $rows['month']; ?></td>
                 <td><?php echo $rows['date_attended']; ?></td>
+                <td><?php echo !empty($rows['start_date']) ? $rows['start_date'] : "-"; ?></td>
+                <td><?php echo !empty($rows['end_date']) ? $rows['end_date'] : "-"; ?></td>
                 <td><?php echo $rows['organization']; ?></td>
                 <td><?php echo $rows['conference_journal_name']; ?></td>
                 <td><?php echo $rows['type']; ?></td>
@@ -1201,7 +1220,7 @@ $id = $_SESSION['id'];
           <?php
             }
           } else {
-            echo "<tr class='empty-row'><td colspan='10'>No reviewer-activity records found yet.</td></tr>";
+            echo "<tr class='empty-row'><td colspan='12'>No reviewer-activity records found yet.</td></tr>";
           }
           ?>
         </table>
@@ -1275,6 +1294,8 @@ $id = $_SESSION['id'];
             <th>Domain</th>
             <th>Date of Completion</th>
             <th>Pursuing Year</th>
+            <th>Start Date</th>
+            <th>End Date</th>
             <th>Proof</th>
             <th>Edit</th>
             <th>Delete</th>
@@ -1292,6 +1313,8 @@ $id = $_SESSION['id'];
                 <td><?php echo $rows['domain_name']; ?></td>
                 <td><?php echo $rows['date_of_completion']; ?></td>
                 <td><?php echo $rows['pursuing_year']; ?></td>
+                <td><?php echo !empty($rows['start_date']) ? $rows['start_date'] : "-"; ?></td>
+                <td><?php echo !empty($rows['end_date']) ? $rows['end_date'] : "-"; ?></td>
                 <td><?php echo !empty($rows['proof_link']) ? "<a href='" . htmlspecialchars($rows['proof_link']) . "' target='_blank'>View</a>" : "—"; ?></td>
                 <td><a href='ephd.php?id=<?php echo $rows['id']; ?>'><button class='btn'>Edit</button></a></td>
                 <td><a href='dwa.php?table=phd_details&id=<?php echo $rows['id']; ?>'><button class='btn'>Delete</button></a></td>
@@ -1299,7 +1322,7 @@ $id = $_SESSION['id'];
           <?php
             }
           } else {
-            echo "<tr class='empty-row'><td colspan='9'>No PhD records found yet.</td></tr>";
+            echo "<tr class='empty-row'><td colspan='11'>No PhD records found yet.</td></tr>";
           }
           ?>
         </table>
@@ -1376,6 +1399,8 @@ $id = $_SESSION['id'];
             <th>Duration</th>
             <th>Students Count</th>
             <th>Domain</th>
+            <th>Start Date</th>
+            <th>End Date</th>
             <th>Proof</th>
             <th>Edit</th>
             <th>Delete</th>
@@ -1392,6 +1417,8 @@ $id = $_SESSION['id'];
                 <td><?php echo $rows['duration']; ?></td>
                 <td><?php echo $rows['students_count']; ?></td>
                 <td><?php echo $rows['domain_name']; ?></td>
+                <td><?php echo !empty($rows['start_date']) ? $rows['start_date'] : "-"; ?></td>
+                <td><?php echo !empty($rows['end_date']) ? $rows['end_date'] : "-"; ?></td>
                 <td><?php echo !empty($rows['proof_link']) ? "<a href='" . htmlspecialchars($rows['proof_link']) . "' target='_blank'>View</a>" : "—"; ?></td>
                 <td><a href='eworkingmodels.php?id=<?php echo $rows['id']; ?>'><button class='btn'>Edit</button></a></td>
                 <td><a href='dwa.php?table=working_models&id=<?php echo $rows['id']; ?>'><button class='btn'>Delete</button></a></td>
@@ -1399,7 +1426,7 @@ $id = $_SESSION['id'];
           <?php
             }
           } else {
-            echo "<tr class='empty-row'><td colspan='8'>No working-model records found yet.</td></tr>";
+            echo "<tr class='empty-row'><td colspan='10'>No working-model records found yet.</td></tr>";
           }
           ?>
         </table>
@@ -1525,11 +1552,11 @@ $id = $_SESSION['id'];
     }
 
     function myFunctionop() {
-      filterTable("myInputop", "myTableop", 4);
+      filterTable("myInputop", "myTableop", 6);
     }
 
     function myFunctionra() {
-      filterTable("myInputra", "myTablera", 4);
+      filterTable("myInputra", "myTablera", 6);
     }
 
     function myFunctionpm() {
