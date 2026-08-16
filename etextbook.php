@@ -21,7 +21,7 @@ function fetch_row($conn, $id)
     return $r;
 }
 
-// Fetch current record first, so POST handling can fall back to existing file values
+// Fetch current record first, so POST handling can fall back to existing values
 $row = fetch_row($conn, $id);
 if (!$row) {
     die("Record not found for id: " . htmlspecialchars($id));
@@ -35,15 +35,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $main_editor = trim($_POST['main_editor'] ?? '');
     $textbook_name = trim($_POST['textbook_name'] ?? '');
     $publisher_name = trim($_POST['publisher_name'] ?? '');
-    $url = trim($_POST['url'] ?? '');
     $start_date = trim($_POST['start_date'] ?? '');
     $end_date = trim($_POST['end_date'] ?? '');
+    $faculty_id = trim($_POST['faculty_id'] ?? '');
+
+    // url is the certificate/proof link for this table — a plain text URL, not an uploaded file.
+    // Leave the field blank on submit to keep whatever link is already saved.
+    $url = trim($_POST['url'] ?? '');
+    if ($url === '') {
+        $url = $row['url'];
+    }
 
     if (empty($errorMsg)) {
-        $sql = "UPDATE `textbook` SET `academic_year` = ?, `month` = ?, `faculty_name` = ?, `main_editor` = ?, `textbook_name` = ?, `publisher_name` = ?, `url` = ?, `start_date` = ?, `end_date` = ? WHERE id = ?";
+        $sql = "UPDATE `textbook` SET `academic_year` = ?, `month` = ?, `faculty_name` = ?, `main_editor` = ?, `textbook_name` = ?, `publisher_name` = ?, `url` = ?, `start_date` = ?, `end_date` = ?, `faculty_id` = ? WHERE id = ?";
         $stmt = mysqli_prepare($conn, $sql);
         if ($stmt) {
-            mysqli_stmt_bind_param($stmt, "ssssssssss", $academic_year, $month, $faculty_name, $main_editor, $textbook_name, $publisher_name, $url, $start_date, $end_date, $id);
+            mysqli_stmt_bind_param($stmt, "sssssssssss", $academic_year, $month, $faculty_name, $main_editor, $textbook_name, $publisher_name, $url, $start_date, $end_date, $faculty_id, $id);
             if (mysqli_stmt_execute($stmt)) {
                 $successMsg = "Record updated successfully.";
                 $row = fetch_row($conn, $id); // refresh with latest saved values
@@ -207,6 +214,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         input[type=text],
+        input[type=url],
         input[type=date],
         input[type=number],
         textarea,
@@ -234,6 +242,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             resize: vertical;
         }
 
+        .field-hint {
+            font-size: 12.5px;
+            color: var(--muted);
+        }
+
         .current-file {
             font-size: 12.5px;
             color: var(--muted);
@@ -242,11 +255,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .current-file a {
             color: var(--accent);
-        }
-
-        input[type=file] {
-            color: var(--muted);
-            font-size: 13px;
         }
 
         .actions {
@@ -299,7 +307,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="msg error"><?php echo htmlspecialchars($errorMsg); ?></div>
             <?php endif; ?>
 
-            <form method="POST" enctype="multipart/form-data">
+            <form method="POST">
                 <input type="hidden" name="id" value="<?php echo htmlspecialchars($id); ?>">
 
                 <div class="field">
@@ -318,6 +326,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <div class="field">
+                    <label for="faculty_id">Faculty ID</label>
+                    <input type="text" name="faculty_id" id="faculty_id" value="<?php echo htmlspecialchars($row['faculty_id'] ?? ''); ?>">
+                </div>
+
+                <div class="field">
                     <label for="main_editor">Main Editor</label>
                     <input type="text" name="main_editor" id="main_editor" value="<?php echo htmlspecialchars($row['main_editor'] ?? ''); ?>">
                 </div>
@@ -333,11 +346,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <div class="field">
-                    <label for="url">URL</label>
-                    <input type="text" name="url" id="url" value="<?php echo htmlspecialchars($row['url'] ?? ''); ?>">
-                </div>
-
-                <div class="field">
                     <label for="start_date">Start Date</label>
                     <input type="date" name="start_date" id="start_date" value="<?php echo htmlspecialchars($row['start_date'] ?? ''); ?>">
                 </div>
@@ -347,7 +355,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <input type="date" name="end_date" id="end_date" value="<?php echo htmlspecialchars($row['end_date'] ?? ''); ?>">
                 </div>
 
-
+                <div class="field full">
+                    <label for="url">Proof / Certificate Link (paste a URL; leave empty to keep the current link)</label>
+                    <input type="url" name="url" id="url" placeholder="https://...">
+                    <?php if (!empty($row['url'])): ?>
+                        <div class="current-file">Current link: <a href="<?php echo htmlspecialchars($row['url']); ?>" target="_blank" rel="noopener"><?php echo htmlspecialchars($row['url']); ?></a></div>
+                    <?php else: ?>
+                        <div class="field-hint">No link saved yet.</div>
+                    <?php endif; ?>
+                </div>
 
                 <div class="actions">
                     <button type="submit" class="save">Save Changes</button>
