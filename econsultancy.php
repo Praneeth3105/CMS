@@ -39,21 +39,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $duration = trim($_POST['duration'] ?? '');
     $students_involved = trim($_POST['students_involved'] ?? '');
 
-    // Handle optional file re-upload for proof_link
-    $proof_link = $row['proof_link']; // keep existing by default
-    if (isset($_FILES['upload_file']) && $_FILES['upload_file']['error'] === UPLOAD_ERR_OK) {
-        $uploadDir = __DIR__ . '/images/';
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0755, true);
-        }
-        $origName = basename($_FILES['upload_file']['name']);
-        $safeName = time() . '_' . preg_replace('/[^A-Za-z0-9._-]/', '_', $origName);
-        $destPath = $uploadDir . $safeName;
-        if (move_uploaded_file($_FILES['upload_file']['tmp_name'], $destPath)) {
-            $proof_link = $safeName;
-        } else {
-            $errorMsg = "File upload failed, keeping the existing file.";
-        }
+    // proof_link is now a plain URL/link entered by the user, not an uploaded file.
+    $proof_link = trim($_POST['proof_link'] ?? '');
+    if ($proof_link === '') {
+        $proof_link = $row['proof_link'];
     }
 
     if (empty($errorMsg)) {
@@ -224,6 +213,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         input[type=text],
+        input[type=url],
         input[type=date],
         input[type=number],
         textarea,
@@ -249,6 +239,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         textarea {
             min-height: 90px;
             resize: vertical;
+        }
+
+        .field-hint {
+            font-size: 12.5px;
+            color: var(--muted);
         }
 
         .current-file {
@@ -316,7 +311,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="msg error"><?php echo htmlspecialchars($errorMsg); ?></div>
             <?php endif; ?>
 
-            <form method="POST" enctype="multipart/form-data">
+            <form method="POST">
                 <input type="hidden" name="id" value="<?php echo htmlspecialchars($id); ?>">
 
                 <div class="field">
@@ -365,10 +360,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <div class="field full">
-                    <label for="upload_file">Proof / Certificate File (leave empty to keep current file)</label>
-                    <input type="file" name="upload_file" id="upload_file">
+                    <label for="proof_link">Proof / Certificate Link (paste a URL; leave empty to keep the current link)</label>
+                    <input type="url" name="proof_link" id="proof_link" placeholder="https://...">
                     <?php if (!empty($row['proof_link'])): ?>
-                        <div class="current-file">Current file: <a href="images/<?php echo htmlspecialchars($row['proof_link']); ?>" target="_blank"><?php echo htmlspecialchars($row['proof_link']); ?></a></div>
+                        <div class="current-file">Current link: <a href="<?php echo htmlspecialchars($row['proof_link']); ?>" target="_blank" rel="noopener"><?php echo htmlspecialchars($row['proof_link']); ?></a></div>
+                    <?php else: ?>
+                        <div class="field-hint">No link saved yet.</div>
                     <?php endif; ?>
                 </div>
 
