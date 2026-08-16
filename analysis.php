@@ -239,14 +239,14 @@ session_start();
 			'textbook'                 => array('label' => 'Text Books',              'date_cols' => array('start_date', 'end_date')),
 			'patents'                  => array('label' => 'Patents',                 'date_cols' => array('start_date', 'end_date')),
 			'nptel'                    => array('label' => 'NPTEL',                   'date_cols' => array('start_date', 'end_date')),
-			'achievements'             => array('label' => 'Achievements',            'date_cols' => null),
+			'achievements'             => array('label' => 'Achievements',            'date_cols' => array('achievement_date', 'achievement_end_date')),
 			'outside_participations'   => array('label' => 'Outside Participation',   'date_cols' => array('start_date', 'end_date')),
 			'reviewer_activities'      => array('label' => 'Reviewer Activities',     'date_cols' => array('start_date', 'end_date')),
-			'professional_membership'  => array('label' => 'Professional Membership', 'date_cols' => null),
+			'professional_membership'  => array('label' => 'Professional Membership', 'date_cols' => array('start_date', "end_date")),
 			'phd_details'              => array('label' => 'PHD',                     'date_cols' => array('start_date', 'end_date')),
-			'consultancy_work'         => array('label' => 'Consultancy Work',        'date_cols' => null),
+			'consultancy_work'         => array('label' => 'Consultancy Work',        'date_cols' => array('start_date', 'end_date')),
 			'working_models'           => array('label' => 'Working Models',          'date_cols' => array('start_date', 'end_date')),
-			'funding_projects'         => array('label' => 'Funding Projects',        'date_cols' => null),
+			'funding_projects'         => array('label' => 'Funding Projects',        'date_cols' => array('start_date', 'end_date')),
 		);
 
 		function getCategoryCount($conn, $table, $faculty_id, $date_cols, $std, $end)

@@ -1,7 +1,6 @@
 <?php
 session_start();
 include_once('db_conn.php');
-
 $id = $_SESSION['id'];
 ?>
 <!DOCTYPE html>
