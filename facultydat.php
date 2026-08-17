@@ -449,7 +449,7 @@ include "db_conn.php";
 
     <div class="topbar">
         <h1 class="brand">
-            
+
             Certificate <span>Management</span> System
         </h1>
         <div class="topbar-actions">
@@ -472,11 +472,42 @@ include "db_conn.php";
 
                     <div class="profile-block">
                         <div class="profile-header">
-                            <div class="icon-circle">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="#b5502e" stroke-width="1.6">
-                                    <circle cx="12" cy="8" r="4" />
-                                    <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7" stroke-linecap="round" />
-                                </svg>
+                            <div class="icon-circle" style="position:relative;">
+                                <?php if (!empty($row['profile_pic'])): ?>
+                                    <img src="images/profile/<?php echo htmlspecialchars($row['profile_pic']); ?>"
+                                        alt="Profile photo"
+                                        style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+                                <?php else: ?>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="#b5502e" stroke-width="1.6">
+                                        <circle cx="12" cy="8" r="4" />
+                                        <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7" stroke-linecap="round" />
+                                    </svg>
+                                <?php endif; ?>
+
+                                <a href="profile_pic.php" class="n"
+                                    title="Change profile picture"
+                                    style="
+                                     position:absolute;
+                                     bottom:-2px;
+                                     right:-2px;
+                                     width:30px;
+                                     height:30px;
+                                     border-radius:50%;
+                                     background: var(--gold);
+                                     border: 2px solid #fff;
+                                     display:flex;
+                                     align-items:center;
+                                     justify-content:center;
+                                     box-shadow: 0 3px 8px rgba(26,18,11,.25);
+                                     transition: background .2s ease, transform .2s ease;
+                                   "
+                                    onmouseover="this.style.background='#b5502e';this.style.transform='scale(1.08)';"
+                                    onmouseout="this.style.background='var(--gold)';this.style.transform='scale(1)';">
+                                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--dark)" stroke-width="2">
+                                        <path d="M4 8h3l2-2h6l2 2h3v11H4z" stroke-linejoin="round" />
+                                        <circle cx="12" cy="13.5" r="3.2" />
+                                    </svg>
+                                </a>
                             </div>
                             <div class="headline">
                                 <p class="eyebrow">Faculty Profile</p>
