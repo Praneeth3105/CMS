@@ -139,6 +139,7 @@ if (!isset($_SESSION['id'])) {
             justify-content: center;
             color: var(--rust);
             font-size: 30px;
+            overflow: hidden;
         }
 
         .profile-label {
@@ -462,19 +463,21 @@ if (!isset($_SESSION['id'])) {
         <div class="main-card">
 
             <?php
-            // CHANGED: we no longer re-derive id/name/department from a fresh
-            // query here. Login already put them in the session. We only
-            // run this query to display the profile card (name + year).
-            // CHANGED: your real table is 'faculty', matched on 'id' — not
-            // a 'login' table matched on 'username' (that table/column
-            // combination doesn't exist in your schema per login2.php).
             $uid = $_SESSION['id'];
             $query = "select * from faculty where id='$uid'";
             $result = mysqli_query($conn, $query);
             while ($row = mysqli_fetch_array($result)) {
             ?>
                 <div class="profile-row">
-                    <div class="profile-icon"><i class="fa-solid fa-user"></i></div>
+                    <div class="profile-icon">
+                        <?php if (!empty($row['profile_pic'])): ?>
+                            <img src="images/profile/<?php echo htmlspecialchars($row['profile_pic']); ?>"
+                                alt="Profile photo"
+                                style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+                        <?php else: ?>
+                            <i class="fa-solid fa-user"></i>
+                        <?php endif; ?>
+                    </div>
                     <div>
                         <div class="profile-label">Faculty Profile</div>
                         <h2 style="font-family:'Playfair Display', serif; margin:0;"><?php echo htmlspecialchars($row['name']); ?></h2>
@@ -486,9 +489,6 @@ if (!isset($_SESSION['id'])) {
                     <h3>Year of Joining<br><?php echo htmlspecialchars($row['year']); ?></h3>
                 </div>
             <?php
-                // REMOVED: $_SESSION['id'] = $row['rollno'];
-                // REMOVED: $_SESSION['department'] = $row['department'];
-                // These are already set at login time now — see login.php
             }
             ?>
 
@@ -855,3 +855,6 @@ if (!isset($_SESSION['id'])) {
             }
         }
     </script>
+</body>
+
+</html>
