@@ -1,80 +1,88 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<link rel="icon" type="image/x-icon" href="icon2.png">
-	<title>CERTIFICATE MAINTANCE SYSTEM</title>
-	<link rel="stylesheet" href="style2.css">
-	<link rel="stylesheet" href="style1.css">
-	<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-	<link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet">
-	<script src="https://kit.fontawesome.com/a81368914c.js"></script>
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<style>
-.n{
-    text-decoration: none;
-}
-#btn1{
-	float: right;
- 
-}
-#btn1{
-    width: 10%;
-}
-#btn2{
-    width: 10%;
-    float: left;
-}
-h3{
-    display: inline-block;
-    margin-top: 1%;
-}
-.info{
-    margin-left: 30%;
-}
-body{
-    overflow-y: scroll;
-  
-}
-.note {
-  width: 100%;
-}
-#note1 {
- margin-left:40%;
-text-align: center;
-}
-@media only screen and (max-width: 900px) {
-   #btn1, #btn2{
-    width: 30%;
-   } 
-   .info{
-    margin-left: 20%;
-}
-
-}
-	</style>
-</head>
-<body>
-    <a href="logout.php" class="n" ><button type="button" class="btn" id="btn1" >Logout</button></a>
-    <a href="fsearch.php" class="n" ><button type="button" class="btn" id="btn2" >Back</button></a>
 <?php
-		 include "db_conn.php";
-         session_start();
-         $uname=$_SESSION['username'];
-         $wnn=$_GET['editwn'];
-         $in=$_GET['edi'];
-         echo $wnn;
-         echo $in;
-         $sql="DELETE FROM fworkshop WHERE workshopn='$wnn' and file='$in' and id='$uname'";
+session_start();
+include_once('db_conn.php');
 
+// Logged-in faculty's own id — a delete can NEVER touch another faculty's record,
+// even if someone edits the URL by hand.
+$faculty_id = $_SESSION['id'];
+if (!$faculty_id) {
+    die("Not logged in.");
+}
 
- $res=mysqli_query($conn, $sql);
-    if($res) {
-        unlink("images/".$in);
-        echo "<script>alert('Data Deleted Successfully');window.location='fsearch.php';</script>";
-        
-    }else{
-        echo "<script>alert('Data not Delete')</script>";
+// ---- Whitelist of the 19 tables this button is allowed to delete from. ----
+// Each entry maps table name -> the column that stores the uploaded file
+// (null if that table has no file column). This is the ONLY place table
+// names are trusted from — never trust $_GET['table'] directly.
+$allowedTables = array(
+    'fdp'                       => 'certificate_link',
+    'fdporg'                    => 'certificate_link',
+    'ffworkshop'                => 'certificate_link',
+    'paperpublications'         => 'proof_link',
+    'conferences'                => 'proof_link',
+    'certificates'               => 'certificate_link',
+    'bookpublish'                => 'proof_link',
+    'bookedited'                 => 'proof_link',
+    'textbook'                   => null,
+    'patents'                    => 'proof_link',
+    'nptel'                      => 'certificate_link',
+    'achievements'                => 'achievement_link',
+    'outside_participations'     => 'proof_link',
+    'reviewer_activities'        => 'proof_link',
+    'professional_membership'    => 'proof_link',
+    'phd_details'                => 'proof_link',
+    'consultancy_work'           => 'proof_link',
+    'working_models'             => 'proof_link',
+    'funding_projects'           => null,
+);
+
+$table = isset($_GET['table']) ? $_GET['table'] : '';
+$id    = isset($_GET['id']) ? $_GET['id'] : '';
+
+// ---- Validate table name against the whitelist ----
+if (!array_key_exists($table, $allowedTables)) {
+    die("Invalid table.");
+}
+if (!$id || !ctype_digit((string)$id)) {
+    die("Invalid record id.");
+}
+
+$fileColumn = $allowedTables[$table];
+
+// ---- Step 1: fetch the record first, so we can (a) confirm it belongs to
+// this faculty, and (b) know the filename to remove from images/ ----
+$selectSql = "SELECT * FROM `$table` WHERE id = ? AND faculty_id = ?";
+$stmt = mysqli_prepare($conn, $selectSql);
+mysqli_stmt_bind_param($stmt, "ss", $id, $faculty_id);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
+$row = mysqli_fetch_assoc($result);
+mysqli_stmt_close($stmt);
+
+if (!$row) {
+    // Either the id doesn't exist, or it belongs to someone else.
+    header("Location: fsearch.php?deleted=notfound");
+    exit;
+}
+
+// ---- Step 2: delete the uploaded file from images/, if any ----
+if ($fileColumn && !empty($row[$fileColumn])) {
+    $filePath = __DIR__ . '/images/' . basename($row[$fileColumn]);
+    if (file_exists($filePath)) {
+        @unlink($filePath);
     }
-         ?>
- 
+}
 
+// ---- Step 3: delete the DB row — scoped to id AND faculty_id, so a
+// tampered URL can never delete someone else's record ----
+$deleteSql = "DELETE FROM `$table` WHERE id = ? AND faculty_id = ?";
+$stmt = mysqli_prepare($conn, $deleteSql);
+mysqli_stmt_bind_param($stmt, "ss", $id, $faculty_id);
+$ok = mysqli_stmt_execute($stmt);
+mysqli_stmt_close($stmt);
+
+if ($ok) {
+    header("Location: fsearch.php?deleted=success");
+} else {
+    header("Location: fsearch.php?deleted=error");
+}
+exit;

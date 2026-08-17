@@ -530,7 +530,6 @@ if (!isset($_SESSION['id'])) {
 
         </div>
     </div>
-
     <script>
         function myFunction() {
 
@@ -574,9 +573,7 @@ if (!isset($_SESSION['id'])) {
             <p><label>Type (Workshop/Seminar/Conference)</label><input class='w3-input' type='text' name='workshop' required></p>
             <p><label>Organized By</label><input class='w3-input' type='text' name='org' required></p>
             <p><label>Start Date</label><input class='w3-input' type='text' name='start_date' placeholder='YYYY-MM-DD' required></p>
-            <p><label>Start Date (raw text, optional)</label><input class='w3-input' type='text' name='start_date_raw'></p>
             <p><label>End Date</label><input class='w3-input' type='text' name='end_date' placeholder='YYYY-MM-DD' required></p>
-            <p><label>End Date (raw text, optional)</label><input class='w3-input' type='text' name='end_date_raw'></p>
             <p><label>Duration</label><input class='w3-input' type='text' name='duration' required></p>
             <p><label>Mode</label><input class='w3-input' type='text' name='mode' required></p>
             <p><label>Certificate Link</label><input class='w3-input' type='text' name='certificate_link' required></p>
@@ -596,6 +593,8 @@ if (!isset($_SESSION['id'])) {
             <p><label>URL / DOI</label><input class='w3-input' type='text' name='url_doi' required></p>
             <p><label>Academic Year</label><input class='w3-input' type='text' name='academic_year' required></p>
             <p><label>Month</label><input class='w3-input' type='text' name='month' required></p>
+            <p><label>Start Date</label><input class='w3-input' type='text' name='start_date' placeholder='YYYY-MM-DD'></p>
+            <p><label>End Date</label><input class='w3-input' type='text' name='end_date' placeholder='YYYY-MM-DD'></p>
             <p><label>Proof Link</label><input class='w3-input' type='text' name='proof_link' required></p>
             <input type='submit' class='btn' value='submit' name='submit'>
         </form>`;
@@ -611,6 +610,8 @@ if (!isset($_SESSION['id'])) {
             <p><label>Paper Title</label><input class='w3-input' type='text' name='paper_title' required></p>
             <p><label>Conference Proceedings</label><input class='w3-input' type='text' name='conference_proceedings' required></p>
             <p><label>UGC/Scopus Type</label><input class='w3-input' type='text' name='ugc_scopus' required></p>
+            <p><label>Start Date</label><input class='w3-input' type='text' name='start_date' placeholder='YYYY-MM-DD'></p>
+            <p><label>End Date</label><input class='w3-input' type='text' name='end_date' placeholder='YYYY-MM-DD'></p>
             <p><label>URL</label><input class='w3-input' type='text' name='url' required></p>
             <p><label>DOI</label><input class='w3-input' type='text' name='doi' required></p>
             <p><label>Proof Link</label><input class='w3-input' type='text' name='proof_link' required></p>
@@ -626,9 +627,7 @@ if (!isset($_SESSION['id'])) {
             <p><label>Certificate Name</label><input class='w3-input' type='text' name='certificate' required></p>
             <p><label>Organization</label><input class='w3-input' type='text' name='org' required></p>
             <p><label>Start Date</label><input class='w3-input' type='text' name='start_date' placeholder='YYYY-MM-DD' required></p>
-            <p><label>Start Date (raw text, optional)</label><input class='w3-input' type='text' name='start_date_raw'></p>
             <p><label>End Date</label><input class='w3-input' type='text' name='end_date' placeholder='YYYY-MM-DD' required></p>
-            <p><label>End Date (raw text, optional)</label><input class='w3-input' type='text' name='end_date_raw'></p>
             <p><label>Duration</label><input class='w3-input' type='text' name='duration' required></p>
             <p><label>Mode</label><input class='w3-input' type='text' name='mode' required></p>
             <p><label>Certificate Link</label><input class='w3-input' type='text' name='certificate_link' required></p>
@@ -647,6 +646,8 @@ if (!isset($_SESSION['id'])) {
             <p><label>Title</label><input class='w3-input' type='text' name='title' required></p>
             <p><label>Publisher</label><input class='w3-input' type='text' name='publisher' required></p>
             <p><label>Scopus/SCI</label><input class='w3-input' type='text' name='scopus_sci' required></p>
+            <p><label>Start Date</label><input class='w3-input' type='text' name='start_date' placeholder='YYYY-MM-DD'></p>
+            <p><label>End Date</label><input class='w3-input' type='text' name='end_date' placeholder='YYYY-MM-DD'></p>
             <p><label>URL</label><input class='w3-input' type='text' name='url' required></p>
             <p><label>ISBN</label><input class='w3-input' type='text' name='isbn' required></p>
             <p><label>DOI</label><input class='w3-input' type='text' name='doi' required></p>
@@ -666,6 +667,8 @@ if (!isset($_SESSION['id'])) {
             <p><label>URL</label><input class='w3-input' type='text' name='url' required></p>
             <p><label>Academic Year</label><input class='w3-input' type='text' name='academic_year' required></p>
             <p><label>Month</label><input class='w3-input' type='text' name='month' required></p>
+            <p><label>Start Date</label><input class='w3-input' type='text' name='start_date' placeholder='YYYY-MM-DD'></p>
+            <p><label>End Date</label><input class='w3-input' type='text' name='end_date' placeholder='YYYY-MM-DD'></p>
             <p><label>Proof Link</label><input class='w3-input' type='text' name='proof_link' required></p>
             <input type='submit' class='btn' value='submit' name='submit'>
         </form>`;
@@ -680,6 +683,8 @@ if (!isset($_SESSION['id'])) {
             <p><label>Main Editor</label><input class='w3-input' type='text' name='main_editor' required></p>
             <p><label>Textbook Name</label><input class='w3-input' type='text' name='textbook_name' required></p>
             <p><label>Publisher Name</label><input class='w3-input' type='text' name='publisher_name' required></p>
+            <p><label>Start Date</label><input class='w3-input' type='text' name='start_date' placeholder='YYYY-MM-DD'></p>
+            <p><label>End Date</label><input class='w3-input' type='text' name='end_date' placeholder='YYYY-MM-DD'></p>
             <p><label>URL</label><input class='w3-input' type='text' name='url' required></p>
             <input type='submit' class='btn' value='submit' name='submit'>
         </form>`;
@@ -697,6 +702,8 @@ if (!isset($_SESSION['id'])) {
             <p><label>Status</label><input class='w3-input' type='text' name='status' required></p>
             <p><label>Patent Type</label><input class='w3-input' type='text' name='patent_type' required></p>
             <p><label>Filing Agency</label><input class='w3-input' type='text' name='filing_agency' required></p>
+            <p><label>Start Date</label><input class='w3-input' type='text' name='start_date' placeholder='YYYY-MM-DD'></p>
+            <p><label>End Date</label><input class='w3-input' type='text' name='end_date' placeholder='YYYY-MM-DD'></p>
             <p><label>Proof Link</label><input class='w3-input' type='text' name='proof_link' required></p>
             <input type='submit' class='btn' value='submit' name='submit'>
         </form>`;
@@ -726,7 +733,8 @@ if (!isset($_SESSION['id'])) {
             <p><label>Academic Year</label><input class='w3-input' type='text' name='academic_year' required></p>
             <p><label>Award Name</label><input class='w3-input' type='text' name='award_name' required></p>
             <p><label>Description</label><input class='w3-input' type='text' name='description' required></p>
-            <p><label>Achievement Date</label><input class='w3-input' type='text' name='achievement_date' required></p>
+            <p><label>Achievement Date</label><input class='w3-input' type='text' name='achievement_date' placeholder='YYYY-MM-DD' required></p>
+            <p><label>Achievement End Date</label><input class='w3-input' type='text' name='achievement_end_date' placeholder='YYYY-MM-DD'></p>
             <p><label>Organization</label><input class='w3-input' type='text' name='organization' required></p>
             <p><label>Achievement Link</label><input class='w3-input' type='text' name='achievement_link' required></p>
             <input type='submit' class='btn' value='submit' name='submit'>
@@ -740,6 +748,8 @@ if (!isset($_SESSION['id'])) {
             <p><label>Academic Year</label><input class='w3-input' type='text' name='academic_year' required></p>
             <p><label>Month</label><input class='w3-input' type='text' name='month' required></p>
             <p><label>Date Attended</label><input class='w3-input' type='text' name='date_attended' required></p>
+            <p><label>Start Date</label><input class='w3-input' type='text' name='start_date' placeholder='YYYY-MM-DD'></p>
+            <p><label>End Date</label><input class='w3-input' type='text' name='end_date' placeholder='YYYY-MM-DD'></p>
             <p><label>Organization</label><input class='w3-input' type='text' name='organization' required></p>
             <p><label>Conference/Journal Name</label><input class='w3-input' type='text' name='conference_journal_name' required></p>
             <p><label>Type</label><input class='w3-input' type='text' name='type' required></p>
@@ -755,6 +765,8 @@ if (!isset($_SESSION['id'])) {
             <p><label>Academic Year</label><input class='w3-input' type='text' name='academic_year' required></p>
             <p><label>Month</label><input class='w3-input' type='text' name='month' required></p>
             <p><label>Date Attended</label><input class='w3-input' type='text' name='date_attended' required></p>
+            <p><label>Start Date</label><input class='w3-input' type='text' name='start_date' placeholder='YYYY-MM-DD'></p>
+            <p><label>End Date</label><input class='w3-input' type='text' name='end_date' placeholder='YYYY-MM-DD'></p>
             <p><label>Organization</label><input class='w3-input' type='text' name='organization' required></p>
             <p><label>Conference/Journal Name</label><input class='w3-input' type='text' name='conference_journal_name' required></p>
             <p><label>Type</label><input class='w3-input' type='text' name='type' required></p>
@@ -770,8 +782,8 @@ if (!isset($_SESSION['id'])) {
             <p><label>Membership Name</label><input class='w3-input' type='text' name='membership_name' required></p>
             <p><label>Membership ID</label><input class='w3-input' type='text' name='membership_id'></p>
             <p><label>Membership Type</label><input class='w3-input' type='text' name='membership_type' required></p>
-            <p><label>Start Date</label><input class='w3-input' type='text' name='start_date' required></p>
-            <p><label>End Date</label><input class='w3-input' type='text' name='end_date'></p>
+            <p><label>Start Date</label><input class='w3-input' type='text' name='start_date' placeholder='YYYY-MM-DD' required></p>
+            <p><label>End Date</label><input class='w3-input' type='text' name='end_date' placeholder='YYYY-MM-DD'></p>
             <p><label>Proof Link</label><input class='w3-input' type='text' name='proof_link' required></p>
             <input type='submit' class='btn' value='submit' name='submit'>
         </form>`;
@@ -786,6 +798,8 @@ if (!isset($_SESSION['id'])) {
             <p><label>Domain Name</label><input class='w3-input' type='text' name='domain_name' required></p>
             <p><label>Date of Completion</label><input class='w3-input' type='text' name='date_of_completion'></p>
             <p><label>Pursuing Year</label><input class='w3-input' type='text' name='pursuing_year'></p>
+            <p><label>Start Date</label><input class='w3-input' type='text' name='start_date' placeholder='YYYY-MM-DD'></p>
+            <p><label>End Date</label><input class='w3-input' type='text' name='end_date' placeholder='YYYY-MM-DD'></p>
             <p><label>Proof Link</label><input class='w3-input' type='text' name='proof_link' required></p>
             <input type='submit' class='btn' value='submit' name='submit'>
         </form>`;
@@ -799,8 +813,8 @@ if (!isset($_SESSION['id'])) {
             <p><label>Description</label><input class='w3-input' type='text' name='description' required></p>
             <p><label>Organization</label><input class='w3-input' type='text' name='organization' required></p>
             <p><label>Amount</label><input class='w3-input' type='text' name='amount' required></p>
-            <p><label>Start Date</label><input class='w3-input' type='text' name='start_date' required></p>
-            <p><label>End Date</label><input class='w3-input' type='text' name='end_date' required></p>
+            <p><label>Start Date</label><input class='w3-input' type='text' name='start_date' placeholder='YYYY-MM-DD' required></p>
+            <p><label>End Date</label><input class='w3-input' type='text' name='end_date' placeholder='YYYY-MM-DD' required></p>
             <p><label>Duration</label><input class='w3-input' type='text' name='duration' required></p>
             <p><label>Students Involved</label><input class='w3-input' type='text' name='students_involved'></p>
             <p><label>Proof Link</label><input class='w3-input' type='text' name='proof_link' required></p>
@@ -817,6 +831,8 @@ if (!isset($_SESSION['id'])) {
             <p><label>Duration</label><input class='w3-input' type='text' name='duration' required></p>
             <p><label>Students Count</label><input class='w3-input' type='text' name='students_count' required></p>
             <p><label>Domain Name</label><input class='w3-input' type='text' name='domain_name' required></p>
+            <p><label>Start Date</label><input class='w3-input' type='text' name='start_date' placeholder='YYYY-MM-DD'></p>
+            <p><label>End Date</label><input class='w3-input' type='text' name='end_date' placeholder='YYYY-MM-DD'></p>
             <p><label>Proof Link</label><input class='w3-input' type='text' name='proof_link' required></p>
             <input type='submit' class='btn' value='submit' name='submit'>
         </form>`;
@@ -830,8 +846,8 @@ if (!isset($_SESSION['id'])) {
             <p><label>Title</label><input class='w3-input' type='text' name='title' required></p>
             <p><label>Agency Name</label><input class='w3-input' type='text' name='agency_name' required></p>
             <p><label>Amount</label><input class='w3-input' type='text' name='amount' required></p>
-            <p><label>Start Date</label><input class='w3-input' type='text' name='start_date' required></p>
-            <p><label>End Date</label><input class='w3-input' type='text' name='end_date' required></p>
+            <p><label>Start Date</label><input class='w3-input' type='text' name='start_date' placeholder='YYYY-MM-DD' required></p>
+            <p><label>End Date</label><input class='w3-input' type='text' name='end_date' placeholder='YYYY-MM-DD' required></p>
             <p><label>Duration</label><input class='w3-input' type='text' name='duration' required></p>
             <p><label>Funding Type</label><input class='w3-input' type='text' name='funding_type' required></p>
             <input type='submit' class='btn' value='submit' name='submit'>
@@ -839,6 +855,3 @@ if (!isset($_SESSION['id'])) {
             }
         }
     </script>
-</body>
-
-</html> 
