@@ -14,7 +14,6 @@ include_once('db_conn.php');
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap');
-
     :root {
       --bg-cream: #f4efe4;
       --bg-dark: #17120e;
