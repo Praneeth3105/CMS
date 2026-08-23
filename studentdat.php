@@ -213,14 +213,13 @@ session_start();
       text-overflow: ellipsis;
     }
 
-    /* ---------- Divider ---------- */
     .divider {
       border: none;
       border-top: 1px dashed var(--border);
       margin: 0 0 32px;
     }
 
-    /* ---------- Section title ---------- */
+  
     .section-title {
       text-align: center;
       font-family: 'Playfair Display', serif;
@@ -241,7 +240,6 @@ session_start();
       margin: 0 0 26px;
     }
 
-    /* ---------- Action cards ---------- */
     .action-cards {
       display: flex;
       gap: 18px;
@@ -281,7 +279,6 @@ session_start();
       color: var(--dark);
     }
 
-    /* ---------- Add section ---------- */
     .add-section {
       text-align: center;
     }
