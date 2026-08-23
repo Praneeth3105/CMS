@@ -2,17 +2,12 @@
 session_start();
 include_once('db_conn.php');
 
-// Logged-in faculty's own id — a delete can NEVER touch another faculty's record,
-// even if someone edits the URL by hand.
+
 $faculty_id = $_SESSION['id'];
 if (!$faculty_id) {
     die("Not logged in.");
 }
 
-// ---- Whitelist of the 19 tables this button is allowed to delete from. ----
-// Each entry maps table name -> the column that stores the uploaded file
-// (null if that table has no file column). This is the ONLY place table
-// names are trusted from — never trust $_GET['table'] directly.
 $allowedTables = array(
     'fdp'                       => 'certificate_link',
     'fdporg'                    => 'certificate_link',
