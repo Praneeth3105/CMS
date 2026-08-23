@@ -21,13 +21,11 @@ function fetch_row($conn, $id)
     return $r;
 }
 
-// Fetch current record first, so POST handling can fall back to existing file values
 $row = fetch_row($conn, $id);
 if (!$row) {
     die("Record not found for id: " . htmlspecialchars($id));
 }
 
-// Handle update submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $faculty_name = trim($_POST['faculty_name'] ?? '');
     $membership_name = trim($_POST['membership_name'] ?? '');
