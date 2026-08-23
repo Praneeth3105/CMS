@@ -389,9 +389,6 @@
                 }
                 echo '</tr>';
 
-                // 0 Faculty ID | 1 Academic Year | 2 Month | 3 Faculty Name
-                // 4 Main Editor | 5 Textbook Name | 6 Publisher | 7 URL
-
                 $facultyId      = mysqli_real_escape_string($conn, isset($data[0]) ? trim($data[0]) : "");
                 $academicYear   = mysqli_real_escape_string($conn, isset($data[1]) ? trim($data[1]) : "");
                 $month          = mysqli_real_escape_string($conn, isset($data[2]) ? trim($data[2]) : "");
