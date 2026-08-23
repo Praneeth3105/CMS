@@ -207,7 +207,6 @@
       font-weight: 700;
     }
 
-    /* ===== Quick actions ===== */
     .actions-section {
       padding: 60px 6% 70px;
     }
