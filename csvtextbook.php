@@ -342,7 +342,6 @@
     <?php
     include "db_conn.php";
 
-
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
 
         $file = $_FILES['csvFile']['tmp_name'];
