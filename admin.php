@@ -385,7 +385,6 @@
   if ($res) {
     $rowcount = mysqli_num_rows($res);
   }
-
   include "db_conn.php";
   $qr = "SELECT * from sworkshop where year='1st year' and branch='CSE'";
   $ress = mysqli_query($conn, $qr);
@@ -422,7 +421,7 @@
   }
   ?>
 
-  <!-- ===== Quick actions ===== -->
+
   <div class="actions-section">
     <div class="section-title">Quick <span>Actions</span></div>
     <div class="actions-grid">
