@@ -269,7 +269,6 @@
 
 <body>
 
-  <!-- HERO with circular badge (replaces gif slideshow) -->
   <section class="cms-hero">
     <div class="badge-circle">
       <span class="material-icons">workspace_premium</span>
