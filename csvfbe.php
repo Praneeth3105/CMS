@@ -181,7 +181,7 @@
             color: var(--dark);
         }
 
-        /* ================= TABLE SECTION ================= */
+    
 
         .preview-wrap {
             width: 100%;
