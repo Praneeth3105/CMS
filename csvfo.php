@@ -303,7 +303,7 @@
     </div>
     <?php
     include "db_conn.php";
-    // Check if a file is uploaded
+
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
         $file = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
