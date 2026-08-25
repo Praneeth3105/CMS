@@ -39,7 +39,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $start_date = trim($_POST['start_date'] ?? '');
     $end_date = trim($_POST['end_date'] ?? '');
 
-    // proof_link is now a plain URL/link entered by the user, not an uploaded file.
     $proof_link = trim($_POST['proof_link'] ?? '');
     if ($proof_link === '') {
         $proof_link = $row['proof_link'];
