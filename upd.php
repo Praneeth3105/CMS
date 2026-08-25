@@ -60,8 +60,6 @@ $query2="UPDATE academic SET semto='$file1' WHERE rollno='$uname'";
 	{
 		 echo "<script>alert('Data not Uploaded 3');window.location='accer.php';</script>";
 	}
-
-
 }
 elseif($i=='semtt'){
 
