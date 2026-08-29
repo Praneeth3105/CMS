@@ -48,7 +48,6 @@
       text-decoration: none;
     }
 
-    /* ---------- Top bar ---------- */
     .topbar {
       display: flex;
       justify-content: space-between;
