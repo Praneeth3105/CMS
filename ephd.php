@@ -30,6 +30,7 @@ if (!$row) {
 // Handle update submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $faculty_name = trim($_POST['faculty_name'] ?? '');
+    $academic_year = trim($_POST['academic_year'] ?? '');
     $university_name = trim($_POST['university_name'] ?? '');
     $status = trim($_POST['status'] ?? '');
     $domain_name = trim($_POST['domain_name'] ?? '');
@@ -45,10 +46,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if (empty($errorMsg)) {
-        $sql = "UPDATE `phd_details` SET `faculty_name` = ?, `university_name` = ?, `status` = ?, `domain_name` = ?, `date_of_completion` = ?, `pursuing_year` = ?, `start_date` = ?, `end_date` = ?, `proof_link` = ? WHERE id = ?";
+        $sql = "UPDATE `phd_details` SET `faculty_name` = ?, `academic_year` = ?, `university_name` = ?, `status` = ?, `domain_name` = ?, `date_of_completion` = ?, `pursuing_year` = ?, `start_date` = ?, `end_date` = ?, `proof_link` = ? WHERE id = ?";
         $stmt = mysqli_prepare($conn, $sql);
         if ($stmt) {
-            mysqli_stmt_bind_param($stmt, "ssssssssss", $faculty_name, $university_name, $status, $domain_name, $date_of_completion, $pursuing_year, $start_date, $end_date, $proof_link, $id);
+            mysqli_stmt_bind_param($stmt, "sssssssssss", $faculty_name, $academic_year, $university_name, $status, $domain_name, $date_of_completion, $pursuing_year, $start_date, $end_date, $proof_link, $id);
             if (mysqli_stmt_execute($stmt)) {
                 $successMsg = "Record updated successfully.";
                 $row = fetch_row($conn, $id); // refresh with latest saved values
@@ -316,6 +317,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="field">
                     <label for="faculty_name">Faculty Name</label>
                     <input type="text" name="faculty_name" id="faculty_name" value="<?php echo htmlspecialchars($row['faculty_name'] ?? ''); ?>">
+                </div>
+
+                <div class="field">
+                    <label for="academic_year">Academic Year</label>
+                    <input type="text" name="academic_year" id="academic_year" placeholder="e.g. 2024-2025" value="<?php echo htmlspecialchars($row['academic_year'] ?? ''); ?>">
                 </div>
 
                 <div class="field">

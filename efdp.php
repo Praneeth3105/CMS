@@ -32,6 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name'] ?? '');
     $department = trim($_POST['department'] ?? '');
     $fdpname = trim($_POST['fdpname'] ?? '');
+    $academic_year = trim($_POST['academic_year'] ?? '');
     $org = trim($_POST['org'] ?? '');
     $mode = trim($_POST['mode'] ?? '');
     $duration = trim($_POST['duration'] ?? '');
@@ -45,10 +46,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $certificate_link = $row['certificate_link'];
     }
 
-    $sql = "UPDATE `fdp` SET `name` = ?, `department` = ?, `fdpname` = ?, `org` = ?, `mode` = ?, `duration` = ?, `startdate` = ?, `enddate` = ?, `certificate_link` = ? WHERE id = ?";
+    $sql = "UPDATE `fdp` SET `name` = ?, `department` = ?, `fdpname` = ?, `academic_year` = ?, `org` = ?, `mode` = ?, `duration` = ?, `startdate` = ?, `enddate` = ?, `certificate_link` = ? WHERE id = ?";
     $stmt = mysqli_prepare($conn, $sql);
     if ($stmt) {
-        mysqli_stmt_bind_param($stmt, "ssssssssss", $name, $department, $fdpname, $org, $mode, $duration, $startdate, $enddate, $certificate_link, $id);
+        mysqli_stmt_bind_param($stmt, "sssssssssss", $name, $department, $fdpname, $academic_year, $org, $mode, $duration, $startdate, $enddate, $certificate_link, $id);
         if (mysqli_stmt_execute($stmt)) {
             $successMsg = "Record updated successfully.";
             $row = fetch_row($conn, $id); // refresh with latest saved values
@@ -320,6 +321,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="field">
                     <label for="fdpname">FDP Name</label>
                     <input type="text" name="fdpname" id="fdpname" value="<?php echo htmlspecialchars($row['fdpname'] ?? ''); ?>">
+                </div>
+
+                <div class="field">
+                    <label for="academic_year">Academic Year</label>
+                    <input type="text" name="academic_year" id="academic_year" placeholder="e.g. 2024-2025" value="<?php echo htmlspecialchars($row['academic_year'] ?? ''); ?>">
                 </div>
 
                 <div class="field">
