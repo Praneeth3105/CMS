@@ -185,7 +185,7 @@
 
         .preview-wrap {
             width: 100%;
-            max-width: 1200px;
+            max-width: 1300px;
             margin: 0 auto 60px;
             padding: 0 32px;
         }
@@ -209,7 +209,7 @@
 
         table {
             width: 100%;
-            min-width: 1350px;
+            min-width: 1500px;
             table-layout: fixed;
             border-collapse: collapse;
             background: var(--cream-card);
@@ -217,61 +217,83 @@
             overflow: hidden;
         }
 
-        /* Per-column widths tuned for the 7 professional-membership CSV fields */
+        /* Per-column widths tuned for the 9 professional-membership CSV fields */
+        col.col-facultyid {
+            width: 110px;
+        }
+
         col.col-faculty {
-            width: 170px;
+            width: 150px;
+        }
+
+        col.col-academicyear {
+            width: 120px;
         }
 
         col.col-membershipname {
-            width: 220px;
+            width: 190px;
         }
 
         col.col-membershipid {
-            width: 160px;
+            width: 140px;
         }
 
         col.col-membershiptype {
-            width: 170px;
+            width: 150px;
         }
 
         col.col-startdate {
-            width: 120px;
+            width: 110px;
         }
 
         col.col-enddate {
-            width: 120px;
+            width: 110px;
         }
 
         col.col-link {
-            width: 250px;
+            width: 210px;
         }
 
         th {
             background: var(--dark);
             color: var(--gold-pale);
             text-transform: uppercase;
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             letter-spacing: 0.5px;
-            padding: 14px 16px;
+            padding: 12px 14px;
             text-align: left;
             border: none;
             white-space: normal;
-            line-height: 1.3;
+            line-height: 1.25;
+            vertical-align: middle;
         }
 
         td {
-            padding: 13px 16px;
+            padding: 10px 14px;
             border-bottom: 1px solid #ece3d1;
-            font-size: 0.88rem;
+            font-size: 0.86rem;
+            line-height: 1.35;
             color: #4a4030;
-            vertical-align: top;
+            vertical-align: middle;
             white-space: normal;
             word-break: normal;
             overflow-wrap: break-word;
+            max-height: 0;
+            /* forces cell to hug its content instead of stretching */
+        }
+
+        td.bad-date {
+            background: #fde9e2 !important;
+            color: var(--rust);
+            font-weight: 600;
         }
 
         tr:nth-child(even) td {
             background: #faf6ec;
+        }
+
+        tr:nth-child(even) td.bad-date {
+            background: #fde2d8 !important;
         }
 
         tr:hover td {
@@ -304,6 +326,24 @@
             width: fit-content;
             margin: 20px auto;
             text-align: center;
+        }
+
+        .status-warning {
+            color: #8a6d1a;
+            background: #fdf6e0;
+            border: 1px solid #ecd888;
+            padding: 14px 20px;
+            border-radius: 10px;
+            max-width: 900px;
+            margin: 20px auto;
+            font-size: 0.88rem;
+            line-height: 1.5;
+            text-align: left;
+        }
+
+        .status-warning ul {
+            margin: 8px 0 0;
+            padding-left: 20px;
         }
 
         @media (max-width: 600px) {
@@ -425,6 +465,11 @@
 
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
         $file = $_FILES['csvFile']['tmp_name'];
+
+        // Handle files that use old Mac (\r only) or Windows (\r\n) line endings
+        // so fgetcsv doesn't leave stray blank/tall rows.
+        ini_set('auto_detect_line_endings', '1');
+
         $handle = fopen($file, "r");
         fgetcsv($handle, 1000, ",");
 
@@ -435,6 +480,7 @@
         echo '<colgroup>
             <col class="col-facultyid">
             <col class="col-faculty">
+            <col class="col-academicyear">
             <col class="col-membershipname">
             <col class="col-membershipid">
             <col class="col-membershiptype">
@@ -498,20 +544,29 @@
         while (($data = fgetcsv($handle, 1000, ",")) !== false) {
             $rowNum++;
 
-            $rowIsEmpty = count(array_filter($data, fn($v) => trim($v) !== '')) === 0;
+            // Clean each field: trim whitespace and collapse any stray line breaks
+            // that sneak in from multi-line CSV cells, which is what was causing
+            // the tall/empty-looking rows in the preview table.
+            $data = array_map(function ($v) {
+                $v = trim((string) $v);
+                $v = preg_replace('/\s+/', ' ', $v);
+                return $v;
+            }, $data);
+
+            $rowIsEmpty = count(array_filter($data, fn($v) => $v !== '')) === 0;
             if ($rowIsEmpty) {
                 continue;
             }
 
-            $facultyId      = isset($data[0]) ? trim($data[0]) : "";
-            $facultyName    = isset($data[1]) ? trim($data[1]) : "";
-            $academicYear   = isset($data[2]) ? trim($data[2]) : "";
-            $membershipName = isset($data[3]) ? trim($data[3]) : "";
-            $membershipId   = isset($data[4]) ? trim($data[4]) : "";
-            $membershipType = isset($data[5]) ? trim($data[5]) : "";
-            $startDateRaw   = isset($data[6]) ? trim($data[6]) : "";
-            $endDateRaw     = isset($data[7]) ? trim($data[7]) : "";
-            $proofLink      = isset($data[8]) ? trim($data[8]) : "";
+            $facultyId      = isset($data[0]) ? $data[0] : "";
+            $facultyName    = isset($data[1]) ? $data[1] : "";
+            $academicYear   = isset($data[2]) ? $data[2] : "";
+            $membershipName = isset($data[3]) ? $data[3] : "";
+            $membershipId   = isset($data[4]) ? $data[4] : "";
+            $membershipType = isset($data[5]) ? $data[5] : "";
+            $startDateRaw   = isset($data[6]) ? $data[6] : "";
+            $endDateRaw     = isset($data[7]) ? $data[7] : "";
+            $proofLink      = isset($data[8]) ? $data[8] : "";
 
             $startDate = parseFlexibleDate($startDateRaw);
             $endDate   = parseFlexibleDate($endDateRaw);
@@ -531,7 +586,7 @@
             echo '<tr>';
             foreach ($data as $colIndex => $value) {
                 $cellClass = '';
-                if ($rowHasBadDate && ($colIndex === 5 || $colIndex === 6)) {
+                if ($rowHasBadDate && ($colIndex === 6 || $colIndex === 7)) {
                     $cellClass = ' class="bad-date"';
                 }
                 echo '<td' . $cellClass . '>' . htmlspecialchars($value) . '</td>';
