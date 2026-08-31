@@ -433,8 +433,8 @@
             // Prepare the insert once, outside the loop
             $stmt = $conn->prepare(
                 "INSERT INTO fdp
-                (name, department, fdpname, org, mode, duration, startdate, enddate, startdate_raw, enddate_raw, certificate_link, faculty_id)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    (name, department, fdpname, academic_year, org, mode, duration, startdate, enddate, startdate_raw, enddate_raw, certificate_link, faculty_id)
+ VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
             );
 
             if (!$stmt) {
@@ -445,10 +445,11 @@
             }
 
             $stmt->bind_param(
-                "ssssssssssss",
+                "sssssssssssss",
                 $name,
                 $department,
                 $fdpname,
+                $academic_year,
                 $org,
                 $mode,
                 $duration,
@@ -472,12 +473,13 @@
                 $name        = isset($data[1]) ? trim($data[1]) : "";
                 $department  = isset($data[2]) ? trim($data[2]) : "";
                 $fdpname     = isset($data[3]) ? trim($data[3]) : "";
-                $org         = isset($data[4]) ? trim($data[4]) : "";
-                $mode        = isset($data[5]) ? trim($data[5]) : "";
-                $duration    = isset($data[6]) ? trim($data[6]) : "";
-                $startRaw    = isset($data[7]) ? trim($data[7]) : "";
-                $endRaw      = isset($data[8]) ? trim($data[8]) : "";
-                $certificatelink = isset($data[9]) ? trim($data[9]) : "";
+                $academic_year = isset($data[4]) ? trim($data[4]) : "";
+                $org         = isset($data[5]) ? trim($data[5]) : "";
+                $mode        = isset($data[6]) ? trim($data[6]) : "";
+                $duration    = isset($data[7]) ? trim($data[7]) : "";
+                $startRaw    = isset($data[8]) ? trim($data[8]) : "";
+                $endRaw      = isset($data[9]) ? trim($data[9]) : "";
+                $certificatelink = isset($data[10]) ? trim($data[10]) : "";
 
                 $startdate = parseFlexibleDate($startRaw);
                 $enddate   = parseFlexibleDate($endRaw);
