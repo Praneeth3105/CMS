@@ -447,6 +447,7 @@
         $headerLabels = [
             'Faculty ID',
             'Faculty Name',
+            'Academic Year',
             'Membership Name',
             'Membership ID',
             'Membership Type',
@@ -461,10 +462,10 @@
 
         $stmt = $conn->prepare(
             "INSERT INTO professional_membership
-                (faculty_id, faculty_name, membership_name, membership_id,
-                 membership_type, start_date, end_date, start_date_raw, end_date_raw,
-                 proof_link)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        (faculty_id, faculty_name, academic_year, membership_name, membership_id,
+         membership_type, start_date, end_date, start_date_raw, end_date_raw,
+         proof_link)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         );
 
         if (!$stmt) {
@@ -475,9 +476,10 @@
         }
 
         $stmt->bind_param(
-            "ssssssssss",
+            "sssssssssss",
             $facultyId,
             $facultyName,
+            $academicYear,
             $membershipName,
             $membershipId,
             $membershipType,
@@ -503,13 +505,13 @@
 
             $facultyId      = isset($data[0]) ? trim($data[0]) : "";
             $facultyName    = isset($data[1]) ? trim($data[1]) : "";
-            $membershipName = isset($data[2]) ? trim($data[2]) : "";
-            $membershipId   = isset($data[3]) ? trim($data[3]) : "";
-            $membershipType = isset($data[4]) ? trim($data[4]) : "";
-
-            $startDateRaw = isset($data[5]) ? trim($data[5]) : "";
-            $endDateRaw   = isset($data[6]) ? trim($data[6]) : "";
-            $proofLink    = isset($data[7]) ? trim($data[7]) : "";
+            $academicYear   = isset($data[2]) ? trim($data[2]) : "";
+            $membershipName = isset($data[3]) ? trim($data[3]) : "";
+            $membershipId   = isset($data[4]) ? trim($data[4]) : "";
+            $membershipType = isset($data[5]) ? trim($data[5]) : "";
+            $startDateRaw   = isset($data[6]) ? trim($data[6]) : "";
+            $endDateRaw     = isset($data[7]) ? trim($data[7]) : "";
+            $proofLink      = isset($data[8]) ? trim($data[8]) : "";
 
             $startDate = parseFlexibleDate($startDateRaw);
             $endDate   = parseFlexibleDate($endDateRaw);
