@@ -457,6 +457,7 @@ $id = $_SESSION['id'];
         <table id='myTable2'>
           <tr class='header'>
             <th>Name</th>
+            <th>Academic Year</th>
             <th>FDP Name</th>
             <th>Organisation</th>
             <th>Mode</th>
@@ -476,6 +477,7 @@ $id = $_SESSION['id'];
           ?>
               <tr>
                 <td><?php echo $rows['name']; ?></td>
+                <td><?php echo $rows['academic_year']; ?></td>
                 <td><?php echo $rows['fdpname']; ?></td>
                 <td><?php echo $rows['org']; ?></td>
                 <td><?php echo $rows['mode']; ?></td>
@@ -490,7 +492,7 @@ $id = $_SESSION['id'];
           <?php
             }
           } else {
-            echo "<tr class='empty-row'><td colspan='11'>No FDP records found yet.</td></tr>";
+            echo "<tr class='empty-row'><td colspan='12'>No FDP records found yet.</td></tr>";
           }
           ?>
         </table>
@@ -1239,6 +1241,7 @@ $id = $_SESSION['id'];
         <table id='myTablepm'>
           <tr class='header'>
             <th>Name</th>
+            <th>Academic Year</th>
             <th>Membership Name</th>
             <th>Membership ID</th>
             <th>Type</th>
@@ -1256,6 +1259,7 @@ $id = $_SESSION['id'];
           ?>
               <tr>
                 <td><?php echo $rows['faculty_name']; ?></td>
+                <td><?php echo $rows['academic_year']; ?></td>
                 <td><?php echo $rows['membership_name']; ?></td>
                 <td><?php echo $rows['membership_id']; ?></td>
                 <td><?php echo $rows['membership_type']; ?></td>
@@ -1268,7 +1272,7 @@ $id = $_SESSION['id'];
           <?php
             }
           } else {
-            echo "<tr class='empty-row'><td colspan='9'>No professional-membership records found yet.</td></tr>";
+            echo "<tr class='empty-row'><td colspan='10'>No professional-membership records found yet.</td></tr>";
           }
           ?>
         </table>
@@ -1288,6 +1292,7 @@ $id = $_SESSION['id'];
         <table id='myTablephd'>
           <tr class='header'>
             <th>Name</th>
+            <th>Academic Year</th>
             <th>University</th>
             <th>Status</th>
             <th>Domain</th>
@@ -1307,6 +1312,7 @@ $id = $_SESSION['id'];
           ?>
               <tr>
                 <td><?php echo $rows['faculty_name']; ?></td>
+                <td><?php echo $rows['academic_year']; ?></td>
                 <td><?php echo $rows['university_name']; ?></td>
                 <td><?php echo $rows['status']; ?></td>
                 <td><?php echo $rows['domain_name']; ?></td>
@@ -1321,7 +1327,7 @@ $id = $_SESSION['id'];
           <?php
             }
           } else {
-            echo "<tr class='empty-row'><td colspan='11'>No PhD records found yet.</td></tr>";
+            echo "<tr class='empty-row'><td colspan='12'>No PhD records found yet.</td></tr>";
           }
           ?>
         </table>
@@ -1503,7 +1509,7 @@ $id = $_SESSION['id'];
   <script src="mainl.js"></script>
   <script>
     function myFunction2() {
-      filterTable("myInput2", "myTable2", 1);
+      filterTable("myInput2", "myTable2", 2);
     }
 
     function myFunctionfo() {
@@ -1559,11 +1565,11 @@ $id = $_SESSION['id'];
     }
 
     function myFunctionpm() {
-      filterTable("myInputpm", "myTablepm", 1);
+      filterTable("myInputpm", "myTablepm", 2);
     }
 
     function myFunctionphd() {
-      filterTable("myInputphd", "myTablephd", 1);
+      filterTable("myInputphd", "myTablephd", 2);
     }
 
     function myFunctioncw() {
