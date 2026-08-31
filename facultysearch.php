@@ -2,26 +2,6 @@
 include_once('db_conn.php');
 // session_start();
 
-/*
- * ============================================================
- *  CONFIG — one entry per "type" in the dropdown.
- *  This is the ONLY place you edit if a table/column changes,
- *  or if you want to add a 20th category later.
- *
- *  key      -> value shown in <select>, also used to build the
- *              div id ($key . "Div") and table id ($key . "Table")
- *  label    -> heading shown to the user
- *  table    -> real MySQL table name
- *  columns  -> [ db_column => "Header shown in table" ]
- *              (id and faculty_id are deliberately left out —
- *               they're internal, not useful to display)
- *  search   -> which db_column the search box filters on
- *  link     -> OPTIONAL. db_column that holds a URL
- *              (certificate_link / proof_link / achievement_link / url ...)
- *              If set, that column is rendered as a "View" button
- *              instead of a plain text cell.
- * ============================================================
- */
 $config = [
   'fdp' => [
     'label'   => 'FDP Attended',
