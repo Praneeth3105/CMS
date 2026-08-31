@@ -185,7 +185,7 @@
 
         .preview-wrap {
             width: 100%;
-            max-width: 1200px;
+            max-width: 1300px;
             margin: 0 auto 60px;
             padding: 0 32px;
         }
@@ -209,7 +209,7 @@
 
         table {
             width: 100%;
-            min-width: 1350px;
+            min-width: 1450px;
             table-layout: fixed;
             border-collapse: collapse;
             background: var(--cream-card);
@@ -217,57 +217,69 @@
             overflow: hidden;
         }
 
-        /* Per-column widths tuned for the 7 PhD-details CSV fields */
+        /* Per-column widths tuned for the 9 PhD-details CSV fields */
+        col.col-facultyid {
+            width: 110px;
+        }
+
         col.col-faculty {
-            width: 170px;
+            width: 160px;
         }
 
-        col.col-university {
-            width: 220px;
-        }
-
-        col.col-status {
-            width: 140px;
-        }
-
-        col.col-domain {
-            width: 190px;
-        }
-
-        col.col-completiondate {
-            width: 150px;
-        }
-
-        col.col-pursuingyear {
+        col.col-academicyear {
             width: 130px;
         }
 
+        col.col-university {
+            width: 190px;
+        }
+
+        col.col-status {
+            width: 130px;
+        }
+
+        col.col-domain {
+            width: 170px;
+        }
+
+        col.col-completiondate {
+            width: 140px;
+        }
+
+        col.col-pursuingyear {
+            width: 120px;
+        }
+
         col.col-link {
-            width: 250px;
+            width: 220px;
         }
 
         th {
             background: var(--dark);
             color: var(--gold-pale);
             text-transform: uppercase;
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             letter-spacing: 0.5px;
-            padding: 14px 16px;
+            padding: 12px 14px;
             text-align: left;
             border: none;
             white-space: normal;
-            line-height: 1.3;
+            line-height: 1.25;
+            vertical-align: middle;
         }
 
         td {
-            padding: 13px 16px;
+            padding: 10px 14px;
             border-bottom: 1px solid #ece3d1;
-            font-size: 0.88rem;
+            font-size: 0.86rem;
+            line-height: 1.35;
             color: #4a4030;
-            vertical-align: top;
+            vertical-align: middle;
             white-space: normal;
             word-break: normal;
             overflow-wrap: break-word;
+            max-height: 0;
+            /* forces cell to hug its content instead of stretching */
         }
 
         tr:nth-child(even) td {
@@ -340,6 +352,11 @@
 
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
         $file = $_FILES['csvFile']['tmp_name'];
+
+        // Handle files that use old Mac (\r only) or Windows (\r\n) line endings
+        // so fgetcsv doesn't read the whole file as one line or leave stray blank rows.
+        ini_set('auto_detect_line_endings', '1');
+
         $handle = fopen($file, "r");
         fgetcsv($handle, 1000, ",");
 
@@ -350,6 +367,7 @@
         echo '<colgroup>
             <col class="col-facultyid">
             <col class="col-faculty">
+            <col class="col-academicyear">
             <col class="col-university">
             <col class="col-status">
             <col class="col-domain">
@@ -362,6 +380,7 @@
         $headerLabels = [
             'Faculty ID',
             'Faculty Name',
+            'Academic Year',
             'University Name',
             'Pursuing/Completed',
             'Domain Name',
@@ -379,7 +398,16 @@
 
         while (($data = fgetcsv($handle, 1000, ",")) !== false) {
 
-            $rowIsEmpty = count(array_filter($data, fn($v) => trim($v) !== '')) === 0;
+            // Clean each field: trim whitespace and collapse any stray line breaks
+            // that sneak in from multi-line CSV cells, which is what was causing
+            // the tall/empty-looking rows.
+            $data = array_map(function ($v) {
+                $v = trim((string) $v);
+                $v = preg_replace('/\s+/', ' ', $v);
+                return $v;
+            }, $data);
+
+            $rowIsEmpty = count(array_filter($data, fn($v) => $v !== '')) === 0;
             if ($rowIsEmpty) {
                 continue;
             }
@@ -390,27 +418,39 @@
             }
             echo '</tr>';
 
-            $facultyId        = mysqli_real_escape_string($conn, isset($data[0]) ? trim($data[0]) : "");
-            $facultyName      = mysqli_real_escape_string($conn, isset($data[1]) ? trim($data[1]) : "");
-            $universityName   = mysqli_real_escape_string($conn, isset($data[2]) ? trim($data[2]) : "");
-            $status           = mysqli_real_escape_string($conn, isset($data[3]) ? trim($data[3]) : "");
-            $domainName       = mysqli_real_escape_string($conn, isset($data[4]) ? trim($data[4]) : "");
-            // Dates accepted as-is, in whatever format the CSV has — no
-            // strtotime()/parsing, so nothing here can fail on a weird format.
-            $dateOfCompletion = mysqli_real_escape_string($conn, isset($data[5]) ? trim($data[5]) : "");
-            $pursuingYear     = mysqli_real_escape_string($conn, isset($data[6]) ? trim($data[6]) : "");
-            $proofLink        = mysqli_real_escape_string($conn, isset($data[7]) ? trim($data[7]) : "");
-
+            $facultyId        = mysqli_real_escape_string($conn, isset($data[0]) ? $data[0] : "");
+            $facultyName      = mysqli_real_escape_string($conn, isset($data[1]) ? $data[1] : "");
+            $academicYear     = mysqli_real_escape_string($conn, isset($data[2]) ? $data[2] : "");
+            $universityName   = mysqli_real_escape_string($conn, isset($data[3]) ? $data[3] : "");
+            $status           = mysqli_real_escape_string($conn, isset($data[4]) ? $data[4] : "");
+            $domainName       = mysqli_real_escape_string($conn, isset($data[5]) ? $data[5] : "");
+            $dateOfCompletion = mysqli_real_escape_string($conn, isset($data[6]) ? $data[6] : "");
+            $pursuingYear     = mysqli_real_escape_string($conn, isset($data[7]) ? $data[7] : "");
+            $proofLink        = mysqli_real_escape_string($conn, isset($data[8]) ? $data[8] : "");
             $sql = "INSERT INTO phd_details
-    (
-        faculty_id, faculty_name, university_name, status,
-        domain_name, date_of_completion, pursuing_year, proof_link
-    )
-    VALUES
-    (
-        '$facultyId', '$facultyName', '$universityName', '$status',
-        '$domainName', '$dateOfCompletion', '$pursuingYear', '$proofLink'
-    )";
+(
+    faculty_id,
+    faculty_name,
+    academic_year,
+    university_name,
+    status,
+    domain_name,
+    date_of_completion,
+    pursuing_year,
+    proof_link
+)
+VALUES
+(
+    '$facultyId',
+    '$facultyName',
+    '$academicYear',
+    '$universityName',
+    '$status',
+    '$domainName',
+    '$dateOfCompletion',
+    '$pursuingYear',
+    '$proofLink'
+)";
 
             if (mysqli_query($conn, $sql)) {
                 $success++;
