@@ -2,6 +2,28 @@
 include_once('db_conn.php');
 // session_start();
 
+/*
+ * ============================================================
+ *  CONFIG — one entry per "type" in the dropdown.
+ *  This is the ONLY place you edit if a table/column changes,
+ *  or if you want to add a 20th category later.
+ *
+ *  key      -> value shown in <select>, also used to build the
+ *              div id ($key . "Div") and table id ($key . "Table")
+ *  label    -> heading shown to the user
+ *  table    -> real MySQL table name
+ *  columns  -> [ db_column => "Header shown in table" ]
+ *              (id and faculty_id are deliberately left out —
+ *               they're internal, not useful to display)
+ *  search   -> which db_column the search box filters on
+ *  link     -> OPTIONAL. Either:
+ *                - a single db_column name that holds a URL
+ *                  (rendered as one "Proof" button), or
+ *                - an array [ db_column => "Header" ] when a
+ *                  table has more than one URL column (e.g. a
+ *                  paper's "URL/DOI" AND its "Proof" link).
+ * ============================================================
+ */
 $config = [
   'fdp' => [
     'label'   => 'FDP Attended',
@@ -37,7 +59,7 @@ $config = [
     'link'   => 'certificate_link',
   ],
   'ffworkshop' => [
-    'label'   => 'Workshop / Seminar Attended',
+    'label'   => 'Workshop',
     'table'   => 'ffworkshop',
     'columns' => [
       'academic_year' => 'Academic Year',
@@ -64,9 +86,14 @@ $config = [
       'number'        => 'Issue No.',
       'academic_year' => 'Academic Year',
       'month'         => 'Month',
+      'start_date'    => 'Start Date',
+      'end_date'      => 'End Date',
     ],
     'search' => 'title',
-    'link'   => 'proof_link',
+    'link'   => [
+      'url_doi'    => 'URL/DOI',
+      'proof_link' => 'Proof',
+    ],
   ],
   'conferences' => [
     'label'   => 'Conference Paper Publication',
@@ -74,13 +101,20 @@ $config = [
     'columns' => [
       'academic_year'          => 'Academic Year',
       'faculty_name'           => 'Name',
-      'author_type'            => 'Author Type',
+      'co_authors_count'       => 'Co-authors',
+      'author_type'            => 'Author Position',
       'paper_title'            => 'Paper Title',
       'conference_proceedings' => 'Conference / Proceedings',
       'ugc_scopus'             => 'UGC / Scopus',
+      'start_date'             => 'Start Date',
+      'end_date'               => 'End Date',
+      'doi'                    => 'DOI',
     ],
     'search' => 'paper_title',
-    'link'   => 'proof_link',
+    'link'   => [
+      'url'        => 'URL',
+      'proof_link' => 'Proof',
+    ],
   ],
   'certificates' => [
     'label'   => 'Certificates',
@@ -104,14 +138,22 @@ $config = [
     'columns' => [
       'academic_year'   => 'Academic Year',
       'faculty_name'    => 'Name',
+      'month'           => 'Month',
+      'no_of_authors'   => 'No. of Authors',
       'author_position' => 'Author Position',
       'title'           => 'Title',
       'publisher'       => 'Publisher',
       'scopus_sci'      => 'Scopus / SCI',
       'isbn'            => 'ISBN',
+      'doi'             => 'DOI',
+      'start_date'      => 'Start Date',
+      'end_date'        => 'End Date',
     ],
     'search' => 'title',
-    'link'   => 'proof_link',
+    'link'   => [
+      'url'        => 'URL',
+      'proof_link' => 'Proof',
+    ],
   ],
   'bookedited' => [
     'label'   => 'Book Edited',
@@ -124,9 +166,14 @@ $config = [
       'isbn_number'    => 'ISBN',
       'academic_year'  => 'Academic Year',
       'month'          => 'Month',
+      'start_date'     => 'Start Date',
+      'end_date'       => 'End Date',
     ],
     'search' => 'book_name',
-    'link'   => 'proof_link',
+    'link'   => [
+      'url'        => 'URL',
+      'proof_link' => 'Proof',
+    ],
   ],
   'textbook' => [
     'label'   => 'Textbook Published',
@@ -138,6 +185,8 @@ $config = [
       'textbook_name'   => 'Textbook Name',
       'publisher_name'  => 'Publisher',
       'month'           => 'Month',
+      'start_date'      => 'Start Date',
+      'end_date'        => 'End Date',
     ],
     'search' => 'textbook_name',
     'link'   => 'url',
@@ -148,12 +197,15 @@ $config = [
     'columns' => [
       'academic_year'      => 'Academic Year',
       'faculty_name'       => 'Name',
+      'month'              => 'Month',
       'patent_details'     => 'Patent Details',
       'area_of_patent'     => 'Area',
       'application_number' => 'Application No.',
       'status'             => 'Status',
       'patent_type'        => 'Type',
       'filing_agency'      => 'Filing Agency',
+      'start_date'         => 'Start Date',
+      'end_date'           => 'End Date',
     ],
     'search' => 'patent_details',
     'link'   => 'proof_link',
@@ -195,7 +247,10 @@ $config = [
     'columns' => [
       'academic_year'            => 'Academic Year',
       'faculty_name'             => 'Name',
+      'month'                    => 'Month',
       'date_attended'            => 'Date Attended',
+      'start_date'               => 'Start Date',
+      'end_date'                 => 'End Date',
       'organization'             => 'Organisation',
       'conference_journal_name'  => 'Conference / Journal',
       'type'                     => 'Type',
@@ -209,7 +264,10 @@ $config = [
     'columns' => [
       'academic_year'            => 'Academic Year',
       'faculty_name'             => 'Name',
+      'month'                    => 'Month',
       'date_attended'            => 'Date',
+      'start_date'               => 'Start Date',
+      'end_date'                 => 'End Date',
       'organization'             => 'Organisation',
       'conference_journal_name'  => 'Conference / Journal',
       'type'                     => 'Type',
@@ -243,6 +301,8 @@ $config = [
       'domain_name'         => 'Domain',
       'date_of_completion'  => 'Completion Date',
       'pursuing_year'       => 'Pursuing Year',
+      'start_date'          => 'Start Date',
+      'end_date'            => 'End Date',
     ],
     'search' => 'university_name',
     'link'   => 'proof_link',
@@ -273,6 +333,8 @@ $config = [
       'duration'       => 'Duration',
       'students_count' => 'Students Count',
       'domain_name'    => 'Domain',
+      'start_date'     => 'Start Date',
+      'end_date'       => 'End Date',
     ],
     'search' => 'model_name',
     'link'   => 'proof_link',
@@ -499,7 +561,17 @@ $allowedTables = array_column($config, 'table');
       <?php foreach ($config as $key => $cfg):
         $table   = $cfg['table'];
         $columns = $cfg['columns'];
-        $linkCol = $cfg['link'] ?? null;
+
+        // Normalize 'link' into an assoc array [db_column => header],
+        // whether the config gave us a single string or an array.
+        $linkCols = [];
+        if (!empty($cfg['link'])) {
+          if (is_array($cfg['link'])) {
+            $linkCols = $cfg['link'];
+          } else {
+            $linkCols = [$cfg['link'] => 'Proof'];
+          }
+        }
 
         if (!in_array($table, $allowedTables, true)) {
           continue;
@@ -521,9 +593,9 @@ $allowedTables = array_column($config, 'table');
                   <?php foreach ($columns as $header): ?>
                     <th><?php echo htmlspecialchars($header); ?></th>
                   <?php endforeach; ?>
-                  <?php if ($linkCol): ?>
-                    <th>Proof</th>
-                  <?php endif; ?>
+                  <?php foreach ($linkCols as $linkHeader): ?>
+                    <th><?php echo htmlspecialchars($linkHeader); ?></th>
+                  <?php endforeach; ?>
                 </tr>
               </thead>
               <tbody>
@@ -533,7 +605,7 @@ $allowedTables = array_column($config, 'table');
                       <?php foreach (array_keys($columns) as $col): ?>
                         <td><?php echo htmlspecialchars($row[$col] ?? ''); ?></td>
                       <?php endforeach; ?>
-                      <?php if ($linkCol): ?>
+                      <?php foreach (array_keys($linkCols) as $linkCol): ?>
                         <td>
                           <?php if (!empty($row[$linkCol])): ?>
                             <a href="<?php echo htmlspecialchars($row[$linkCol]); ?>" target="_blank" rel="noopener">
@@ -543,12 +615,12 @@ $allowedTables = array_column($config, 'table');
                             &mdash;
                           <?php endif; ?>
                         </td>
-                      <?php endif; ?>
+                      <?php endforeach; ?>
                     </tr>
                   <?php endwhile; ?>
                 <?php else: ?>
                   <tr class="empty-row">
-                    <td colspan="<?php echo count($columns) + ($linkCol ? 1 : 0); ?>">No records found.</td>
+                    <td colspan="<?php echo count($columns) + count($linkCols); ?>">No records found.</td>
                   </tr>
                 <?php endif; ?>
               </tbody>
