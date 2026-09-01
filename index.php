@@ -278,7 +278,6 @@
     <p>One secure place for students, faculty, and admins to issue, track, and manage academic certificates.</p>
   </section>
 
-  <!-- LOGIN CARDS: student, faculty, admin side by side -->
   <section class="login-section">
     <div class="login-row">
 
