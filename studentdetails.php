@@ -1,6 +1,49 @@
 <?php
 include_once('db_conn.php');
 session_start();
+
+// Resolve where a student's saved photo actually lives on disk.
+// Photos may be in the current student_profile/ folder, directly in
+// images/, or in some other legacy subfolder from before this upload
+// page existed — so after checking the two known spots, fall back to
+// searching the whole images/ tree for a file with this exact name.
+function resolveStudentPicUrl($pic)
+{
+  if (empty($pic)) {
+    return null;
+  }
+
+  $picClean = ltrim(str_replace('\\', '/', $pic), '/');
+  $needle = basename($picClean);
+
+  // Fast path: the two locations we expect.
+  $candidates = [
+    'images/student_profile/' . $needle,
+    'images/' . $picClean, // in case the DB value already includes a subfolder
+    'images/' . $needle,
+  ];
+  foreach ($candidates as $rel) {
+    if (file_exists(__DIR__ . '/' . $rel)) {
+      return $rel;
+    }
+  }
+
+  // Fallback: search every subfolder under images/ for this filename.
+  $imagesRoot = __DIR__ . '/images';
+  if (is_dir($imagesRoot)) {
+    $it = new RecursiveIteratorIterator(
+      new RecursiveDirectoryIterator($imagesRoot, FilesystemIterator::SKIP_DOTS)
+    );
+    foreach ($it as $file) {
+      if ($file->isFile() && strcasecmp($file->getFilename(), $needle) === 0) {
+        $relPath = str_replace('\\', '/', substr($file->getPathname(), strlen(__DIR__) + 1));
+        return $relPath;
+      }
+    }
+  }
+
+  return null;
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -55,6 +98,7 @@ session_start();
       gap: 12px;
       box-shadow: var(--shadow);
     }
+
     .brand {
       font-family: 'Playfair Display', serif;
       font-size: 1.35rem;
@@ -248,7 +292,6 @@ session_start();
         height: 70vh;
       }
     }
-
   </style>
 </head>
 
@@ -305,19 +348,24 @@ session_start();
                 <td><?php echo $rows['counsular']; ?></td>
                 <td><?php echo $rows['academic_year']; ?></td>
                 <td><?php
-                    $ext = pathinfo('images/' . $rows['pic'] . '', PATHINFO_EXTENSION);
-                    if ($ext == 'pdf') {
-                      echo "
+                    $picPath = resolveStudentPicUrl($rows['pic'] ?? null);
+                    if ($picPath) {
+                      $ext = strtolower(pathinfo($picPath, PATHINFO_EXTENSION));
+                      if ($ext == 'pdf') {
+                        echo "
 <embed
-    src='images/" . $rows['pic'] . "'
+    src='" . htmlspecialchars($picPath) . "'
     type='application/pdf'
     frameBorder='0'
     scrolling='auto'
     height='100'
     width='200'
 ></embed>";
+                      } else {
+                        echo "<a href='" . htmlspecialchars($picPath) . "' target='_blank' rel='noopener'><img src='" . htmlspecialchars($picPath) . "' width='200' height='100'></a>";
+                      }
                     } else {
-                      echo "<a href='images/" . $rows['pic'] . "' target='_blank' rel='noopener'><img src='images/" . $rows['pic'] . "' width='200' height='100'></a>";
+                      echo "&mdash;";
                     }
                     ?></td>
               </tr>

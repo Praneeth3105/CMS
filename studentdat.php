@@ -1,6 +1,49 @@
 <?php
 include "db_conn.php";
 session_start();
+
+// Resolve where a student's saved photo actually lives on disk.
+// Photos may be in the current student_profile/ folder, directly in
+// images/, or in some other legacy subfolder from before this upload
+// page existed — so after checking the two known spots, fall back to
+// searching the whole images/ tree for a file with this exact name.
+function resolveStudentPicUrl($pic)
+{
+  if (empty($pic)) {
+    return null;
+  }
+
+  $picClean = ltrim(str_replace('\\', '/', $pic), '/');
+  $needle = basename($picClean);
+
+  // Fast path: the two locations we expect.
+  $candidates = [
+    'images/student_profile/' . $needle,
+    'images/' . $picClean, // in case the DB value already includes a subfolder
+    'images/' . $needle,
+  ];
+  foreach ($candidates as $rel) {
+    if (file_exists(__DIR__ . '/' . $rel)) {
+      return $rel;
+    }
+  }
+
+  // Fallback: search every subfolder under images/ for this filename.
+  $imagesRoot = __DIR__ . '/images';
+  if (is_dir($imagesRoot)) {
+    $it = new RecursiveIteratorIterator(
+      new RecursiveDirectoryIterator($imagesRoot, FilesystemIterator::SKIP_DOTS)
+    );
+    foreach ($it as $file) {
+      if ($file->isFile() && strcasecmp($file->getFilename(), $needle) === 0) {
+        $relPath = str_replace('\\', '/', substr($file->getPathname(), strlen(__DIR__) + 1));
+        return $relPath;
+      }
+    }
+  }
+
+  return null;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -156,6 +199,35 @@ session_start();
       font-size: 2.2rem;
       color: var(--accent);
       flex-shrink: 0;
+      position: relative;
+    }
+
+    .avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    .avatar .camera-badge {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--gold);
+      border: 2px solid #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 3px 8px rgba(26, 18, 11, .25);
+      transition: background .2s ease, transform .2s ease;
+    }
+
+    .avatar .camera-badge:hover {
+      background: var(--accent);
+      transform: scale(1.08);
     }
 
     .profile-header .who {
@@ -219,7 +291,7 @@ session_start();
       margin: 0 0 32px;
     }
 
-  
+
     .section-title {
       text-align: center;
       font-family: 'Playfair Display', serif;
@@ -370,7 +442,21 @@ session_start();
       <div class="profile-card">
 
         <div class="profile-header">
-          <div class="avatar"><i class="fa-solid fa-user"></i></div>
+          <div class="avatar">
+            <?php $picUrl = resolveStudentPicUrl($row['pic'] ?? null); ?>
+            <?php if ($picUrl): ?>
+              <img src="<?php echo htmlspecialchars($picUrl); ?>" alt="Profile photo">
+            <?php else: ?>
+              <i class="fa-solid fa-user"></i>
+            <?php endif; ?>
+
+            <a href="student_profile_pic.php" class="n camera-badge" title="Change profile picture">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--dark)" stroke-width="2">
+                <path d="M4 8h3l2-2h6l2 2h3v11H4z" stroke-linejoin="round" />
+                <circle cx="12" cy="13.5" r="3.2" />
+              </svg>
+            </a>
+          </div>
           <div class="who">
             <div class="tag">Student Profile</div>
             <div class="name"><?php echo htmlspecialchars($row['name']); ?></div>
