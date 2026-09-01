@@ -10,11 +10,6 @@ if (!isset($_SESSION['username'])) {
 $uname = $_SESSION['username'];
 $errorMsg = "";
 
-// Resolve where a student's saved photo actually lives on disk.
-// Photos may be in the current student_profile/ folder, directly in
-// images/ (where this page used to save them), or some other legacy
-// subfolder — so after checking the two known spots, fall back to
-// searching the whole images/ tree for a file with this exact name.
 function resolveStudentPicUrl($pic)
 {
     if (empty($pic)) {
