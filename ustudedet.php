@@ -1,6 +1,175 @@
 <?php
 include "db_conn.php";
 session_start();
+
+if (!isset($_SESSION['username'])) {
+    header("Location: login.php");
+    exit;
+}
+
+$uname = $_SESSION['username'];
+$errorMsg = "";
+
+// Resolve where a student's saved photo actually lives on disk.
+// Photos may be in the current student_profile/ folder, directly in
+// images/ (where this page used to save them), or some other legacy
+// subfolder — so after checking the two known spots, fall back to
+// searching the whole images/ tree for a file with this exact name.
+function resolveStudentPicUrl($pic)
+{
+    if (empty($pic)) {
+        return null;
+    }
+
+    $picClean = ltrim(str_replace('\\', '/', $pic), '/');
+    $needle = basename($picClean);
+
+    $candidates = [
+        'images/student_profile/' . $needle,
+        'images/' . $picClean,
+        'images/' . $needle,
+    ];
+    foreach ($candidates as $rel) {
+        if (file_exists(__DIR__ . '/' . $rel)) {
+            return $rel;
+        }
+    }
+
+    $imagesRoot = __DIR__ . '/images';
+    if (is_dir($imagesRoot)) {
+        $it = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($imagesRoot, FilesystemIterator::SKIP_DOTS)
+        );
+        foreach ($it as $file) {
+            if ($file->isFile() && strcasecmp($file->getFilename(), $needle) === 0) {
+                return str_replace('\\', '/', substr($file->getPathname(), strlen(__DIR__) + 1));
+            }
+        }
+    }
+
+    return null;
+}
+
+// ---- Handle update submission ----
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
+
+    $name       = trim($_POST['name'] ?? '');
+    $num        = trim($_POST['number'] ?? '');
+    $year       = trim($_POST['year'] ?? '');
+    $department = trim($_POST['department'] ?? '');
+    $add        = trim($_POST['address'] ?? '');
+    $email      = trim($_POST['email'] ?? '');
+    $acc        = trim($_POST['acc'] ?? '');
+    $oldimage   = trim($_POST['oldimage'] ?? '');
+
+    // Look up the current pic value fresh from the DB, so we never trust
+    // a hidden field alone for what to delete / fall back to.
+    $curStmt = mysqli_prepare($conn, "SELECT pic FROM studentdetails WHERE username = ?");
+    mysqli_stmt_bind_param($curStmt, "s", $uname);
+    mysqli_stmt_execute($curStmt);
+    $curRes = mysqli_stmt_get_result($curStmt);
+    $curRow = mysqli_fetch_assoc($curRes);
+    mysqli_stmt_close($curStmt);
+    $currentPic = $curRow['pic'] ?? $oldimage;
+
+    $newPicName = $currentPic; // default: keep existing photo unless a new one is uploaded
+
+    $hasNewFile = isset($_FILES['file']) && $_FILES['file']['error'] !== UPLOAD_ERR_NO_FILE;
+
+    if ($hasNewFile) {
+        $file = $_FILES['file'];
+
+        if ($file['error'] !== UPLOAD_ERR_OK) {
+            $errorMsg = "Upload failed. Please try again.";
+        } else {
+            $allowedExt = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+            $maxSize = 3 * 1024 * 1024; // 3MB
+
+            if (!in_array($ext, $allowedExt)) {
+                $errorMsg = "Only JPG, PNG, GIF, or WEBP images are allowed.";
+            } elseif ($file['size'] > $maxSize) {
+                $errorMsg = "Image must be smaller than 3MB.";
+            } else {
+                $uploadDir = __DIR__ . '/images/student_profile/';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0755, true);
+                }
+
+                $newPicName = 'student_' . preg_replace('/[^A-Za-z0-9_-]/', '_', $uname) . '_' . time() . '.' . $ext;
+                $destPath = $uploadDir . $newPicName;
+
+                if (move_uploaded_file($file['tmp_name'], $destPath)) {
+                    // Clean up the old photo, wherever it actually is.
+                    $oldResolved = resolveStudentPicUrl($currentPic);
+                    if ($oldResolved && basename($oldResolved) !== $newPicName) {
+                        @unlink(__DIR__ . '/' . $oldResolved);
+                    }
+                } else {
+                    $errorMsg = "Could not save the uploaded file.";
+                    $newPicName = $currentPic; // fall back, don't null out an existing photo
+                }
+            }
+        }
+    }
+
+    if ($errorMsg === "") {
+        $sql = "UPDATE studentdetails SET
+                name = ?,
+                number = ?,
+                location = ?,
+                email = ?,
+                department = ?,
+                year = ?,
+                pic = ?,
+                academic_year = ?
+                WHERE username = ?";
+        $stmt = mysqli_prepare($conn, $sql);
+        if ($stmt) {
+            mysqli_stmt_bind_param(
+                $stmt,
+                "sssssssss",
+                $name,
+                $num,
+                $add,
+                $email,
+                $department,
+                $year,
+                $newPicName,
+                $acc,
+                $uname
+            );
+            $res = mysqli_stmt_execute($stmt);
+            mysqli_stmt_close($stmt);
+
+            if ($res) {
+                echo "<script>
+                        alert('Data Updated Successfully');
+                        window.location='studentdat.php';
+                      </script>";
+                exit;
+            } else {
+                $errorMsg = "Data not updated: " . mysqli_error($conn);
+            }
+        } else {
+            $errorMsg = "Query preparation failed: " . mysqli_error($conn);
+        }
+    }
+}
+
+// ---- Fetch current record for the form ----
+$stmt = mysqli_prepare($conn, "SELECT * FROM studentdetails WHERE username = ?");
+mysqli_stmt_bind_param($stmt, "s", $uname);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
+$row = mysqli_fetch_assoc($result);
+mysqli_stmt_close($stmt);
+
+if (!$row) {
+    die("Record not found.");
+}
+
+$picUrl = resolveStudentPicUrl($row['pic'] ?? null);
 ?>
 <!DOCTYPE html>
 <html>
@@ -20,6 +189,7 @@ session_start();
             --text-dark: #2b2318;
             --text-muted: #6b6155;
             --border: #e6ddc9;
+            --danger: #a0522d;
         }
 
         * {
@@ -127,6 +297,100 @@ session_start();
             padding: 40px;
         }
 
+        .error-msg {
+            background: #fbeae4;
+            color: var(--danger);
+            border: 1px solid #eec4b4;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 22px;
+        }
+
+        /* ---- Profile photo upload block ---- */
+        .photo-upload-row {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-top: 8px;
+        }
+
+        .photo-preview {
+            width: 84px;
+            height: 84px;
+            min-width: 84px;
+            border-radius: 50%;
+            overflow: hidden;
+            background: var(--cream);
+            border: 3px solid var(--gold);
+            box-shadow: 0 4px 12px rgba(28, 21, 16, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: Arial, sans-serif;
+            font-size: 10px;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .photo-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .photo-controls {
+            flex: 1;
+        }
+
+        .file-input-wrap {
+            position: relative;
+            display: inline-block;
+        }
+
+        .file-input-wrap input[type=file] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
+        .file-input-label {
+            display: inline-block;
+            font-family: Arial, sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 9px 18px;
+            border-radius: 999px;
+            border: 1px solid var(--gold);
+            background: var(--cream);
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            max-width: 220px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .file-input-wrap:hover .file-input-label {
+            background: var(--gold);
+            color: var(--dark);
+        }
+
+        .file-hint {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        /* ---- end profile photo upload block ---- */
+
         .parent {
             display: flex;
             gap: 40px;
@@ -151,7 +415,6 @@ session_start();
         input[type=text],
         input[type=password],
         input[type=email],
-        input[type=file],
         select {
             width: 100%;
             font-family: Arial, sans-serif;
@@ -179,11 +442,6 @@ session_start();
             background-position: calc(100% - 18px) calc(1em + 4px), calc(100% - 13px) calc(1em + 4px);
             background-size: 5px 5px, 5px 5px;
             background-repeat: no-repeat;
-        }
-
-        input[type=file] {
-            padding: 10px 12px;
-            cursor: pointer;
         }
 
         .submit-row {
@@ -226,73 +484,78 @@ session_start();
 
     <div class="form-container">
         <div class="form-card">
+
+            <?php if ($errorMsg): ?>
+                <div class="error-msg"><?php echo htmlspecialchars($errorMsg); ?></div>
+            <?php endif; ?>
+
             <form method='POST' action='' enctype='multipart/form-data'>
-                <?php
+                <div class="parent">
+                    <div class="child">
+                        <label for="name">Name</label>
+                        <input type="text" placeholder="Enter Your Name" value='<?php echo htmlspecialchars($row['name']); ?>' name="name" id="name" required>
 
-                $uname = $_SESSION['username'];
-                $query = "select * from studentdetails where username='$uname'";
-                $result = mysqli_query($conn, $query);
-                while ($row = mysqli_fetch_array($result)) {
-                ?>
-                    <div class="parent">
-                        <div class="child">
-                            <label for="name">Name</label>
-                            <input type="text" placeholder="Enter Your Name" value='<?php echo $row['name']; ?>' name="name" id="name" required>
+                        <label for="number">Phone Number</label>
+                        <input type="text" placeholder="Enter Phone Number" name="number" value='<?php echo htmlspecialchars($row['number']); ?>' id="number" required>
 
-                            <label for="number">Phone Number</label>
-                            <input type="text" placeholder="Enter Phone Number" name="number" value='<?php echo $row['number']; ?>' id="number" required>
+                        <label for="department">Department</label>
+                        <select name="department" id="department" required>
+                            <option value="">Branch</option>
+                            <?php foreach (['CSM', 'CSE', 'CIC', 'CSO', 'EEE', 'ECE', 'MECH', 'CIVIL', 'CSD'] as $dept): ?>
+                                <option value="<?php echo $dept; ?>" <?php echo ($row['department'] === $dept) ? 'selected' : ''; ?>><?php echo $dept; ?></option>
+                            <?php endforeach; ?>
+                        </select>
 
-                            <label for="department">Department</label>
-                            <select name="department" id="department" required>
-                                <option value="">Branch</option>
-                                <option value="CSM">CSM</option>
-                                <option value="CSE">CSE</option>
-                                <option value="CIC">CIC</option>
-                                <option value="CSO">CSO</option>
-                                <option value="EEE">EEE</option>
-                                <option value="ECE">ECE</option>
-                                <option value="MECH">MECH</option>
-                                <option value="CIVIL">CIVIL</option>
-                                <option value="CSD">CSD</option>
-                            </select>
-
-                            <label for="year">Year</label>
-                            <select id='year' onclick='my()' name='year' required>
-                                <option value="year">Year</option>
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                            </select>
-                        </div>
-
-                        <div class="child">
-                            <label for="address">Address</label>
-                            <input type="text" placeholder="Enter Your Address" value='<?php echo $row['location']; ?>' name="address" id="address" required>
-
-                            <label for="email">Email</label>
-                            <input type="email" placeholder="Enter Email" name="email" value='<?php echo $row['email']; ?>' id="email" required>
-
-                            <label for="academic">Academic Year</label>
-                            <select id='academic' onclick='my()' name='acc' required>
-                                <option value="">Academic Year</option>
-                                <option value='2019-2023'>2019-2023</option>
-                                <option value='2020-2024'>2020-2024</option>
-                                <option value='2021-2025'>2021-2025</option>
-                                <option value='2022-2026'>2022-2026</option>
-                                <option value='2023-2027'>2023-2027</option>
-                            </select>
-
-                            <label for="classteacher">Upload your photo</label>
-                            <input type="file" name="file" id="classteacher" required>
-                            <input type='hidden' name='oldimage' value='<?php echo $row['pic']; ?>'>
-                        </div>
+                        <label for="year">Year</label>
+                        <select id='year' name='year' required>
+                            <option value="">Year</option>
+                            <?php foreach (['1', '2', '3', '4'] as $yr): ?>
+                                <option value="<?php echo $yr; ?>" <?php echo ((string) $row['year'] === $yr) ? 'selected' : ''; ?>><?php echo $yr; ?></option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
 
-                    <div class="submit-row">
-                        <input type='submit' value='Update' name='submit'>
+                    <div class="child">
+                        <label for="address">Address</label>
+                        <input type="text" placeholder="Enter Your Address" value='<?php echo htmlspecialchars($row['location']); ?>' name="address" id="address" required>
+
+                        <label for="email">Email</label>
+                        <input type="email" placeholder="Enter Email" name="email" value='<?php echo htmlspecialchars($row['email']); ?>' id="email" required>
+
+                        <label for="academic">Academic Year</label>
+                        <select id='academic' name='acc' required>
+                            <option value="">Academic Year</option>
+                            <?php foreach (['2019-2023', '2020-2024', '2021-2025', '2022-2026', '2023-2027'] as $acc): ?>
+                                <option value="<?php echo $acc; ?>" <?php echo ($row['academic_year'] === $acc) ? 'selected' : ''; ?>><?php echo $acc; ?></option>
+                            <?php endforeach; ?>
+                        </select>
+
+                        <label for="photo">Profile Photo</label>
+                        <div class="photo-upload-row">
+                            <div class="photo-preview">
+                                <?php if ($picUrl): ?>
+                                    <img src="<?php echo htmlspecialchars($picUrl); ?>" alt="Current photo">
+                                <?php else: ?>
+                                    No photo
+                                <?php endif; ?>
+                            </div>
+                            <div class="photo-controls">
+                                <div class="file-input-wrap">
+                                    <span class="file-input-label" id="fileLabel">Choose Photo</span>
+                                    <input type="file" name="file" id="photo"
+                                        accept="image/jpeg,image/png,image/gif,image/webp"
+                                        onchange="document.getElementById('fileLabel').textContent = this.files[0] ? this.files[0].name : 'Choose Photo'">
+                                </div>
+                                <div class="file-hint">Leave empty to keep your current photo.</div>
+                            </div>
+                        </div>
+                        <input type='hidden' name='oldimage' value='<?php echo htmlspecialchars($row['pic'] ?? ''); ?>'>
                     </div>
-                <?php } ?>
+                </div>
+
+                <div class="submit-row">
+                    <input type='submit' value='Update' name='submit'>
+                </div>
             </form>
         </div>
     </div>
@@ -300,64 +563,3 @@ session_start();
 </body>
 
 </html>
-<?php
-include "db_conn.php";
-
-if (isset($_POST['submit'])) {
-
-    session_start();
-
-    $uname = $_SESSION['username'];
-
-    $name       = $_POST['name'];
-    $num        = $_POST['number'];
-    $year       = $_POST['year'];
-    $department = $_POST['department'];
-    $add        = $_POST['address'];
-    $email      = $_POST['email'];
-    $acc        = $_POST['acc'];
-    $oldimage   = $_POST['oldimage'];
-
-    $filename = $_FILES['file']['name'];
-    $tempname = $_FILES['file']['tmp_name'];
-
-    $folder = "images/" . $filename;
-
-    $sql = "UPDATE studentdetails SET
-            name='$name',
-            number='$num',
-            location='$add',
-            email='$email',
-            department='$department',
-            year='$year',
-            pic='$filename',
-            academic_year='$acc'
-            WHERE username='$uname'";
-
-    $res = mysqli_query($conn, $sql);
-
-    if ($res) {
-
-        if (!empty($filename)) {
-
-            move_uploaded_file($tempname, $folder);
-
-            if (!empty($oldimage) && file_exists("images/" . $oldimage)) {
-                unlink("images/" . $oldimage);
-            }
-        }
-
-        echo "<script>
-                alert('Data Updated Successfully');
-                window.location='studentdat.php';
-              </script>";
-    } else {
-
-        echo "<script>
-                alert('Data Not Updated');
-              </script>";
-
-        echo mysqli_error($conn);
-    }
-}
-?>
