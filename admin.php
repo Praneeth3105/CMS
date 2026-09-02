@@ -310,7 +310,7 @@
   <!-- ===== Top bar ===== -->
   <div class="topbar">
     <div class="brand">
-        
+
       <h1>Certificate <span>Management</span> System</h1>
     </div>
     <div class="topbar-actions">
@@ -479,7 +479,11 @@
         </button>
       </a>
 
-      
+      <a href="consolidated.php" class="n">
+        <button type="button" class="action-btn">
+          <span class="icon-badge"><i class="fas fa-clipboard-list"></i></span> Consolidated Faculty Report
+        </button>
+      </a>
 
     </div>
   </div>
