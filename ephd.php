@@ -299,7 +299,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="topbar">
             <a href="fsearch.php" class="back-link">&larr; Back</a>
         </div>
-
         <h1>Edit PhD Details</h1>
         <div class="subtitle">Table: phd_details &middot; Record ID: <?php echo htmlspecialchars($id); ?></div>
 
