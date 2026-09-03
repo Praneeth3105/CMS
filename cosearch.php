@@ -163,7 +163,6 @@ include_once('db_conn.php');
 			font-size: 0.95rem;
 		}
 
-		/* ---------- Container / sections ---------- */
 		html body .container {
 			max-width: 1300px !important;
 			width: 100% !important;
@@ -257,7 +256,6 @@ include_once('db_conn.php');
 			color: var(--muted);
 		}
 
-		/* ---------- Scroll wrapper / tables ---------- */
 		html body .scroll {
 			height: auto;
 			max-height: 420px;
