@@ -105,7 +105,6 @@ $acc=$_SESSION['acc'];
 
 if(isset($_POST['submit'])){
     $sql = "UPDATE extracircular SET eventname='$nevent', conductingclg='$condclg', orgname='$conorg', dates='$dates', ie='$ie', file='$filename', academic_year='$acc'  WHERE rollno='$uname' and  eventname='$wnn'";
-    // Execute query
     $res=mysqli_query($conn, $sql);
     if($res and move_uploaded_file($tempname, $folder)) {
         echo "<script>alert('Data Updated Successfully');window.location='ssearch.php';</script>";
