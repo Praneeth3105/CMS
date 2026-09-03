@@ -225,7 +225,6 @@ session_start();
 
 		<br><br>
 		<h1>Faculty Details</h1>
-
 		<?php
 		$categories = array(
 			'fdp'                      => array('label' => 'FDP Attended',            'date_cols' => array('startdate', 'enddate')),
@@ -248,7 +247,6 @@ session_start();
 			'working_models'           => array('label' => 'Working Models',          'date_cols' => array('start_date', 'end_date')),
 			'funding_projects'         => array('label' => 'Funding Projects',        'date_cols' => array('start_date', 'end_date')),
 		);
-
 		function getCategoryCount($conn, $table, $faculty_id, $date_cols, $std, $end)
 		{
 			if ($date_cols && $std && $end) {
@@ -266,7 +264,6 @@ session_start();
 			mysqli_stmt_close($stmt);
 			return (int) $row['c'];
 		}
-
 		$std = null;
 		$end = null;
 		if (isset($_POST['submit']) && !empty($_POST['stdd']) && !empty($_POST['endd'])) {
@@ -274,11 +271,9 @@ session_start();
 			$end = $_POST['endd'];
 		}
 		?>
-
 		<?php if ($std && $end): ?>
 			<p class="note">Showing counts for <?php echo htmlspecialchars($std); ?> to <?php echo htmlspecialchars($end); ?> where a record date is tracked; other categories show all-time totals.</p>
 		<?php endif; ?>
-
 		<div class="login-content">
 			<div class="scroll">
 				<table id="myTable">
@@ -305,7 +300,6 @@ session_start();
 			</div>
 		</div>
 	</div>
-
 	<div class="panel">
 		<div class="cen">
 			<form method="POST">
@@ -333,13 +327,10 @@ session_start();
 				</div>
 			</form>
 		</div>
-
 		<br>
 		<a href="graph1.php" class="n"><button type="button" class="btn" id="btn1">Graph Analysis</button></a>
 		<br><br>
 		<h1>Student Details</h1>
-
-
 		<?php if (isset($_POST['submi'])) {
 			$year = $_POST['year'];
 			$branch = $_POST['department'];
@@ -356,13 +347,10 @@ session_start();
 							<th style="width:20%;">Extracircular</th>
 							<th style="width:20%;">Cocircular</th>
 							<th style="width:20%;">Certificates</th>
-
-
 						</tr>
 						<?php
 						#session_start();
 						#$name=$_SESSION['name'];
-
 						$query = "SELECT * FROM studentdetails WHERE  department='$branch' and year='$year' ";
 						$result = mysqli_query($conn, $query);
 						while ($rows = mysqli_fetch_assoc($result)) {
@@ -380,7 +368,6 @@ session_start();
 									} ?></td>
 									<?php
 									$sql1 = "SELECT * from sproject WHERE Name='$names' and branch='$branch' and year='$year'";
-
 									if ($results1 = mysqli_query($conn, $sql1)) {
 										$rowcount1 = mysqli_num_rows($results1);
 									?>
@@ -388,7 +375,6 @@ session_start();
 										} ?></td>
 										<?php
 										$sql2 = "SELECT * from sinternship WHERE name='$names' and branch='$branch' and year='$year'";
-
 										if ($results2 = mysqli_query($conn, $sql2)) {
 											$rowcount2 = mysqli_num_rows($results2);
 										?>
@@ -438,11 +424,8 @@ session_start();
 							<th style="width:20%;">Extracircular</th>
 							<th style="width:20%;">Cocircular</th>
 							<th style="width:20%;">Certificates</th>
-
-
 						</tr>
 						<?php
-			
 						$query = "SELECT * FROM studentdetails";
 						$result = mysqli_query($conn, $query);
 						while ($rows = mysqli_fetch_assoc($result)) {
@@ -451,7 +434,6 @@ session_start();
 
 							if ($results = mysqli_query($conn, $sql)) {
 								$rowcount = mysqli_num_rows($results);
-
 						?>
 								<tr>
 									<td><?php echo $rows['username']; ?></td>
@@ -508,7 +490,5 @@ session_start();
 			</div><br>
 	</div>
 	</div>
-
 </body>
-
 </html>
