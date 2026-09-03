@@ -2,11 +2,6 @@
 include "db_conn.php";
 session_start();
 
-/*
- * One entry per table. 'table' is whitelisted below so nothing user-
- * controlled ever reaches the SQL — this array is the single source
- * of truth for which tables this report covers.
- */
 $tables = [
     'fdp'                     => ['label' => 'FDP Attended',                 'icon' => 'fa-chalkboard-teacher'],
     'fdporg'                  => ['label' => 'FDP Organized',                'icon' => 'fa-chalkboard'],
