@@ -290,7 +290,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <h1>Edit Funding Project</h1>
         <div class="subtitle">Table: funding_projects &middot; Record ID: <?php echo htmlspecialchars($id); ?></div>
-
         <div class="card">
             <?php if ($successMsg): ?>
                 <div class="msg success"><?php echo htmlspecialchars($successMsg); ?></div>
