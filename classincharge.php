@@ -2,6 +2,46 @@
 
 include "db_conn.php";
 session_start();
+
+// Resolve where a student's saved photo actually lives on disk.
+// Photos may be in the current student_profile/ folder, directly in
+// images/, or some other legacy subfolder — so after checking the two
+// known spots, fall back to searching the whole images/ tree for a
+// file with this exact name.
+function resolveStudentPicUrl($pic)
+{
+  if (empty($pic)) {
+    return null;
+  }
+
+  $picClean = ltrim(str_replace('\\', '/', $pic), '/');
+  $needle = basename($picClean);
+
+  $candidates = [
+    'images/student_profile/' . $needle,
+    'images/' . $picClean,
+    'images/' . $needle,
+  ];
+  foreach ($candidates as $rel) {
+    if (file_exists(__DIR__ . '/' . $rel)) {
+      return $rel;
+    }
+  }
+
+  $imagesRoot = __DIR__ . '/images';
+  if (is_dir($imagesRoot)) {
+    $it = new RecursiveIteratorIterator(
+      new RecursiveDirectoryIterator($imagesRoot, FilesystemIterator::SKIP_DOTS)
+    );
+    foreach ($it as $file) {
+      if ($file->isFile() && strcasecmp($file->getFilename(), $needle) === 0) {
+        return str_replace('\\', '/', substr($file->getPathname(), strlen(__DIR__) + 1));
+      }
+    }
+  }
+
+  return null;
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -264,7 +304,14 @@ session_start();
                   <td><?php echo htmlspecialchars($rows['email']); ?></td>
                   <td><?php echo htmlspecialchars($rows['classteacher']); ?></td>
                   <td><?php echo htmlspecialchars($rows['counsular']); ?></td>
-                  <td><?php echo "<a href='images/" . htmlspecialchars($rows['pic']) . "' data-lightbox='mygallery' ><img src='images/" . htmlspecialchars($rows['pic']) . "' width='200' height='100' ></a>"; ?></td>
+                  <td><?php
+                      $picUrl = resolveStudentPicUrl($rows['pic'] ?? null);
+                      if ($picUrl) {
+                        echo "<a href='" . htmlspecialchars($picUrl) . "' data-lightbox='mygallery'><img src='" . htmlspecialchars($picUrl) . "' width='200' height='100'></a>";
+                      } else {
+                        echo "&mdash;";
+                      }
+                      ?></td>
 
                 </tr>
               <?php
