@@ -275,7 +275,7 @@ function resolveStudentPicUrl($pic)
 
             <table id="myTable">
               <tr class="header">
-                <th>Check Box</th>
+                <th><input type='checkbox' id='selectAll' onclick='toggleAll(this)'> All</th>
                 <th>Rollno</th>
                 <th>Name</th>
                 <th>Phone Number</th>
@@ -294,7 +294,7 @@ function resolveStudentPicUrl($pic)
               while ($rows = mysqli_fetch_assoc($result)) {
               ?>
                 <tr>
-                  <td><input type='checkbox' name='check[]' value='<?php echo htmlspecialchars($rows['username']); ?>' style='width:90%;height:90%;' required></td>
+                  <td><input type='checkbox' name='check[]' value='<?php echo htmlspecialchars($rows['username']); ?>' style='width:90%;height:90%;'></td>
                   <td><?php echo htmlspecialchars($_SESSION['un'] = $rows['username']); ?></td>
                   <td><?php echo htmlspecialchars($rows['name']); ?></td>
                   <td><?php echo htmlspecialchars($rows['number']); ?></td>
@@ -353,6 +353,27 @@ function resolveStudentPicUrl($pic)
         var branchMatch = branchFilter === "" || branchVal === branchFilter;
 
         tr[i].style.display = (yearMatch && branchMatch) ? "" : "none";
+      }
+
+      // reset select-all when the filter changes, so it doesn't look stuck checked
+      var selectAll = document.getElementById("selectAll");
+      if (selectAll) {
+        selectAll.checked = false;
+      }
+    }
+
+    function toggleAll(source) {
+      var table = document.getElementById("myTable");
+      var tr = table.getElementsByTagName("tr");
+      for (var i = 0; i < tr.length; i++) {
+        // skip the header row and any row hidden by the year/branch filter
+        if (tr[i].classList.contains('header')) continue;
+        if (tr[i].style.display === "none") continue;
+
+        var checkbox = tr[i].querySelector("input[type='checkbox']");
+        if (checkbox) {
+          checkbox.checked = source.checked;
+        }
       }
     }
   </script>
