@@ -275,7 +275,7 @@ function resolveStudentPicUrl($pic)
 
             <table id="myTable">
               <tr class="header">
-                <th><input type='checkbox' id='selectAll' onclick='toggleAll(this)'> All</th>
+                <th><input type='checkbox' id='selectAll' onclick='toggleAll(this)'> Check All</th>
                 <th>Rollno</th>
                 <th>Name</th>
                 <th>Phone Number</th>
