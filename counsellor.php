@@ -239,7 +239,8 @@ function resolveStudentPicUrl($pic)
           while ($rows = mysqli_fetch_assoc($result)) {
           ?>
 
-            <option value="<?php echo htmlspecialchars($rows['name']); ?>"><?php echo htmlspecialchars($rows['name']); ?></option>
+            <option value="<?php echo htmlspecialchars($rows['id']); ?>"><?php echo htmlspecialchars($rows['name']); ?></option>
+
           <?php
           }
           ?>

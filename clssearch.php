@@ -447,8 +447,10 @@ include_once('db_conn.php');
 						</tr>
 						<?php
 						$name = $_SESSION['name'];
-						$query = "SELECT * FROM sworkshop WHERE classteacher='$name'";
-						$result = mysqli_query($conn, $query);
+						$stmt = mysqli_prepare($conn, "SELECT * FROM sworkshop WHERE classteacher_id = ?");
+						mysqli_stmt_bind_param($stmt, "s", $facid);
+						mysqli_stmt_execute($stmt);
+						$result = mysqli_stmt_get_result($stmt);
 						while ($rows = mysqli_fetch_assoc($result)) {
 						?>
 							<tr>

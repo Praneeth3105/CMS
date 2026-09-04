@@ -477,9 +477,11 @@ include_once('db_conn.php');
 							<th style="width:6%;">Download</th>
 						</tr>
 						<?php
-						$name = $_SESSION['name'];
-						$query = "SELECT * FROM sworkshop WHERE classteacher='$name'";
-						$result = mysqli_query($conn, $query);
+						$facid = $_SESSION['id'];
+						$stmt = mysqli_prepare($conn, "SELECT * FROM sworkshop WHERE counsular_id = ?");
+						mysqli_stmt_bind_param($stmt, "s", $facid);
+						mysqli_stmt_execute($stmt);
+						$result = mysqli_stmt_get_result($stmt);
 						while ($rows = mysqli_fetch_assoc($result)) {
 						?>
 							<tr>
@@ -544,8 +546,10 @@ include_once('db_conn.php');
 							<th style="width:6%;">Download</th>
 						</tr>
 						<?php
-						$query = "SELECT * FROM sinternship WHERE classteacher='$name'";
-						$result = mysqli_query($conn, $query);
+						$stmt = mysqli_prepare($conn, "SELECT * FROM sinternship WHERE counsular_id = ?");
+						mysqli_stmt_bind_param($stmt, "s", $facid);
+						mysqli_stmt_execute($stmt);
+						$result = mysqli_stmt_get_result($stmt);
 						while ($rows = mysqli_fetch_assoc($result)) {
 						?>
 							<tr>
@@ -604,8 +608,10 @@ include_once('db_conn.php');
 							<th style="width:10%;">Class Teacher</th>
 						</tr>
 						<?php
-						$query = "SELECT * FROM sproject WHERE classteacher='$name'";
-						$result = mysqli_query($conn, $query);
+						$stmt = mysqli_prepare($conn, "SELECT * FROM sproject WHERE counsular_id = ?");
+						mysqli_stmt_bind_param($stmt, "s", $facid);
+						mysqli_stmt_execute($stmt);
+						$result = mysqli_stmt_get_result($stmt);
 						while ($rows = mysqli_fetch_assoc($result)) {
 						?>
 							<tr>
@@ -643,8 +649,10 @@ include_once('db_conn.php');
 							<th style="width:6%;">Download</th>
 						</tr>
 						<?php
-						$query = "SELECT * FROM course WHERE classteacher='$name'";
-						$result = mysqli_query($conn, $query);
+						$stmt = mysqli_prepare($conn, "SELECT * FROM course WHERE counsular_id = ?");
+						mysqli_stmt_bind_param($stmt, "s", $facid);
+						mysqli_stmt_execute($stmt);
+						$result = mysqli_stmt_get_result($stmt);
 						while ($rows = mysqli_fetch_assoc($result)) {
 						?>
 							<tr>
@@ -704,8 +712,10 @@ include_once('db_conn.php');
 							<th style="width:6%;">Download</th>
 						</tr>
 						<?php
-						$query = "SELECT * FROM extracircular WHERE classteacher='$name'";
-						$result = mysqli_query($conn, $query);
+						$stmt = mysqli_prepare($conn, "SELECT * FROM extracircular WHERE counsular_id = ?");
+						mysqli_stmt_bind_param($stmt, "s", $facid);
+						mysqli_stmt_execute($stmt);
+						$result = mysqli_stmt_get_result($stmt);
 						while ($rows = mysqli_fetch_assoc($result)) {
 						?>
 							<tr>
@@ -766,8 +776,10 @@ include_once('db_conn.php');
 							<th style="width:6%;">Download</th>
 						</tr>
 						<?php
-						$query = "SELECT * FROM cocircular WHERE classteacher='$name'";
-						$result = mysqli_query($conn, $query);
+						$stmt = mysqli_prepare($conn, "SELECT * FROM cocircular WHERE counsular_id = ?");
+						mysqli_stmt_bind_param($stmt, "s", $facid);
+						mysqli_stmt_execute($stmt);
+						$result = mysqli_stmt_get_result($stmt);
 						while ($rows = mysqli_fetch_assoc($result)) {
 						?>
 							<tr>

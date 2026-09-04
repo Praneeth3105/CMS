@@ -438,6 +438,8 @@ function resolveStudentPicUrl($pic)
     while ($row = mysqli_fetch_array($result)) {
       $_SESSION['name'] = $row['name'];
       $_SESSION['rollno'] = $row['username'];
+      $_SESSION['classteacher_id'] = $row['classteacher_id'];   // ADD
+      $_SESSION['counsular_id'] = $row['counsular_id'];          // ADD
     ?>
       <div class="profile-card">
 
