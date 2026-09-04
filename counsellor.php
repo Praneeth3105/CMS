@@ -239,7 +239,7 @@ function resolveStudentPicUrl($pic)
           while ($rows = mysqli_fetch_assoc($result)) {
           ?>
 
-            <option value="<?php echo $rows['name']; ?>"><?php echo $rows['name']; ?></option>
+            <option value="<?php echo htmlspecialchars($rows['name']); ?>"><?php echo htmlspecialchars($rows['name']); ?></option>
           <?php
           }
           ?>
@@ -274,7 +274,7 @@ function resolveStudentPicUrl($pic)
 
             <table id="myTable">
               <tr class="header">
-                <th>Check Box</th>
+                <th><input type='checkbox' id='selectAll' onclick='toggleAll(this)'>Check All</th>
                 <th>Rollno</th>
                 <th>Name</th>
                 <th>Phone Number</th>
@@ -293,16 +293,16 @@ function resolveStudentPicUrl($pic)
               while ($rows = mysqli_fetch_assoc($result)) {
               ?>
                 <tr>
-                  <td><input type='checkbox' name='check[]' value='<?php echo $rows['username']; ?>' style='width:90%;height:90%;'></td>
-                  <td><?php echo $_SESSION['un'] = $rows['username']; ?></td>
-                  <td><?php echo $rows['name']; ?></td>
-                  <td><?php echo $rows['number']; ?></td>
-                  <td><?php echo $rows['department']; ?></td>
-                  <td><?php echo $rows['year']; ?></td>
-                  <td><?php echo $rows['location']; ?></td>
-                  <td><?php echo $rows['email']; ?></td>
-                  <td><?php echo $rows['classteacher']; ?></td>
-                  <td><?php echo $rows['counsular']; ?></td>
+                  <td><input type='checkbox' name='check[]' value='<?php echo htmlspecialchars($rows['username']); ?>' style='width:90%;height:90%;'></td>
+                  <td><?php echo htmlspecialchars($_SESSION['un'] = $rows['username']); ?></td>
+                  <td><?php echo htmlspecialchars($rows['name']); ?></td>
+                  <td><?php echo htmlspecialchars($rows['number']); ?></td>
+                  <td><?php echo htmlspecialchars($rows['department']); ?></td>
+                  <td><?php echo htmlspecialchars($rows['year']); ?></td>
+                  <td><?php echo htmlspecialchars($rows['location']); ?></td>
+                  <td><?php echo htmlspecialchars($rows['email']); ?></td>
+                  <td><?php echo htmlspecialchars($rows['classteacher']); ?></td>
+                  <td><?php echo htmlspecialchars($rows['counsular']); ?></td>
                   <td><?php
                       $picUrl = resolveStudentPicUrl($rows['pic'] ?? null);
                       if ($picUrl) {
@@ -386,6 +386,26 @@ function resolveStudentPicUrl($pic)
           } else {
             tr[i].style.display = "none";
           }
+        }
+      }
+      // reset select-all when the filter changes, so it doesn't look stuck checked
+      var selectAll = document.getElementById("selectAll");
+      if (selectAll) {
+        selectAll.checked = false;
+      }
+    }
+
+    function toggleAll(source) {
+      var table = document.getElementById("myTable");
+      var tr = table.getElementsByTagName("tr");
+      for (var i = 0; i < tr.length; i++) {
+        // skip the header row and any row hidden by the year/branch filter
+        if (tr[i].classList.contains('header')) continue;
+        if (tr[i].style.display === "none") continue;
+
+        var checkbox = tr[i].querySelector("input[type='checkbox']");
+        if (checkbox) {
+          checkbox.checked = source.checked;
         }
       }
     }
