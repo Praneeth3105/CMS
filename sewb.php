@@ -110,7 +110,6 @@ if(isset($_POST['submit'])){
   $durt=$durt->format('%m months, %d days');
   
     $sql = "UPDATE sinternship SET companyname='$cn', domain='$dd', paid='$paid', tech='$tech', pic='$filename', amount='$amount', duration='$durt', startdate='$sd', enddate='$ed'  WHERE rollno='$uname' and  companyname='$wnn'";
-    // Execute query
     $res=mysqli_query($conn, $sql);
     if($res and move_uploaded_file($tempname, $folder)) {
         echo "<script>alert('Data Updated Successfully');window.location='ssearch.php';</script>";
