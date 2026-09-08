@@ -32,7 +32,6 @@ $durt = date_diff($datetime1, $datetime2);
 $durt = $durt->format('%m months, %d days');
 if (isset($_POST['submit'])) {
     $sql = "INSERT INTO sinternship (name,rollno,companyname,branch,year,startdate,enddate,duration,amount,paid,tech,pic,counsular,classteacher,domain,academic_year) VALUES ('$name','$rollno','$cn','$branch','$year','$sd','$ed','$durt','$amount','$paid','$tech','$filename','$counsular','$classteacher','$dd','$accy')";
-    // Execute query
     $res = mysqli_query($conn, $sql);
     if ($res and move_uploaded_file($tempname, $folder)) {
         echo "<script>alert('Data Uploaded Successfully');window.location='studentadd.php';</script>";
