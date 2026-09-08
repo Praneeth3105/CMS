@@ -116,7 +116,6 @@ $query5="UPDATE academic SET semtht='$file1' WHERE rollno='$uname'";
 
 }
 elseif($i=='semfo'){
-
 $query6="UPDATE academic SET semfo='$file1' WHERE rollno='$uname'";
 	$fire6=mysqli_query($conn,$query6);
 	if($fire6)
