@@ -349,5 +349,4 @@ $picUrl = resolveStudentPicUrl($row['pic'] ?? null);
         </div>
     </div>
 </body>
-
 </html>
