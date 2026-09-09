@@ -395,8 +395,6 @@ $rollno = $_SESSION['username'];
 
     <div id="demo">
 
-      <!-- ════════════ WORKSHOP ════════════ -->
-      <!-- ════════════ WORKSHOP ════════════ -->
       <div id="sec_workshop" class="section-card" style="display:none;">
         <h1>Workshops</h1>
         <p class="section-sub">All workshops you've added to your collection</p>
