@@ -65,8 +65,6 @@ text-align: center;
          echo $wnn;
          echo $in;
          $sql="DELETE FROM cocircular WHERE eventname='$wnn' and file='$in' and rollno='$uname'";
-
-
  $res=mysqli_query($conn, $sql);
     if($res) {
         unlink("images/".$in);
