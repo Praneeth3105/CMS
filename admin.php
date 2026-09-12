@@ -314,6 +314,9 @@
       <h1>Certificate <span>Management</span> System</h1>
     </div>
     <div class="topbar-actions">
+      <a href="facultydetails.php" class="n">
+        <button type="button" class="pill-btn"><i class="fas fa-chalkboard-teacher"></i> Faculty Details</button>
+      </a>
       <a href="studentdetailss.php" class="n">
         <button type="button" class="pill-btn"><i class="fas fa-user-graduate"></i> Student Details</button>
       </a>
