@@ -326,6 +326,7 @@
   <!-- ===== Hero / heading strip ===== -->
   <div class="hero-strip">
     <div class="tag">Admin Dashboard</div>
+    <div class="tag">Faculty Details</div>
     <h2>Digital Records, <span>Verified</span></h2>
   </div>
 

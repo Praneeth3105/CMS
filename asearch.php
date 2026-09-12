@@ -1,7 +1,28 @@
 <?php
 include_once('db_conn.php');
 
+// Renders a file preview cell that works for ANY file type:
+// - images show inline with lightbox
+// - PDFs show as an embedded viewer
+// - everything else (docx, xlsx, zip, mp4, etc.) shows as a generic file link
+function renderFile($path)
+{
+  if (empty($path) || trim($path) === 'images/') {
+    return "N/A";
+  }
+  $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+  $imageExts = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
+  $safePath = htmlspecialchars($path, ENT_QUOTES);
 
+  if ($ext == 'pdf') {
+    return "<embed src='$safePath' type='application/pdf' frameBorder='0' scrolling='auto' height='100' width='200'></embed>";
+  } elseif (in_array($ext, $imageExts)) {
+    return "<a href='$safePath' data-lightbox='mygallery'><img src='$safePath' width='200' height='100'></a>";
+  } else {
+    $label = $ext ? strtoupper($ext) . " File" : "File";
+    return "<a href='$safePath' target='_blank' style='display:inline-block;text-align:center;'><i style='font-size:36px' class='fa fa-file-o'></i><br>$label</a>";
+  }
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -252,7 +273,6 @@ include_once('db_conn.php');
       <div id="workshopDiv" class="optionDiv">
         <h1>Workshop</h1>
         <input type='text' id='myInput' onkeyup='myFunction()' placeholder='search by Workshop Name..' title='Type in a name'>
-        <!-- FIX: was <div class='container'>, changed to 'scroll' so it matches every other section -->
         <div class='scroll'>
           <table id='myTable'>
             <tr class='header'>
@@ -285,16 +305,7 @@ include_once('db_conn.php');
                 <td><?php echo $rows['EndDate']; ?></td>
                 <td><?php echo $rows['Duration']; ?></td>
                 <td><?php echo $rows['Place']; ?></td>
-                <td>
-                  <?php
-                  $ext = pathinfo('images/' . $rows['file'], PATHINFO_EXTENSION);
-                  if ($ext == 'pdf') {
-                    echo "<embed src='images/" . $rows['file'] . "' type='application/pdf' frameBorder='0' scrolling='auto' height='100' width='200'></embed>";
-                  } else {
-                    echo "<a href='images/" . $rows['file'] . "' data-lightbox='mygallery'><img src='images/" . $rows['file'] . "' width='200' height='100'></a>";
-                  }
-                  ?>
-                </td>
+                <td><?php echo renderFile('images/' . $rows['file']); ?></td>
                 <td><?php echo $rows['branch']; ?></td>
                 <td><?php echo $rows['year']; ?></td>
                 <td><?php echo $rows['counsular']; ?></td>
@@ -346,7 +357,7 @@ include_once('db_conn.php');
                 <td><?php echo $rows['amount']; ?></td>
                 <td><?php echo $rows['paid']; ?></td>
                 <td><?php echo $rows['tech']; ?></td>
-                <td><?php echo "<a href='images/" . $rows['pic'] . "' data-lightbox='mygallery'><img src='images/" . $rows['pic'] . "' width='200' height='100'></a>"; ?></td>
+                <td><?php echo renderFile('images/' . $rows['pic']); ?></td>
                 <td><?php echo $rows['counsular']; ?></td>
                 <td><?php echo $rows['classteacher']; ?></td>
                 <td><?php echo "<a href='images/" . $rows['pic'] . "' download><button class='btn'><i style='font-size:24px' class='fa'>&#xf019;</i></button></a>"; ?></td>
@@ -429,7 +440,7 @@ include_once('db_conn.php');
                 <td><?php echo $rows['Enddate']; ?></td>
                 <td><?php echo $rows['Duration']; ?></td>
                 <td><?php echo $rows['academicyear']; ?></td>
-                <td><?php echo "<a href='images/" . $rows['file'] . "' data-lightbox='mygallery'><img src='images/" . $rows['file'] . "' width='200' height='100'></a>"; ?></td>
+                <td><?php echo renderFile('images/' . $rows['file']); ?></td>
                 <td><?php echo $rows['branch']; ?></td>
                 <td><?php echo $rows['counsular']; ?></td>
                 <td><?php echo $rows['classteacher']; ?></td>
@@ -478,7 +489,7 @@ include_once('db_conn.php');
                 <td><?php echo $rows['dates']; ?></td>
                 <td><?php echo $rows['ie']; ?></td>
                 <td><?php echo $rows['academic_year']; ?></td>
-                <td><?php echo "<a href='images/" . $rows['file'] . "' data-lightbox='mygallery'><img src='images/" . $rows['file'] . "' width='200' height='100'></a>"; ?></td>
+                <td><?php echo renderFile('images/' . $rows['file']); ?></td>
                 <td><?php echo $rows['counsular']; ?></td>
                 <td><?php echo $rows['classteacher']; ?></td>
                 <td><?php echo "<a href='images/" . $rows['file'] . "' download><button class='btn'><i style='font-size:24px' class='fa'>&#xf019;</i></button></a>"; ?></td>
@@ -526,7 +537,7 @@ include_once('db_conn.php');
                 <td><?php echo $rows['dates']; ?></td>
                 <td><?php echo $rows['ie']; ?></td>
                 <td><?php echo $rows['academic_year']; ?></td>
-                <td><?php echo "<a href='images/" . $rows['file'] . "' data-lightbox='mygallery'><img src='images/" . $rows['file'] . "' width='200' height='100'></a>"; ?></td>
+                <td><?php echo renderFile('images/' . $rows['file']); ?></td>
                 <td><?php echo $rows['counsular']; ?></td>
                 <td><?php echo $rows['classteacher']; ?></td>
                 <td><?php echo "<a href='images/" . $rows['file'] . "' download><button class='btn'><i style='font-size:24px' class='fa'>&#xf019;</i></button></a>"; ?></td>
