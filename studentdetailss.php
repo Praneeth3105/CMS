@@ -1,6 +1,49 @@
 <?php
-        include "db_conn.php";
-        session_start();
+include "db_conn.php";
+session_start();
+
+// Resolve where a student's saved photo actually lives on disk.
+// Photos may be in the current student_profile/ folder, directly in
+// images/, or in some other legacy subfolder from before this upload
+// page existed — so after checking the two known spots, fall back to
+// searching the whole images/ tree for a file with this exact name.
+function resolveStudentPicUrl($pic)
+{
+  if (empty($pic)) {
+    return null;
+  }
+
+  $picClean = ltrim(str_replace('\\', '/', $pic), '/');
+  $needle = basename($picClean);
+
+  // Fast path: the two locations we expect.
+  $candidates = [
+    'images/student_profile/' . $needle,
+    'images/' . $picClean, // in case the DB value already includes a subfolder
+    'images/' . $needle,
+  ];
+  foreach ($candidates as $rel) {
+    if (file_exists(__DIR__ . '/' . $rel)) {
+      return $rel;
+    }
+  }
+
+  // Fallback: search every subfolder under images/ for this filename.
+  $imagesRoot = __DIR__ . '/images';
+  if (is_dir($imagesRoot)) {
+    $it = new RecursiveIteratorIterator(
+      new RecursiveDirectoryIterator($imagesRoot, FilesystemIterator::SKIP_DOTS)
+    );
+    foreach ($it as $file) {
+      if ($file->isFile() && strcasecmp($file->getFilename(), $needle) === 0) {
+        $relPath = str_replace('\\', '/', substr($file->getPathname(), strlen(__DIR__) + 1));
+        return $relPath;
+      }
+    }
+  }
+
+  return null;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -237,18 +280,27 @@
         $query = "SELECT * FROM studentdetails";
         $result = mysqli_query($conn, $query);
         while ($rows = mysqli_fetch_assoc($result)) {
+          $picUrl = resolveStudentPicUrl($rows['pic'] ?? null);
         ?>
           <tr>
-            <td><?php echo $rows['name']; ?></td>
-            <td><?php echo $rows['username']; ?></td>
-            <td><?php echo $rows['number']; ?></td>
-            <td><?php echo $rows['department']; ?></td>
-            <td><?php echo $rows['year']; ?></td>
-            <td><?php echo $rows['location']; ?></td>
-            <td><?php echo $rows['email']; ?></td>
-            <td><?php echo $rows['classteacher']; ?></td>
-            <td><?php echo $rows['counsular']; ?></td>
-            <td><?php echo "<a href='images/" . $rows['pic'] . "' data-lightbox='mygallery'><img src='images/" . $rows['pic'] . "' width='120' height='80'></a>"; ?></td>
+            <td><?php echo htmlspecialchars($rows['name']); ?></td>
+            <td><?php echo htmlspecialchars($rows['username']); ?></td>
+            <td><?php echo htmlspecialchars($rows['number']); ?></td>
+            <td><?php echo htmlspecialchars($rows['department']); ?></td>
+            <td><?php echo htmlspecialchars($rows['year']); ?></td>
+            <td><?php echo htmlspecialchars($rows['location']); ?></td>
+            <td><?php echo htmlspecialchars($rows['email']); ?></td>
+            <td><?php echo htmlspecialchars($rows['classteacher']); ?></td>
+            <td><?php echo htmlspecialchars($rows['counsular']); ?></td>
+            <td>
+              <?php if ($picUrl): ?>
+                <a href='<?php echo htmlspecialchars($picUrl); ?>' data-lightbox='mygallery'>
+                  <img src='<?php echo htmlspecialchars($picUrl); ?>' width='120' height='80'>
+                </a>
+              <?php else: ?>
+                <span style="color:#a08b6b; font-size:0.8rem;">No photo</span>
+              <?php endif; ?>
+            </td>
           </tr>
         <?php
         }
