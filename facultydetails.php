@@ -1,6 +1,50 @@
 <?php
 include "db_conn.php";
 session_start();
+
+// Resolve where a faculty member's saved photo actually lives on disk.
+// Mirrors resolveStudentPicUrl() used for students: checks the expected
+// faculty_profile/ folder and images/ root, then falls back to a
+// recursive search under images/ for a file with this exact name —
+// so it still works even if the upload folder name is different from
+// what's guessed here.
+function resolveFacultyPicUrl($pic)
+{
+    if (empty($pic)) {
+        return null;
+    }
+
+    $picClean = ltrim(str_replace('\\', '/', $pic), '/');
+    $needle = basename($picClean);
+
+    // Fast path: expected locations.
+    $candidates = [
+        'images/faculty_profile/' . $needle,
+        'images/' . $picClean, // in case the DB value already includes a subfolder
+        'images/' . $needle,
+    ];
+    foreach ($candidates as $rel) {
+        if (file_exists(__DIR__ . '/' . $rel)) {
+            return $rel;
+        }
+    }
+
+    // Fallback: search every subfolder under images/ for this filename.
+    $imagesRoot = __DIR__ . '/images';
+    if (is_dir($imagesRoot)) {
+        $it = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($imagesRoot, FilesystemIterator::SKIP_DOTS)
+        );
+        foreach ($it as $file) {
+            if ($file->isFile() && strcasecmp($file->getFilename(), $needle) === 0) {
+                $relPath = str_replace('\\', '/', substr($file->getPathname(), strlen(__DIR__) + 1));
+                return $relPath;
+            }
+        }
+    }
+
+    return null;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -8,7 +52,7 @@ session_start();
 <head>
     <meta charset="UTF-8">
     <link rel="icon" type="image/x-icon" href="icon2.png">
-    <title>Student Details | Certificate Management System</title>
+    <title>Faculty Details | Certificate Management System</title>
     <link rel="stylesheet" href="lightbox.min.css">
     <script src="lightbox-plus-jquery.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
@@ -158,7 +202,7 @@ session_start();
         table {
             border-collapse: collapse;
             width: 100%;
-            min-width: 1100px;
+            min-width: 900px;
             background: var(--cream-card);
         }
 
@@ -212,43 +256,44 @@ session_start();
     </div>
 
     <div class="page-hero">
-        <div class="eyebrow">Student Records</div>
-        <h2>Student <span class="accent">Details</span></h2>
+        <div class="eyebrow">Faculty Records</div>
+        <h2>Faculty <span class="accent">Details</span></h2>
     </div>
 
     <div class="data-wrap">
-        <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search by student name...">
+        <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search by faculty name...">
 
         <div class="scroll">
             <table id="myTable">
                 <tr class="header">
                     <th>Name</th>
-                    <th>Rollno</th>
-                    <th>Phone Number</th>
+                    <th>Faculty ID</th>
                     <th>Department</th>
                     <th>Year</th>
-                    <th>Address</th>
                     <th>Email</th>
-                    <th>Class Teacher</th>
-                    <th>Counsular</th>
                     <th>Photo</th>
                 </tr>
                 <?php
-                $query = "SELECT * FROM studentdetails";
+                $query = "SELECT * FROM faculty";
                 $result = mysqli_query($conn, $query);
                 while ($rows = mysqli_fetch_assoc($result)) {
+                    $picUrl = resolveFacultyPicUrl($rows['profile_pic'] ?? null);
                 ?>
                     <tr>
-                        <td><?php echo $rows['name']; ?></td>
-                        <td><?php echo $rows['username']; ?></td>
-                        <td><?php echo $rows['number']; ?></td>
-                        <td><?php echo $rows['department']; ?></td>
-                        <td><?php echo $rows['year']; ?></td>
-                        <td><?php echo $rows['location']; ?></td>
-                        <td><?php echo $rows['email']; ?></td>
-                        <td><?php echo $rows['classteacher']; ?></td>
-                        <td><?php echo $rows['counsular']; ?></td>
-                        <td><?php echo "<a href='images/" . $rows['pic'] . "' data-lightbox='mygallery'><img src='images/" . $rows['pic'] . "' width='120' height='80'></a>"; ?></td>
+                        <td><?php echo htmlspecialchars($rows['name']); ?></td>
+                        <td><?php echo htmlspecialchars($rows['id']); ?></td>
+                        <td><?php echo htmlspecialchars($rows['department']); ?></td>
+                        <td><?php echo htmlspecialchars($rows['year']); ?></td>
+                        <td><?php echo htmlspecialchars($rows['email']); ?></td>
+                        <td>
+                            <?php if ($picUrl): ?>
+                                <a href='<?php echo htmlspecialchars($picUrl); ?>' data-lightbox='mygallery'>
+                                    <img src='<?php echo htmlspecialchars($picUrl); ?>' width='120' height='80'>
+                                </a>
+                            <?php else: ?>
+                                <span style="color:#a08b6b; font-size:0.8rem;">No photo</span>
+                            <?php endif; ?>
+                        </td>
                     </tr>
                 <?php
                 }
