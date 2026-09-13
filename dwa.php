@@ -43,8 +43,6 @@ if (!$id || !ctype_digit((string)$id)) {
 
 $fileColumn = $allowedTables[$table];
 
-// ---- Step 1: fetch the record first, so we can (a) confirm it belongs to
-// this faculty, and (b) know the filename to remove from images/ ----
 $selectSql = "SELECT * FROM `$table` WHERE id = ? AND faculty_id = ?";
 $stmt = mysqli_prepare($conn, $selectSql);
 mysqli_stmt_bind_param($stmt, "ss", $id, $faculty_id);
@@ -59,7 +57,6 @@ if (!$row) {
     exit;
 }
 
-// ---- Step 2: delete the uploaded file from images/, if any ----
 if ($fileColumn && !empty($row[$fileColumn])) {
     $filePath = __DIR__ . '/images/' . basename($row[$fileColumn]);
     if (file_exists($filePath)) {
@@ -67,8 +64,6 @@ if ($fileColumn && !empty($row[$fileColumn])) {
     }
 }
 
-// ---- Step 3: delete the DB row — scoped to id AND faculty_id, so a
-// tampered URL can never delete someone else's record ----
 $deleteSql = "DELETE FROM `$table` WHERE id = ? AND faculty_id = ?";
 $stmt = mysqli_prepare($conn, $deleteSql);
 mysqli_stmt_bind_param($stmt, "ss", $id, $faculty_id);
