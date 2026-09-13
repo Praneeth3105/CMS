@@ -17,7 +17,6 @@ if (isset($_POST['submit'])) {
 		$_SESSION['id']        = $row['id'];
 		$_SESSION['name']      = $row['name'];
 		// add any other student fields you need, e.g. $_SESSION['course'] = $row['course'];
-
 		header("Location: studentdat.php");
 		exit();
 	} else {
@@ -30,7 +29,6 @@ if (isset($_POST['submit'])) {
 
 <!DOCTYPE html>
 <html>
-
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
