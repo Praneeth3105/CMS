@@ -324,5 +324,4 @@ function resolveFacultyPicUrl($pic)
         }
     </script>
 </body>
-
 </html>
