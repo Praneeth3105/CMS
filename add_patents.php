@@ -19,7 +19,6 @@ if (isset($_POST['submit'])) {
     $patent_type        = mysqli_real_escape_string($conn, $_POST['patent_type']);
     $filing_agency      = mysqli_real_escape_string($conn, $_POST['filing_agency']);
     $proof_link         = mysqli_real_escape_string($conn, $_POST['proof_link']);
-
     $sql = "INSERT INTO patents (academic_year, month, faculty_name, patent_details, area_of_patent, application_number, status, patent_type, filing_agency, proof_link, faculty_id)
             VALUES ('$academic_year', '$month', '$faculty_name', '$patent_details', '$area_of_patent', '$application_number', '$status', '$patent_type', '$filing_agency', '$proof_link', '$faculty_id')";
     $res = mysqli_query($conn, $sql);

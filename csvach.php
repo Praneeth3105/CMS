@@ -9,7 +9,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap');
-
         :root {
             --dark: #1a120b;
             --dark-2: #2b1d13;
@@ -140,7 +139,6 @@
             text-align: center;
             border: 1px solid rgba(212, 175, 55, 0.25);
         }
-
         .upload-card label {
             display: block;
             font-weight: 600;
@@ -413,7 +411,6 @@
             return [null, null];
         }
 
-        // "15-19 June 2025" style: shared month/year, two day numbers
         if (preg_match('/^(\d{1,2})-(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})$/', $raw, $m)) {
             $start = parseFlexibleDate($m[1] . ' ' . $m[3] . ' ' . $m[4]);
             $end = parseFlexibleDate($m[2] . ' ' . $m[3] . ' ' . $m[4]);
@@ -422,7 +419,6 @@
             }
         }
 
-        // "15-06-2026 to 19-06-2026" / "01-July-2025 to 05-07-2025" style
         $parts = preg_split('/\s+(?:to|–|—)\s+|\s+-\s+/i', $raw);
         if (count($parts) === 2) {
             $start = parseFlexibleDate($parts[0]);
