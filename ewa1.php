@@ -107,7 +107,6 @@ if(isset($_POST['submit'])){
         
     }else{
         echo "<script>alert('Data not Uploaded')</script>";
-    }
-      
+    }  
 }
 ?>
