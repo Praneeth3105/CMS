@@ -722,7 +722,5 @@ function renderFile($path)
       }
     }
   </script>
-
 </body>
-
 </html>
