@@ -332,7 +332,6 @@
     <h2>Digital Records, <span>Verified</span></h2>
   </div>
 
-  <!-- ===== Stat cards ===== -->
   <div class="stats-wrapper">
     <div class="stat-card">
       <div class="icon-circle"><i class="fas fa-users"></i></div>
@@ -343,11 +342,9 @@
         $q = "select * from faculty";
         $res = mysqli_query($conn, $q);
         $to = mysqli_num_rows($res);
-
         $q1 = "select * from studentdetails";
         $res1 = mysqli_query($conn, $q1);
         $to1 = mysqli_num_rows($res1);
-
         $total = $to + $to1;
         echo $total;
         ?>

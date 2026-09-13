@@ -17,7 +17,6 @@ function resolveFacultyPicUrl($pic)
     $picClean = ltrim(str_replace('\\', '/', $pic), '/');
     $needle = basename($picClean);
 
-    // Fast path: expected locations.
     $candidates = [
         'images/faculty_profile/' . $needle,
         'images/' . $picClean, // in case the DB value already includes a subfolder
