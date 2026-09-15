@@ -2,30 +2,32 @@
 include "db_conn.php";
 session_start();
 
-// Guard: must be logged in to change password
-if (!isset($_SESSION['username'])) {
-    header("Location: login1.php?error=" . urlencode("Please login first."));
-    exit();
-}
-
-$message = "";
+$error = "";
+$success = "";
 
 if (isset($_POST['submit'])) {
 
-    $uname = $_SESSION['username'];
-    $npsw  = mysqli_real_escape_string($conn, $_POST['psw']);
+    $rollno = mysqli_real_escape_string($conn, $_POST['rollno']);
+    $newpass = mysqli_real_escape_string($conn, $_POST['psw']);
 
-    $sql  = "UPDATE studentdetails SET password='$npsw' WHERE username='$uname'";
-    $reso = mysqli_query($conn, $sql);
+    // Check if the roll no (username) exists in studentdetails
+    $checkQuery = "SELECT * FROM studentdetails WHERE username='$rollno'";
+    $checkResult = mysqli_query($conn, $checkQuery);
 
-    if ($reso) {
-        echo "<script>
-                alert('Password Updated Successfully');
-                window.location='studentdat.php';
-              </script>";
-        exit();
+    if ($checkResult && mysqli_num_rows($checkResult) == 1) {
+
+        // Roll no exists -> update the password
+        $updateQuery = "UPDATE studentdetails SET password='$newpass' WHERE username='$rollno'";
+
+        if (mysqli_query($conn, $updateQuery)) {
+            // Redirect to login page with a success message
+            header("Location: login1.php?success=" . urlencode("Password updated successfully. Please login."));
+            exit();
+        } else {
+            $error = "Something went wrong while updating the password. Please try again.";
+        }
     } else {
-        $message = "Password Not Updated. Please try again.";
+        $error = "Roll No not found. Please check and try again.";
     }
 }
 ?>
@@ -156,6 +158,7 @@ if (isset($_POST['submit'])) {
             text-align: left;
         }
 
+        input[type=text],
         input[type=password] {
             width: 100%;
             font-family: Arial, sans-serif;
@@ -170,6 +173,7 @@ if (isset($_POST['submit'])) {
             margin-bottom: 28px;
         }
 
+        input[type=text]:focus,
         input[type=password]:focus {
             border-color: var(--gold);
         }
@@ -203,6 +207,17 @@ if (isset($_POST['submit'])) {
             font-family: Arial, sans-serif;
             font-size: 14px;
         }
+
+        .success {
+            background: #e8f7ee;
+            color: #1e7a44;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
     </style>
 </head>
 
@@ -210,23 +225,29 @@ if (isset($_POST['submit'])) {
 
     <div class="topbar">
         <h1>Certificate <span>Management</span> System</h1>
-        <a href="studentdat.php" class="n"><button type="button" class="btn btn-dark">&larr; Back</button></a>
+        <a href="login1.php" class="n"><button type="button" class="btn btn-dark">&larr; Back</button></a>
     </div>
 
     <div class="page-heading">
         <div class="eyebrow">Digital Records, Verified</div>
-        <h2>Update <span>Password</span></h2>
+        <h2>Forgot <span>Password</span></h2>
     </div>
 
     <div class="form-container">
         <div class="form-card">
 
-            <?php if ($message) { ?>
-                <div class="error"><?php echo htmlspecialchars($message); ?></div>
+            <?php if ($error) { ?>
+                <div class="error"><?php echo htmlspecialchars($error); ?></div>
+            <?php } ?>
+
+            <?php if ($success) { ?>
+                <div class="success"><?php echo htmlspecialchars($success); ?></div>
             <?php } ?>
 
             <form method='POST' action=''>
-                <label for="psw">New Password</label>
+                <label for="rollno">Enter Your Roll No</label>
+                <input type="text" placeholder="Enter Your Roll No" name="rollno" id="rollno" required>
+                <label for="psw">Enter New Password</label>
                 <input type="password" placeholder="Enter New Password" name="psw" id="psw" required>
                 <input type='submit' value='Update' name='submit'>
             </form>

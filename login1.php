@@ -29,6 +29,7 @@ if (isset($_POST['submit'])) {
 
 <!DOCTYPE html>
 <html>
+
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -197,6 +198,15 @@ if (isset($_POST['submit'])) {
 			text-align: center;
 		}
 
+		.success {
+			background: #e8f7ee;
+			color: #1e7a44;
+			border-radius: 8px;
+			padding: 10px;
+			margin-bottom: 20px;
+			text-align: center;
+		}
+
 		.back {
 			display: block;
 			text-align: center;
@@ -248,6 +258,12 @@ if (isset($_POST['submit'])) {
 					</div>
 				<?php } ?>
 
+				<?php if (isset($_GET['success'])) { ?>
+					<div class="success">
+						<?php echo htmlspecialchars($_GET['success']); ?>
+					</div>
+				<?php } ?>
+
 				<div class="input-group">
 					<label>Username</label>
 
@@ -279,7 +295,9 @@ if (isset($_POST['submit'])) {
 				</button>
 
 			</form>
-
+			<a href="fps.php" class="back">
+				🔑 Forgot Password?
+			</a>
 			<a href="index.php" class="back">
 				← Back to Home
 			</a>
