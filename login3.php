@@ -14,8 +14,7 @@ if (isset($_POST['submit'])) {
 		$row = mysqli_fetch_assoc($result);
 
 		$_SESSION['username'] = $uname;
-		// add any other admin fields you need, e.g. $_SESSION['id'] = $row['id'];
-
+		
 		header("Location: admin.php");
 		exit();
 	} else {
