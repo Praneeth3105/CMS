@@ -108,7 +108,6 @@ $durt = date_diff($datetime1, $datetime2);
 $durt=$durt->format('%m months, %d days');
 if(isset($_POST['submit'])){
     $sql = "UPDATE sworkshop SET WorkshopName='$wn', OrgName='$org', Place='$place', StartDate='$sd', EndDate='$ed', Duration='$durt', file='$filename' WHERE RollNo='$uname' and  WorkshopName='$wnn'";
-    // Execute query
     $res=mysqli_query($conn, $sql);
     if($res and move_uploaded_file($tempname, $folder)) {
         echo "<script>alert('Data Updated Successfully');window.location='ssearch.php';</script>";
