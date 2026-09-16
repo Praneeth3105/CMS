@@ -232,7 +232,6 @@ $rollno = $_SESSION['username'];
       background: var(--cream-card);
     }
 
-    /* ---------- Table ---------- */
     .scroll {
       width: 100%;
       overflow-x: auto;
