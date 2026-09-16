@@ -9,13 +9,11 @@ if (isset($_POST['submit'])) {
     $facid = mysqli_real_escape_string($conn, $_POST['facid']);
     $newpass = mysqli_real_escape_string($conn, $_POST['psw']);
 
-    // Check if the Faculty ID exists in the faculty table
     $checkQuery = "SELECT * FROM faculty WHERE id='$facid'";
     $checkResult = mysqli_query($conn, $checkQuery);
 
     if ($checkResult && mysqli_num_rows($checkResult) == 1) {
 
-        // Faculty ID exists -> update the password
         $updateQuery = "UPDATE faculty SET password='$newpass' WHERE id='$facid'";
 
         if (mysqli_query($conn, $updateQuery)) {
