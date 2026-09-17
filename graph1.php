@@ -288,8 +288,6 @@ session_start();
 						<th style="width:20%;">Certificates</th>
 					</tr>
 					<?php
-					// include "db_conn.php";
-					// session_start();
 
 					$accy = $_POST['accy'];
 					$query = "SELECT * FROM department";
