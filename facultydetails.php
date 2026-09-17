@@ -2,12 +2,6 @@
 include "db_conn.php";
 session_start();
 
-// Resolve where a faculty member's saved photo actually lives on disk.
-// Mirrors resolveStudentPicUrl() used for students: checks the expected
-// faculty_profile/ folder and images/ root, then falls back to a
-// recursive search under images/ for a file with this exact name —
-// so it still works even if the upload folder name is different from
-// what's guessed here.
 function resolveFacultyPicUrl($pic)
 {
     if (empty($pic)) {
