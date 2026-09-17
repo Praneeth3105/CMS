@@ -8,7 +8,6 @@
     $_SESSION['ie'] = $_POST['ie'];
     $_SESSION['ay'] = $_POST['ay'];
 $_SESSION['acc'] = $_POST['acc'];
-
     $filename = $_FILES["file"]["name"];
     $tempname = $_FILES["file"]["tmp_name"];
     $folder = "images/".$filename;  
