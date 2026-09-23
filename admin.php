@@ -150,8 +150,6 @@
     .hero-strip h2 span {
       color: var(--gold);
     }
-
-    /* ===== Stat cards ===== */
     .stats-wrapper {
       display: flex;
       justify-content: center;
@@ -273,7 +271,6 @@
       color: var(--dark);
     }
 
-    /* ===== Responsive ===== */
     @media only screen and (max-width: 900px) {
       .brand h1 {
         font-size: 1.15rem;
@@ -421,7 +418,6 @@
   }
   ?>
 
-
   <div class="actions-section">
     <div class="section-title">Quick <span>Actions</span></div>
     <div class="actions-grid">
@@ -484,10 +480,7 @@
           <span class="icon-badge"><i class="fas fa-clipboard-list"></i></span> Consolidated Faculty Report
         </button>
       </a>
-
     </div>
   </div>
-
 </body>
-
 </html>

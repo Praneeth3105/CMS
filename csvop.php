@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>Conference / Journal CSV Upload | Certificate Management System</title>
@@ -217,7 +216,6 @@
             overflow: hidden;
         }
 
-        /* Per-column widths tuned for the 8 conference/journal CSV fields */
         col.col-year {
             width: 100px;
         }
@@ -346,7 +344,6 @@
         $file = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
         fgetcsv($handle, 1000, ",");
-
         echo '<div class="preview-wrap">';
         echo '<h3>CSV Preview</h3>';
         echo '<div class="table-scroll">';
@@ -362,7 +359,6 @@
             <col class="col-type">
             <col class="col-link">
           </colgroup>';
-
         echo '<tr>';
         $headerLabels = [
             'Faculty ID',
@@ -379,20 +375,13 @@
             echo '<th>' . htmlspecialchars($label) . '</th>';
         }
         echo '</tr>';
-
         $success = 0;
         $failed = 0;
-
         while (($data = fgetcsv($handle, 1000, ",")) !== false) {
-
-            // 0 Faculty ID | 1 Academic Year | 2 Month | 3 Faculty Name | 4 Date
-            // 5 Organization Name | 6 Conference / Journal | 7 Type | 8 Proof Link
-
             $rowIsEmpty = count(array_filter($data, fn($v) => trim($v) !== '')) === 0;
             if ($rowIsEmpty) {
                 continue;
             }
-
             echo '<tr>';
             foreach ($data as $value) {
                 echo '<td>' . htmlspecialchars($value) . '</td>';
@@ -403,16 +392,13 @@
             $academicYear    = mysqli_real_escape_string($conn, isset($data[1]) ? trim($data[1]) : "");
             $month           = mysqli_real_escape_string($conn, isset($data[2]) ? trim($data[2]) : "");
             $facultyName     = mysqli_real_escape_string($conn, isset($data[3]) ? trim($data[3]) : "");
-
             $rawDate = isset($data[4]) ? trim($data[4]) : '';
             $dateAttended = ($rawDate !== '' && strtotime($rawDate) !== false) ? date('Y-m-d', strtotime($rawDate)) : null;
             $dateAttendedSql = $dateAttended === null ? "NULL" : "'" . mysqli_real_escape_string($conn, $dateAttended) . "'";
-
             $organization    = mysqli_real_escape_string($conn, isset($data[5]) ? trim($data[5]) : "");
             $confJournalName = mysqli_real_escape_string($conn, isset($data[6]) ? trim($data[6]) : "");
             $type            = mysqli_real_escape_string($conn, isset($data[7]) ? trim($data[7]) : "");
             $proofLink       = mysqli_real_escape_string($conn, isset($data[8]) ? trim($data[8]) : "");
-
             $sql = "INSERT INTO outside_participations
     (
         faculty_id, academic_year, month, faculty_name, date_attended,
@@ -433,24 +419,18 @@
         }
 
         fclose($handle);
-
         echo '</table>';
         echo '</div>';
-
         echo "<br>";
-
         echo '<p class="status-success"><i class="fa fa-check-circle"></i> CSV Data Uploaded Successfully.</p>';
         if ($failed > 0) {
             echo "<p class='status-error'>Failed : $failed</p>";
         }
-
         echo '</div>';
     } elseif (isset($_FILES['csvFile'])) {
         echo '<div class="preview-wrap"><p class="status-error"><i class="fa fa-times-circle"></i> Error uploading the CSV file.</p></div>';
     }
-
     $conn->close();
     ?>
 </body>
-
 </html>

@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>Patents CSV Upload | Certificate Management System</title>
@@ -181,8 +180,6 @@
             color: var(--dark);
         }
 
-        /* ============ PREVIEW / TABLE SECTION ============ */
-
         .preview-wrap {
             width: 100%;
             max-width: 1200px;
@@ -216,8 +213,6 @@
             border-radius: var(--radius);
             overflow: hidden;
         }
-
-        /* Per-column widths tuned for the 10 patent CSV fields */
         col.col-year {
             width: 90px;
         }
@@ -324,9 +319,7 @@
             }
         }
     </style>
-
 </head>
-
 <body>
 
     <div class="topbar">
@@ -349,12 +342,10 @@
     </div>
     <?php
     include "db_conn.php";
-
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
         $file = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
         fgetcsv($handle, 1000, ",");
-
         echo '<div class="preview-wrap">';
         echo '<h3>CSV Preview</h3>';
         echo '<div class="table-scroll">';
@@ -372,7 +363,6 @@
             <col class="col-agency">
             <col class="col-proof">
           </colgroup>';
-
         echo '<tr>';
         $headerLabels = [
             'Faculty ID',
@@ -391,27 +381,18 @@
             echo '<th>' . htmlspecialchars($label) . '</th>';
         }
         echo '</tr>';
-
         $success = 0;
         $failed = 0;
-
         while (($data = fgetcsv($handle, 1000, ",")) !== false) {
-
-            // 0 Faculty ID | 1 Academic Year | 2 Month | 3 Name of the Faculty | 4 Patent Details
-            // 5 Area of the Patent Filed/Obtained | 6 Application Number | 7 Status
-            // 8 Type (Publication/Grant/Design) | 9 Filing Agency | 10 Proof Link
-
             $rowIsEmpty = count(array_filter($data, fn($v) => trim($v) !== '')) === 0;
             if ($rowIsEmpty) {
                 continue;
             }
-
             echo '<tr>';
             foreach ($data as $value) {
                 echo '<td>' . htmlspecialchars($value) . '</td>';
             }
             echo '</tr>';
-
             $facultyId         = mysqli_real_escape_string($conn, isset($data[0]) ? trim($data[0]) : "");
             $academicYear      = mysqli_real_escape_string($conn, isset($data[1]) ? trim($data[1]) : "");
             $month             = mysqli_real_escape_string($conn, isset($data[2]) ? trim($data[2]) : "");
@@ -423,7 +404,6 @@
             $patentType        = mysqli_real_escape_string($conn, isset($data[8]) ? trim($data[8]) : "");
             $filingAgency      = mysqli_real_escape_string($conn, isset($data[9]) ? trim($data[9]) : "");
             $proofLink         = mysqli_real_escape_string($conn, isset($data[10]) ? trim($data[10]) : "");
-
             $sql = "INSERT INTO patents
     (
         faculty_id, academic_year, month, faculty_name, patent_details,
@@ -442,27 +422,19 @@
                 echo "<p class='status-error'>MySQL Error : " . mysqli_error($conn) . "</p>";
             }
         }
-
         fclose($handle);
-
         echo '</table>';
         echo '</div>';
-
         echo "<br>";
-
         echo '<p class="status-success"><i class="fa fa-check-circle"></i> CSV Data Uploaded Successfully.</p>';
         if ($failed > 0) {
             echo "<p class='status-error'>Failed : $failed</p>";
         }
-
         echo '</div>';
     } elseif (isset($_FILES['csvFile'])) {
         echo '<div class="preview-wrap"><p class="status-error"><i class="fa fa-times-circle"></i> Error uploading the CSV file.</p></div>';
     }
-
     $conn->close();
     ?>
-
 </body>
-
 </html>

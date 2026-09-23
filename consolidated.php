@@ -1,7 +1,6 @@
 <?php
 include "db_conn.php";
 session_start();
-
 $tables = [
     'fdp'                     => ['label' => 'FDP Attended',                 'icon' => 'fa-chalkboard-teacher'],
     'fdporg'                  => ['label' => 'FDP Organized',                'icon' => 'fa-chalkboard'],
@@ -28,14 +27,13 @@ $counts = [];
 $grandTotal = 0;
 
 foreach ($tables as $tableName => $cfg) {
-    // $tableName only ever comes from the array above — never from user input.
     $q = "SELECT COUNT(*) AS cnt FROM `$tableName`";
     $res = mysqli_query($conn, $q);
     if ($res) {
         $row = mysqli_fetch_assoc($res);
         $counts[$tableName] = (int) $row['cnt'];
     } else {
-        $counts[$tableName] = null; // table missing / query failed
+        $counts[$tableName] = null; 
     }
     if ($counts[$tableName] !== null) {
         $grandTotal += $counts[$tableName];
@@ -85,7 +83,6 @@ foreach ($tables as $tableName => $cfg) {
             text-decoration: none;
         }
 
-        /* ===== Top bar ===== */
         .topbar {
             background: linear-gradient(180deg, var(--dark) 0%, var(--dark2) 100%);
             padding: 22px 5%;
@@ -149,8 +146,6 @@ foreach ($tables as $tableName => $cfg) {
             background: var(--gold-deep);
             border-color: var(--gold-deep);
         }
-
-        /* ===== Hero strip ===== */
         .hero-strip {
             background: linear-gradient(180deg, var(--dark2) 0%, var(--dark) 100%);
             padding: 30px 5% 70px;
@@ -177,7 +172,6 @@ foreach ($tables as $tableName => $cfg) {
             color: var(--gold);
         }
 
-        /* ===== Grand total card ===== */
         .total-wrapper {
             display: flex;
             justify-content: center;
@@ -224,7 +218,6 @@ foreach ($tables as $tableName => $cfg) {
             font-weight: 700;
         }
 
-        /* ===== Report grid ===== */
         .report-section {
             padding: 60px 6% 0;
         }
@@ -360,7 +353,5 @@ foreach ($tables as $tableName => $cfg) {
             <?php endforeach; ?>
         </div>
     </div>
-
 </body>
-
 </html>

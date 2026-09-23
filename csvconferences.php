@@ -216,8 +216,6 @@
             border-radius: var(--radius);
             overflow: hidden;
         }
-
-        /* Per-column widths tuned for the 10 conference CSV fields */
         col.col-year {
             width: 90px;
         }
@@ -317,16 +315,13 @@
             margin: 20px auto;
             text-align: center;
         }
-
         @media (max-width: 600px) {
             .preview-wrap {
                 padding: 0 14px;
             }
         }
     </style>
-
 </head>
-
 <body>
 
     <div class="topbar">
@@ -349,32 +344,24 @@
     </div>
     <?php
     include "db_conn.php";
-
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
 
         $file = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
-
         if ($handle) {
 
-            // Skip Header Row
             $header = fgetcsv($handle, 1000, ",");
-
             echo '<div class="preview-wrap">';
             echo "<h3>CSV Preview</h3>";
             echo '<div class="table-scroll">';
             echo "<table>";
             echo "<tr>";
-
             foreach ($header as $head) {
                 echo "<th>" . htmlspecialchars($head) . "</th>";
             }
-
             echo "</tr>";
-
             $success = 0;
             $failed = 0;
-
             while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
                 echo "<tr>";
                 foreach ($data as $value) {
@@ -392,7 +379,6 @@
                 $url                    = mysqli_real_escape_string($conn, isset($data[8]) ? trim($data[8]) : "");
                 $doi                    = mysqli_real_escape_string($conn, isset($data[9]) ? trim($data[9]) : "");
                 $proofLink              = mysqli_real_escape_string($conn, isset($data[10]) ? trim($data[10]) : "");
-
                 $sql = "INSERT INTO conferences
         (
             faculty_id,
@@ -407,7 +393,6 @@
             doi,
             proof_link
         )
-
         VALUES
         (
             '$faculty_id',
@@ -422,37 +407,27 @@
             '$doi',
             '$proofLink'
         )";
-
                 if (mysqli_query($conn, $sql)) {
                     $success++;
                 } else {
                     $failed++;
-
                     echo "<p class='status-error'>MySQL Error : " . mysqli_error($conn) . "</p>";
                 }
             }
-
             fclose($handle);
-
             echo "</table>";
             echo "</div>"; 
-
             echo "<br>";
-
             echo '<p class="status-success"><i class="fa fa-check-circle"></i> CSV Data Uploaded Successfully.</p>';
             if ($failed > 0) {
                 echo "<p class='status-error'>Failed : $failed</p>";
             }
-
             echo '</div>'; 
         } else {
             echo '<div class="preview-wrap"><p class="status-error">Unable to open CSV file.</p></div>';
         }
     }
-
     $conn->close();
     ?>
-
 </body>
-
 </html>

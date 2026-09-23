@@ -37,7 +37,6 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
             echo '<td>' . $value . '</td>';
         }
         echo '</tr>';
-
         $id = isset($data[1]) ? $data[1] : ''; 
         $name = isset($data[3]) ? $data[3] : ''; 
         $department = isset($data[2]) ? $data[2] : ''; 
@@ -47,7 +46,6 @@ if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
         $sql = "INSERT INTO faculty (id, name, department, year, password, email) VALUES ('$id', '$name', '$department', '$year', '$password', '$email')";
         $conn->query($sql);
     }
-
     echo '</table>';
     fclose($handle);
 

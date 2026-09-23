@@ -63,7 +63,6 @@ include_once('db_conn.php');
 			text-decoration: none;
 		}
 
-		/* ---------- Top bar ---------- */
 		html body .topbar {
 			display: flex;
 			justify-content: space-between;
@@ -116,7 +115,6 @@ include_once('db_conn.php');
 			box-shadow: 0 8px 18px rgba(212, 175, 55, 0.3);
 		}
 
-		/* download icon buttons inside tables */
 		#myTable .btn,
 		#myTable1 .btn,
 		#myTable2 .btn,
@@ -126,8 +124,6 @@ include_once('db_conn.php');
 			padding: 8px 14px;
 			font-size: 0.8rem;
 		}
-
-		/* ---------- Hero ---------- */
 		html body .page-hero {
 			text-align: center;
 			padding: 22px 20px 8px;
@@ -822,7 +818,6 @@ include_once('db_conn.php');
 
 		</div>
 	</div>
-
 	<script src="mainl.js"></script>
 	<script>
 		document.addEventListener("DOMContentLoaded", function() {
@@ -946,5 +941,4 @@ include_once('db_conn.php');
 		}
 	</script>
 </body>
-
 </html>

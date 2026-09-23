@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>Books Edited CSV Upload | Certificate Management System</title>
@@ -258,19 +257,12 @@
             margin: 20px auto;
             text-align: center;
         }
-
-
-        /* ================= URL CELLS ================= */
-
         td:nth-child(8),
         td:nth-child(9) {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
-
-        /* ================= LINKS ================= */
-
         td a {
             color: #0b63ce;
             text-decoration: none;
@@ -280,9 +272,6 @@
         td a:hover {
             text-decoration: underline;
         }
-
-        /* ================= MOBILE ================= */
-
         @media(max-width:768px) {
 
             table {
@@ -300,7 +289,6 @@
             }
 
         }
-
         .status-error {
             color: var(--rust);
             font-weight: 600;
@@ -312,16 +300,13 @@
             margin: 20px auto;
             text-align: center;
         }
-
         @media (max-width: 600px) {
             .preview-wrap {
                 padding: 0 14px;
             }
         }
     </style>
-
 </head>
-
 <body>
 
     <div class="topbar">
@@ -344,12 +329,10 @@
     </div>
     <?php
     include "db_conn.php";
-
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
         $file = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
         $columns = fgetcsv($handle, 1000, ",");
-
         echo '<div class="preview-wrap">';
         echo '<h3>CSV Preview</h3>';
         echo '<div class="table-scroll">';
@@ -359,14 +342,12 @@
             echo '<th>' . htmlspecialchars($column) . '</th>';
         }
         echo '</tr>';
-
         while (($data = fgetcsv($handle, 1000, ",")) !== false) {
             echo '<tr>';
             foreach ($data as $value) {
                 echo '<td>' . htmlspecialchars($value) . '</td>';
             }
             echo '</tr>';
-
             $academic_year   = isset($data[1]) ? $data[1] : '';
             $month           = isset($data[2]) ? $data[2] : '';
             $faculty_name    = isset($data[3]) ? $data[3] : '';
@@ -377,7 +358,6 @@
             $url             = isset($data[8]) ? $data[8] : '';
             $proof_link      = isset($data[9]) ? $data[9] : '';
             $faculty_id      = isset($data[0]) ? $data[0] : '';
-
             $academic_year   = $conn->real_escape_string($academic_year);
             $month           = $conn->real_escape_string($month);
             $faculty_name    = $conn->real_escape_string($faculty_name);
@@ -388,27 +368,21 @@
             $url             = $conn->real_escape_string($url);
             $proof_link      = $conn->real_escape_string($proof_link);
             $faculty_id      = $conn->real_escape_string($faculty_id);
-
             $sql = "INSERT INTO bookedited
                     (academic_year, month, faculty_name, no_of_authors, book_name, publisher_name, isbn_number, url, proof_link, faculty_id)
                 VALUES
                     ('$academic_year','$month','$faculty_name','$no_of_authors','$book_name','$publisher_name','$isbn_number','$url','$proof_link','$faculty_id')";
             $conn->query($sql);
         }
-
         echo '</table>';
         echo '</div>';
         fclose($handle);
-
         echo '<p class="status-success"><i class="fa fa-check-circle"></i> CSV Data Uploaded Successfully.</p>';
         echo '</div>';
     } elseif (isset($_FILES['csvFile'])) {
         echo '<div class="preview-wrap"><p class="status-error"><i class="fa fa-times-circle"></i> Error uploading the CSV file.</p></div>';
     }
-
     $conn->close();
     ?>
-
 </body>
-
 </html>

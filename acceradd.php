@@ -216,16 +216,12 @@ session_start();
                     <div class="child">
                         <label>Upload Aadhar Card</label>
                         <input type="file" name="aadhar" required>
-
                         <label>10th Memo</label>
                         <input type="file" name="ssc" required>
-
                         <label>Inter Memo</label>
                         <input type="file" name="inter" required>
-
                         <label>1-1 Semester</label>
                         <input type="file" name="1-1">
-
                         <label>1-2 Semester</label>
                         <input type="file" name="1-2">
                     </div>
@@ -233,31 +229,23 @@ session_start();
                     <div class="child">
                         <label>2-1 Semester</label>
                         <input type="file" name="2-1">
-
                         <label>2-2 Semester</label>
                         <input type="file" name="2-2">
-
                         <label>3-1 Semester</label>
                         <input type="file" name="3-1">
-
                         <label>3-2 Semester</label>
                         <input type="file" name="3-2">
-
                         <label>4-1 Semester</label>
                         <input type="file" name="4-1">
-
                         <label>4-2 Semester</label>
                         <input type="file" name="4-2">
                     </div>
                 </div>
-
                 <div class="submit-row">
                     <input type='submit' value='Submit' name='submit'>
                 </div>
             </form>
         </div>
     </div>
-
 </body>
-
 </html>

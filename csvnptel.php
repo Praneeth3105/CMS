@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>NPTEL CSV Upload | Certificate Management System</title>
@@ -180,9 +179,6 @@
             background: var(--gold);
             color: var(--dark);
         }
-
-        /* ============ PREVIEW / TABLE SECTION ============ */
-
         .preview-wrap {
             width: 100%;
             max-width: 1200px;
@@ -216,8 +212,6 @@
             border-radius: var(--radius);
             overflow: hidden;
         }
-
-        /* Per-column widths tuned for the 10 NPTEL CSV fields */
         col.col-year {
             width: 100px;
         }
@@ -324,9 +318,7 @@
             }
         }
     </style>
-
 </head>
-
 <body>
 
     <div class="topbar">
@@ -349,29 +341,19 @@
     </div>
     <?php
     include "db_conn.php";
-
     function parseFlexibleDate($dateStr)
     {
         $dateStr = trim((string) $dateStr);
-
         if ($dateStr === '') {
             return null;
         }
-
-        // Remove ordinal suffixes: "10th" -> "10"
         $dateStr = preg_replace('/(\d+)(st|nd|rd|th)\b/i', '$1', $dateStr);
-
-        // Normalize spaced-out dashes: "19 -Dec-23" -> "19-Dec-23"
         $dateStr = preg_replace('/\s*-\s*/', '-', $dateStr);
-
-        // Trim stray leading/trailing dashes, spaces
         $dateStr = trim($dateStr, "- \t\n\r\0\x0B");
         $dateStr = preg_replace('/\s+/', ' ', $dateStr);
-
         if ($dateStr === '') {
             return null;
         }
-
         $formats = [
             'Y-m-d',
             'Y/m/d',
@@ -399,8 +381,6 @@
                 }
             }
         }
-
-        // "Month Year" only, e.g. "June 2025" -> 1st of that month
         if (preg_match('/^[A-Za-z]+ \d{4}$/', $dateStr)) {
             $d = DateTime::createFromFormat('F Y', $dateStr);
             if ($d !== false) {

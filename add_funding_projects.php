@@ -1,7 +1,6 @@
 <?php
 include "db_conn.php";
 session_start();
-
 if (!isset($_SESSION['id'])) {
     header("Location: login.php");
     exit;
@@ -17,7 +16,6 @@ if (isset($_POST['submit'])) {
     $end_date      = mysqli_real_escape_string($conn, $_POST['end_date']);
     $duration      = mysqli_real_escape_string($conn, $_POST['duration']);
     $funding_type  = mysqli_real_escape_string($conn, $_POST['funding_type']);
-
     $sql = "INSERT INTO funding_projects (academic_year, faculty_name, title, agency_name, amount, start_date, end_date, duration, funding_type, faculty_id)
             VALUES ('$academic_year', '$faculty_name', '$title', '$agency_name', '$amount', '$start_date', '$end_date', '$duration', '$funding_type', '$faculty_id')";
     $res = mysqli_query($conn, $sql);

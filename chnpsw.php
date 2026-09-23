@@ -1,23 +1,16 @@
 <?php
 include "db_conn.php";
 session_start();
-
-// Guard: must be logged in to change password
 if (!isset($_SESSION['username'])) {
     header("Location: login1.php?error=" . urlencode("Please login first."));
     exit();
 }
-
 $message = "";
-
 if (isset($_POST['submit'])) {
-
     $uname = $_SESSION['username'];
     $npsw  = mysqli_real_escape_string($conn, $_POST['psw']);
-
     $sql  = "UPDATE studentdetails SET password='$npsw' WHERE username='$uname'";
     $reso = mysqli_query($conn, $sql);
-
     if ($reso) {
         echo "<script>
                 alert('Password Updated Successfully');
@@ -205,7 +198,6 @@ if (isset($_POST['submit'])) {
         }
     </style>
 </head>
-
 <body>
 
     <div class="topbar">
@@ -220,11 +212,9 @@ if (isset($_POST['submit'])) {
 
     <div class="form-container">
         <div class="form-card">
-
             <?php if ($message) { ?>
                 <div class="error"><?php echo htmlspecialchars($message); ?></div>
             <?php } ?>
-
             <form method='POST' action=''>
                 <label for="psw">New Password</label>
                 <input type="password" placeholder="Enter New Password" name="psw" id="psw" required>
@@ -232,7 +222,5 @@ if (isset($_POST['submit'])) {
             </form>
         </div>
     </div>
-
 </body>
-
 </html>

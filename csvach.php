@@ -214,8 +214,6 @@
             border-radius: var(--radius);
             overflow: hidden;
         }
-
-        /* Per-column widths tuned for the 7 achievement CSV fields */
         col.col-year {
             width: 100px;
         }
@@ -310,11 +308,8 @@
             }
         }
     </style>
-
 </head>
-
 <body>
-
     <div class="topbar">
         <a href="csvdataupload.php" class="n"><button type="button" class="btn" id="btn1">Back</button></a>
         <a href="logout.php" class="n"><button type="button" class="btn">Logout</button></a>
@@ -335,7 +330,6 @@
     </div>
     <?php
     include "db_conn.php";
-
     function parseFlexibleDate($dateStr)
     {
         $dateStr = trim((string) $dateStr);
@@ -343,17 +337,10 @@
         if ($dateStr === '') {
             return null;
         }
-
-        // Remove ordinal suffixes: "10th" -> "10"
         $dateStr = preg_replace('/(\d+)(st|nd|rd|th)\b/i', '$1', $dateStr);
-
-        // Normalize spaced-out dashes: "19 -Dec-23" -> "19-Dec-23"
         $dateStr = preg_replace('/\s*-\s*/', '-', $dateStr);
-
-        // Trim stray leading/trailing dashes, spaces
         $dateStr = trim($dateStr, "- \t\n\r\0\x0B");
         $dateStr = preg_replace('/\s+/', ' ', $dateStr);
-
         if ($dateStr === '') {
             return null;
         }
@@ -386,8 +373,6 @@
                 }
             }
         }
-
-        // "Month Year" only, e.g. "June 2025" -> 1st of that month
         if (preg_match('/^[A-Za-z]+ \d{4}$/', $dateStr)) {
             $d = DateTime::createFromFormat('F Y', $dateStr);
             if ($d !== false) {
@@ -395,12 +380,10 @@
             }
         }
 
-        // Last resort: PHP's own guesser
         $timestamp = strtotime($dateStr);
         if ($timestamp !== false) {
             return date('Y-m-d', $timestamp);
         }
-
         return null;
     }
 
@@ -427,8 +410,6 @@
                 return [$start, $end];
             }
         }
-
-        // Single date, no range
         $single = parseFlexibleDate($raw);
         return [$single, $single];
     }
@@ -437,7 +418,6 @@
         $file = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
         fgetcsv($handle, 1000, ",");
-
         echo '<div class="preview-wrap">';
         echo '<h3>CSV Preview</h3>';
         echo '<div class="table-scroll">';
@@ -468,7 +448,6 @@
             echo '<th>' . htmlspecialchars($label) . '</th>';
         }
         echo '</tr>';
-
         $stmt = $conn->prepare(
             "INSERT INTO achievements
                 (faculty_id, academic_year, faculty_name, award_name, description,
@@ -476,14 +455,12 @@
                  organization, achievement_link)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         );
-
         if (!$stmt) {
             echo "<p class='status-error'>Prepare failed: " . htmlspecialchars($conn->error) . "</p>";
             echo '</table></div></div>';
             $conn->close();
             exit;
         }
-
         $stmt->bind_param(
             "ssssssssss",
             $facultyId,
@@ -497,23 +474,16 @@
             $organization,
             $achievementLink
         );
-
         $success = 0;
         $failed = 0;
         $unparsedDates = [];
         $rowNum = 1;
-
         while (($data = fgetcsv($handle, 1000, ",")) !== false) {
             $rowNum++;
-
-            // 0 Faculty ID | 1 Academic Year | 2 Faculty Name | 3 Award Name
-            // 4 Description | 5 Date | 6 Organization | 7 Link for Achievement
-
             $rowIsEmpty = count(array_filter($data, fn($v) => trim($v) !== '')) === 0;
             if ($rowIsEmpty) {
                 continue;
             }
-
             $facultyId       = isset($data[0]) ? trim($data[0]) : "";
             $academicYear    = isset($data[1]) ? trim($data[1]) : "";
             $facultyName     = isset($data[2]) ? trim($data[2]) : "";
@@ -522,17 +492,14 @@
             $achievementDateRaw = isset($data[5]) ? trim($data[5]) : "";
             $organization    = isset($data[6]) ? trim($data[6]) : "";
             $achievementLink = isset($data[7]) ? trim($data[7]) : "";
-
             [$achievementDate, $achievementEndDate] = parseDateOrRange($achievementDateRaw);
             $achievementDateSql    = $achievementDate;    // null -> NULL via bind_param
             $achievementEndDateSql = $achievementEndDate;
-
             $rowHasBadDate = false;
             if ($achievementDateRaw !== '' && $achievementDate === null) {
                 $unparsedDates[] = "Row $rowNum, Date: \"$achievementDateRaw\"";
                 $rowHasBadDate = true;
             }
-
             echo '<tr>';
             foreach ($data as $colIndex => $value) {
                 $cellClass = '';
@@ -553,12 +520,9 @@
 
         $stmt->close();
         fclose($handle);
-
         echo '</table>';
         echo '</div>';
-
         echo "<br>";
-
         if ($success > 0) {
             echo '<p class="status-success"><i class="fa fa-check-circle"></i> CSV Data Uploaded Successfully. Inserted: ' . $success . '</p>';
         } else {
@@ -567,7 +531,6 @@
         if ($failed > 0) {
             echo "<p class='status-error'>Failed : $failed</p>";
         }
-
         if (!empty($unparsedDates)) {
             echo '<div class="status-warning"><i class="fa fa-exclamation-triangle"></i> ';
             echo count($unparsedDates) . ' date value(s) could not be understood and were saved as empty (highlighted above). The original text is still kept in achievement_date_raw in the database, so nothing is lost — you can fix these manually:';
@@ -577,15 +540,11 @@
             }
             echo '</ul></div>';
         }
-
         echo '</div>';
     } elseif (isset($_FILES['csvFile'])) {
         echo '<div class="preview-wrap"><p class="status-error"><i class="fa fa-times-circle"></i> Error uploading the CSV file.</p></div>';
     }
-
     $conn->close();
     ?>
-
 </body>
-
 </html>

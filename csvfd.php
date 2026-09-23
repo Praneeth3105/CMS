@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>FDP CSV Upload | Certificate Management System</title>
@@ -180,9 +179,6 @@
             background: var(--gold);
             color: var(--dark);
         }
-
-        /* ============ PREVIEW / TABLE SECTION — FIXED ============ */
-
         .preview-wrap {
             width: 100%;
             max-width: 1200px;

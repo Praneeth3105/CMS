@@ -1,12 +1,10 @@
 <?php
 include "db_conn.php";
 session_start();
-
 if (!isset($_SESSION['id'])) {
     header("Location: login.php");
     exit;
 }
-
 if (isset($_POST['submit'])) {
     $faculty_name    = $_SESSION['name'];
     $faculty_id      = $_SESSION['id'];
@@ -21,7 +19,6 @@ if (isset($_POST['submit'])) {
     $isbn            = mysqli_real_escape_string($conn, $_POST['isbn']);
     $doi             = mysqli_real_escape_string($conn, $_POST['doi']);
     $proof_link      = mysqli_real_escape_string($conn, $_POST['proof_link']);
-
     $sql = "INSERT INTO bookpublish (academic_year, month, faculty_name, no_of_authors, author_position, title, publisher, scopus_sci, url, isbn, doi, proof_link, faculty_id)
             VALUES ('$academic_year', '$month', '$faculty_name', '$no_of_authors', '$author_position', '$title', '$publisher', '$scopus_sci', '$url', '$isbn', '$doi', '$proof_link', '$faculty_id')";
     $res = mysqli_query($conn, $sql);

@@ -1,9 +1,7 @@
 <?php
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>FDP CSV Upload | Certificate Management System</title>
@@ -309,9 +307,6 @@
     function parseFlexibleDate($dateStr)
     {
         $dateStr = (string) $dateStr;
-
-        // Strip invisible/problematic characters Excel/CSV exports sometimes leave behind:
-        // BOM, non-breaking spaces, zero-width spaces, stray control chars.
         $dateStr = str_replace(["\xC2\xA0", "\xEF\xBB\xBF", "\xE2\x80\x8B"], ' ', $dateStr);
         $dateStr = preg_replace('/[\x00-\x1F\x7F]/', '', $dateStr);
         $dateStr = trim($dateStr);
@@ -319,23 +314,14 @@
         if ($dateStr === '') {
             return null;
         }
-
-        // Remove ordinal suffixes: "10th" -> "10"
         $dateStr = preg_replace('/(\d+)(st|nd|rd|th)\b/i', '$1', $dateStr);
-
-        // Normalize dot and spaced-out dash separators to a single dash:
-        // "19 -Dec-23" -> "19-Dec-23", "12.06.2024" -> "12-06-2024"
         $dateStr = preg_replace('/\s*-\s*/', '-', $dateStr);
         $dateStr = preg_replace('/(\d)\s*\.\s*(\d)/', '$1-$2', $dateStr);
-
-        // Trim stray leading/trailing dashes, spaces
         $dateStr = trim($dateStr, "- \t\n\r\0\x0B");
         $dateStr = preg_replace('/\s+/', ' ', $dateStr);
-
         if ($dateStr === '') {
             return null;
         }
-
         $formats = [
             'Y-m-d',
             'Y/m/d',
@@ -359,7 +345,6 @@
             'd.m.Y',
             'd.m.y',
         ];
-
         foreach ($formats as $fmt) {
             $d = DateTime::createFromFormat($fmt, $dateStr);
             if ($d !== false) {
@@ -370,15 +355,12 @@
             }
         }
 
-        // "Month Year" only, e.g. "June 2025" -> 1st of that month
         if (preg_match('/^[A-Za-z]+ \d{4}$/', $dateStr)) {
             $d = DateTime::createFromFormat('F Y', $dateStr);
             if ($d !== false) {
                 return $d->format('Y-m-01');
             }
         }
-
-        // Excel serial date number, e.g. "45458" (days since 1899-12-30)
         if (preg_match('/^\d{5}$/', $dateStr)) {
             $unixTimestamp = ((int) $dateStr - 25569) * 86400;
             $converted = gmdate('Y-m-d', $unixTimestamp);
@@ -386,8 +368,6 @@
                 return $converted;
             }
         }
-
-        // Last resort: PHP's own guesser
         $timestamp = strtotime($dateStr);
         if ($timestamp !== false) {
             return date('Y-m-d', $timestamp);
@@ -395,55 +375,40 @@
 
         return null;
     }
-
-    // Returns a hex dump of a string so hidden/invisible characters are visible for debugging.
     function debugRawBytes($str)
     {
         $hex = bin2hex((string) $str);
         return implode(' ', str_split($hex, 2));
     }
-
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
-
         $file   = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
-
         if ($handle) {
-
-            // Skip Header Row
             $header = fgetcsv($handle, 1000, ",");
-
             echo '<div class="preview-wrap">';
             echo "<h3>CSV Preview</h3>";
             echo '<div class="table-scroll">';
             echo "<table>";
             echo "<tr>";
-
             foreach ($header as $head) {
                 echo "<th>" . htmlspecialchars($head) . "</th>";
             }
-
             echo "</tr>";
-
             $success = 0;
             $failed  = 0;
             $unparsedDates = [];
             $rowNum = 1;
-
-            // Prepare the insert once, outside the loop
             $stmt = $conn->prepare(
                 "INSERT INTO fdp
     (name, department, fdpname, academic_year, org, mode, duration, startdate, enddate, startdate_raw, enddate_raw, certificate_link, faculty_id)
  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
             );
-
             if (!$stmt) {
                 echo "<p class='status-error'>Prepare failed: " . htmlspecialchars($conn->error) . "</p>";
                 echo "</table></div></div>";
                 $conn->close();
                 exit;
             }
-
             $stmt->bind_param(
                 "sssssssssssss",
                 $name,
@@ -460,15 +425,11 @@
                 $certificatelink,
                 $faculty_id
             );
-
             while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
                 $rowNum++;
-
-                // Skip fully blank rows
                 if (count(array_filter($data, fn($v) => trim($v) !== "")) === 0) {
                     continue;
                 }
-
                 $faculty_id  = isset($data[0]) ? trim($data[0]) : "";
                 $name        = isset($data[1]) ? trim($data[1]) : "";
                 $department  = isset($data[2]) ? trim($data[2]) : "";
@@ -480,12 +441,10 @@
                 $startRaw    = isset($data[8]) ? trim($data[8]) : "";
                 $endRaw      = isset($data[9]) ? trim($data[9]) : "";
                 $certificatelink = isset($data[10]) ? trim($data[10]) : "";
-
                 $startdate = parseFlexibleDate($startRaw);
                 $enddate   = parseFlexibleDate($endRaw);
-                $startdateParam = $startdate; // null -> stored as NULL via bind_param
+                $startdateParam = $startdate; 
                 $enddateParam   = $enddate;
-
                 $rowHasBadDate = false;
                 if ($startRaw !== '' && $startdate === null) {
                     $unparsedDates[] = "Row $rowNum, Start Date: \"$startRaw\" (bytes: " . debugRawBytes($startRaw) . ")";
@@ -504,7 +463,6 @@
                     echo "<td" . $cellClass . ">" . htmlspecialchars($value) . "</td>";
                 }
                 echo "</tr>";
-
                 if ($stmt->execute()) {
                     $success++;
                 } else {
@@ -512,14 +470,11 @@
                     echo "<p class='status-error'>MySQL Error: " . htmlspecialchars($stmt->error) . "</p>";
                 }
             }
-
             $stmt->close();
             fclose($handle);
-
             echo "</table>";
             echo "</div>";
             echo "<br>";
-
             echo '<p class="status-success"><i class="fa fa-check-circle"></i> CSV Data Uploaded Successfully. Inserted: ' . $success . '</p>';
             if ($failed > 0) {
                 echo "<p class='status-error'>Failed : $failed</p>";
@@ -534,15 +489,12 @@
                 }
                 echo '</ul></div>';
             }
-
-            echo '</div>'; // .preview-wrap
+            echo '</div>'; 
         } else {
             echo '<div class="preview-wrap"><p class="status-error">Unable to open CSV file.</p></div>';
         }
     }
-
     $conn->close();
     ?>
 </body>
-
 </html>

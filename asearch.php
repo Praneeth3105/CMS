@@ -1,10 +1,5 @@
 <?php
 include_once('db_conn.php');
-
-// Renders a file preview cell that works for ANY file type:
-// - images show inline with lightbox
-// - PDFs show as an embedded viewer
-// - everything else (docx, xlsx, zip, mp4, etc.) shows as a generic file link
 function renderFile($path)
 {
   if (empty($path) || trim($path) === 'images/') {
@@ -366,8 +361,6 @@ function renderFile($path)
           </table>
         </div>
       </div>
-
-      <!-- ================= PROJECT ================= -->
       <div id="projectDiv" class="optionDiv">
         <h1>Project</h1>
         <input type='text' id='myInput2' onkeyup='myFunction2()' placeholder='search by Project Name..' title='Type in a name'>
@@ -404,8 +397,6 @@ function renderFile($path)
           </table>
         </div>
       </div>
-
-      <!-- ================= CERTIFICATE ================= -->
       <div id="certificateDiv" class="optionDiv">
         <h1>Certificates</h1>
         <input type='text' id='myInput3' onkeyup='myFunction3()' placeholder='search for Name of Certificate..' title='Type in a name'>

@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>Professional Membership CSV Upload | Certificate Management System</title>
@@ -180,9 +179,6 @@
             background: var(--gold);
             color: var(--dark);
         }
-
-        /* ============ PREVIEW / TABLE SECTION ============ */
-
         .preview-wrap {
             width: 100%;
             max-width: 1300px;
@@ -216,8 +212,6 @@
             border-radius: var(--radius);
             overflow: hidden;
         }
-
-        /* Per-column widths tuned for the 9 professional-membership CSV fields */
         col.col-facultyid {
             width: 110px;
         }
@@ -279,7 +273,6 @@
             word-break: normal;
             overflow-wrap: break-word;
             max-height: 0;
-            /* forces cell to hug its content instead of stretching */
         }
 
         td.bad-date {
@@ -352,9 +345,7 @@
             }
         }
     </style>
-
 </head>
-
 <body>
 
     <div class="topbar">
@@ -377,30 +368,23 @@
     </div>
     <?php
     include "db_conn.php";
-
     function parseFlexibleDate($dateStr)
     {
         $dateStr = (string) $dateStr;
         $dateStr = str_replace(["\xC2\xA0", "\xEF\xBB\xBF", "\xE2\x80\x8B"], ' ', $dateStr);
         $dateStr = preg_replace('/[\x00-\x1F\x7F]/', '', $dateStr);
         $dateStr = trim($dateStr);
-
         if ($dateStr === '') {
             return null;
         }
-
         $dateStr = preg_replace('/(\d+)(st|nd|rd|th)\b/i', '$1', $dateStr);
-
         $dateStr = preg_replace('/\s*-\s*/', '-', $dateStr);
         $dateStr = preg_replace('/(\d)\s*\.\s*(\d)/', '$1-$2', $dateStr);
-
         $dateStr = trim($dateStr, "- \t\n\r\0\x0B");
         $dateStr = preg_replace('/\s+/', ' ', $dateStr);
-
         if ($dateStr === '') {
             return null;
         }
-
         $formats = [
             'Y-m-d',
             'Y/m/d',
@@ -424,7 +408,6 @@
             'd.m.Y',
             'd.m.y',
         ];
-
         foreach ($formats as $fmt) {
             $d = DateTime::createFromFormat($fmt, $dateStr);
             if ($d !== false) {
@@ -434,14 +417,12 @@
                 }
             }
         }
-
         if (preg_match('/^[A-Za-z]+ \d{4}$/', $dateStr)) {
             $d = DateTime::createFromFormat('F Y', $dateStr);
             if ($d !== false) {
                 return $d->format('Y-m-01');
             }
         }
-
         if (preg_match('/^\d{5}$/', $dateStr)) {
             $unixTimestamp = ((int) $dateStr - 25569) * 86400;
             $converted = gmdate('Y-m-d', $unixTimestamp);
@@ -453,26 +434,18 @@
         if ($timestamp !== false) {
             return date('Y-m-d', $timestamp);
         }
-
         return null;
     }
-
     function debugRawBytes($str)
     {
         $hex = bin2hex((string) $str);
         return implode(' ', str_split($hex, 2));
     }
-
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
         $file = $_FILES['csvFile']['tmp_name'];
-
-        // Handle files that use old Mac (\r only) or Windows (\r\n) line endings
-        // so fgetcsv doesn't leave stray blank/tall rows.
         ini_set('auto_detect_line_endings', '1');
-
         $handle = fopen($file, "r");
         fgetcsv($handle, 1000, ",");
-
         echo '<div class="preview-wrap">';
         echo '<h3>CSV Preview</h3>';
         echo '<div class="table-scroll">';
@@ -535,29 +508,21 @@
             $endDateRaw,
             $proofLink
         );
-
         $success = 0;
         $failed = 0;
         $unparsedDates = [];
         $rowNum = 1;
-
         while (($data = fgetcsv($handle, 1000, ",")) !== false) {
             $rowNum++;
-
-            // Clean each field: trim whitespace and collapse any stray line breaks
-            // that sneak in from multi-line CSV cells, which is what was causing
-            // the tall/empty-looking rows in the preview table.
             $data = array_map(function ($v) {
                 $v = trim((string) $v);
                 $v = preg_replace('/\s+/', ' ', $v);
                 return $v;
             }, $data);
-
             $rowIsEmpty = count(array_filter($data, fn($v) => $v !== '')) === 0;
             if ($rowIsEmpty) {
                 continue;
             }
-
             $facultyId      = isset($data[0]) ? $data[0] : "";
             $facultyName    = isset($data[1]) ? $data[1] : "";
             $academicYear   = isset($data[2]) ? $data[2] : "";
@@ -567,12 +532,10 @@
             $startDateRaw   = isset($data[6]) ? $data[6] : "";
             $endDateRaw     = isset($data[7]) ? $data[7] : "";
             $proofLink      = isset($data[8]) ? $data[8] : "";
-
             $startDate = parseFlexibleDate($startDateRaw);
             $endDate   = parseFlexibleDate($endDateRaw);
-            $startDateSql = $startDate; // null -> stored as NULL via bind_param
+            $startDateSql = $startDate; 
             $endDateSql   = $endDate;
-
             $rowHasBadDate = false;
             if ($startDateRaw !== '' && $startDate === null) {
                 $unparsedDates[] = "Row $rowNum, Start Date: \"$startDateRaw\" (bytes: " . debugRawBytes($startDateRaw) . ")";
@@ -592,7 +555,6 @@
                 echo '<td' . $cellClass . '>' . htmlspecialchars($value) . '</td>';
             }
             echo '</tr>';
-
             if ($stmt->execute()) {
                 $success++;
             } else {
@@ -600,15 +562,11 @@
                 echo "<p class='status-error'>MySQL Error : " . htmlspecialchars($stmt->error) . "</p>";
             }
         }
-
         $stmt->close();
         fclose($handle);
-
         echo '</table>';
         echo '</div>';
-
         echo "<br>";
-
         if ($success > 0) {
             echo '<p class="status-success"><i class="fa fa-check-circle"></i> CSV Data Uploaded Successfully. Inserted: ' . $success . '</p>';
         } else {
@@ -617,7 +575,6 @@
         if ($failed > 0) {
             echo "<p class='status-error'>Failed : $failed</p>";
         }
-
         if (!empty($unparsedDates)) {
             echo '<div class="status-warning"><i class="fa fa-exclamation-triangle"></i> ';
             echo count($unparsedDates) . ' date value(s) could not be understood and were saved as empty (highlighted above). The original text is still kept in start_date_raw / end_date_raw in the database, so nothing is lost — you can fix these manually:';
@@ -627,14 +584,11 @@
             }
             echo '</ul></div>';
         }
-
         echo '</div>';
     } elseif (isset($_FILES['csvFile'])) {
         echo '<div class="preview-wrap"><p class="status-error"><i class="fa fa-times-circle"></i> Error uploading the CSV file.</p></div>';
     }
-
     $conn->close();
     ?>
 </body>
-
 </html>

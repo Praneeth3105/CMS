@@ -1,7 +1,6 @@
 <?php
 include "db_conn.php";
 session_start();
-
 if (!isset($_SESSION['id'])) {
     header("Location: login.php");
     exit;
@@ -16,7 +15,6 @@ if (isset($_POST['submit'])) {
     $conference_journal_name  = mysqli_real_escape_string($conn, $_POST['conference_journal_name']);
     $type                     = mysqli_real_escape_string($conn, $_POST['type']);
     $proof_link               = mysqli_real_escape_string($conn, $_POST['proof_link']);
-
     $sql = "INSERT INTO outside_participations (academic_year, month, faculty_name, date_attended, organization, conference_journal_name, type, proof_link, faculty_id)
             VALUES ('$academic_year', '$month', '$faculty_name', '$date_attended', '$organization', '$conference_journal_name', '$type', '$proof_link', '$faculty_id')";
     $res = mysqli_query($conn, $sql);

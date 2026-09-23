@@ -5,7 +5,6 @@ if (!isset($_SESSION['id'])) {
     header("Location: login.php");
     exit;
 }
-
 if (isset($_POST['submit'])) {
     $faculty_name   = $_SESSION['name'];
     $faculty_id     = $_SESSION['id'];
@@ -15,7 +14,6 @@ if (isset($_POST['submit'])) {
     $textbook_name  = mysqli_real_escape_string($conn, $_POST['textbook_name']);
     $publisher_name = mysqli_real_escape_string($conn, $_POST['publisher_name']);
     $url            = mysqli_real_escape_string($conn, $_POST['url']);
-
     $sql = "INSERT INTO textbook (academic_year, month, faculty_name, main_editor, textbook_name, publisher_name, url, faculty_id)
             VALUES ('$academic_year', '$month', '$faculty_name', '$main_editor', '$textbook_name', '$publisher_name', '$url', '$faculty_id')";
     $res = mysqli_query($conn, $sql);

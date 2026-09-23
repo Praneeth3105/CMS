@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>Working Models CSV Upload | Certificate Management System</title>
@@ -180,9 +179,6 @@
             background: var(--gold);
             color: var(--dark);
         }
-
-        /* ============ PREVIEW / TABLE SECTION ============ */
-
         .preview-wrap {
             width: 100%;
             max-width: 1200px;
@@ -216,8 +212,6 @@
             border-radius: var(--radius);
             overflow: hidden;
         }
-
-        /* Per-column widths tuned for the 6 working-model CSV fields */
         col.col-year {
             width: 110px;
         }
@@ -301,16 +295,13 @@
             margin: 20px auto;
             text-align: center;
         }
-
         @media (max-width: 600px) {
             .preview-wrap {
                 padding: 0 14px;
             }
         }
     </style>
-
 </head>
-
 <body>
 
     <div class="topbar">
@@ -333,12 +324,10 @@
     </div>
     <?php
     include "db_conn.php";
-
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
         $file = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
         fgetcsv($handle, 1000, ",");
-
         echo '<div class="preview-wrap">';
         echo '<h3>CSV Preview</h3>';
         echo '<div class="table-scroll">';
@@ -352,7 +341,6 @@
             <col class="col-domain">
             <col class="col-link">
           </colgroup>';
-
         echo '<tr>';
         $headerLabels = [
             'Faculty ID',
@@ -367,14 +355,9 @@
             echo '<th>' . htmlspecialchars($label) . '</th>';
         }
         echo '</tr>';
-
         $success = 0;
         $failed = 0;
-
         while (($data = fgetcsv($handle, 1000, ",")) !== false) {
-
-            // 0 Faculty ID | 1 Academic Year | 2 Model Name | 3 Duration
-            // 4 No. of Students | 5 Domain Name | 6 Proof Link
 
             $rowIsEmpty = count(array_filter($data, fn($v) => trim($v) !== '')) === 0;
             if ($rowIsEmpty) {
@@ -390,13 +373,10 @@
             $facultyId     = mysqli_real_escape_string($conn, isset($data[0]) ? trim($data[0]) : "");
             $academicYear  = mysqli_real_escape_string($conn, isset($data[1]) ? trim($data[1]) : "");
             $modelName     = mysqli_real_escape_string($conn, isset($data[2]) ? trim($data[2]) : "");
-            // Duration accepted as-is, in whatever format the CSV has — no
-            // parsing, so nothing here can fail on a weird format.
             $duration      = mysqli_real_escape_string($conn, isset($data[3]) ? trim($data[3]) : "");
             $studentsCount = mysqli_real_escape_string($conn, isset($data[4]) ? trim($data[4]) : "");
             $domainName    = mysqli_real_escape_string($conn, isset($data[5]) ? trim($data[5]) : "");
             $proofLink     = mysqli_real_escape_string($conn, isset($data[6]) ? trim($data[6]) : "");
-
             $sql = "INSERT INTO working_models
     (
         faculty_id, academic_year, model_name, duration,
@@ -415,26 +395,19 @@
                 echo "<p class='status-error'>MySQL Error : " . mysqli_error($conn) . "</p>";
             }
         }
-
         fclose($handle);
-
         echo '</table>';
         echo '</div>';
-
         echo "<br>";
-
         echo '<p class="status-success"><i class="fa fa-check-circle"></i> CSV Data Uploaded Successfully.</p>';
         if ($failed > 0) {
             echo "<p class='status-error'>Failed : $failed</p>";
         }
-
         echo '</div>';
     } elseif (isset($_FILES['csvFile'])) {
         echo '<div class="preview-wrap"><p class="status-error"><i class="fa fa-times-circle"></i> Error uploading the CSV file.</p></div>';
     }
-
     $conn->close();
     ?>
 </body>
-
 </html>

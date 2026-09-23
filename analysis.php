@@ -219,10 +219,8 @@ session_start();
 				<input type="submit" name="submit" id="bb">
 			</form>
 		</div>
-
 		<br>
 		<a href="graph.php" class="n"><button type="button" class="btn" id="btn1">Graph Analysis</button></a>
-
 		<br><br>
 		<h1>Faculty Details</h1>
 		<?php
@@ -349,8 +347,6 @@ session_start();
 							<th style="width:20%;">Certificates</th>
 						</tr>
 						<?php
-						#session_start();
-						#$name=$_SESSION['name'];
 						$query = "SELECT * FROM studentdetails WHERE  department='$branch' and year='$year' ";
 						$result = mysqli_query($conn, $query);
 						while ($rows = mysqli_fetch_assoc($result)) {

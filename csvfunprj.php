@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>Funding Projects CSV Upload | Certificate Management System</title>
@@ -216,8 +215,6 @@
             border-radius: var(--radius);
             overflow: hidden;
         }
-
-        /* Per-column widths tuned for the 9 funding-projects CSV fields */
         col.col-year {
             width: 100px;
         }
@@ -320,9 +317,7 @@
             }
         }
     </style>
-
 </head>
-
 <body>
 
     <div class="topbar">
@@ -345,37 +340,23 @@
     </div>
     <?php
     include "db_conn.php";
-
     function parseFlexibleDate($dateStr)
     {
         $dateStr = (string) $dateStr;
-
-        // Strip invisible/problematic characters Excel/CSV exports sometimes leave behind:
-        // BOM, non-breaking spaces, zero-width spaces, stray control chars.
         $dateStr = str_replace(["\xC2\xA0", "\xEF\xBB\xBF", "\xE2\x80\x8B"], ' ', $dateStr);
         $dateStr = preg_replace('/[\x00-\x1F\x7F]/', '', $dateStr);
         $dateStr = trim($dateStr);
-
         if ($dateStr === '') {
             return null;
         }
-
-        // Remove ordinal suffixes: "10th" -> "10"
         $dateStr = preg_replace('/(\d+)(st|nd|rd|th)\b/i', '$1', $dateStr);
-
-        // Normalize dot and spaced-out dash separators to a single dash:
-        // "19 -Dec-23" -> "19-Dec-23", "12.06.2024" -> "12-06-2024"
         $dateStr = preg_replace('/\s*-\s*/', '-', $dateStr);
         $dateStr = preg_replace('/(\d)\s*\.\s*(\d)/', '$1-$2', $dateStr);
-
-        // Trim stray leading/trailing dashes, spaces
         $dateStr = trim($dateStr, "- \t\n\r\0\x0B");
         $dateStr = preg_replace('/\s+/', ' ', $dateStr);
-
         if ($dateStr === '') {
             return null;
         }
-
         $formats = [
             'Y-m-d',
             'Y/m/d',
@@ -409,16 +390,12 @@
                 }
             }
         }
-
-        // "Month Year" only, e.g. "June 2025" -> 1st of that month
         if (preg_match('/^[A-Za-z]+ \d{4}$/', $dateStr)) {
             $d = DateTime::createFromFormat('F Y', $dateStr);
             if ($d !== false) {
                 return $d->format('Y-m-01');
             }
         }
-
-        // Excel serial date number, e.g. "45458" (days since 1899-12-30)
         if (preg_match('/^\d{5}$/', $dateStr)) {
             $unixTimestamp = ((int) $dateStr - 25569) * 86400;
             $converted = gmdate('Y-m-d', $unixTimestamp);
@@ -426,17 +403,12 @@
                 return $converted;
             }
         }
-
-        // Last resort: PHP's own guesser
         $timestamp = strtotime($dateStr);
         if ($timestamp !== false) {
             return date('Y-m-d', $timestamp);
         }
-
         return null;
     }
-
-    // Returns a hex dump of a string so hidden/invisible characters are visible for debugging.
     function debugRawBytes($str)
     {
         $hex = bin2hex((string) $str);
@@ -447,7 +419,6 @@
         $file = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
         fgetcsv($handle, 1000, ",");
-
         echo '<div class="preview-wrap">';
         echo '<h3>CSV Preview</h3>';
         echo '<div class="table-scroll">';
@@ -464,7 +435,6 @@
             <col class="col-duration">
             <col class="col-fundingtype">
           </colgroup>';
-
         echo '<tr>';
         $headerLabels = [
             'Faculty ID',
@@ -513,23 +483,16 @@
             $duration,
             $fundingType
         );
-
         $success = 0;
         $failed = 0;
         $unparsedDates = [];
         $rowNum = 1;
-
         while (($data = fgetcsv($handle, 1000, ",")) !== false) {
             $rowNum++;
-
-            // 0 Faculty ID | 1 Academic Year | 2 Faculty Name | 3 Title | 4 Agency Name
-            // 5 Amount | 6 Start Date | 7 End Date | 8 Duration | 9 Type of Funding
-
             $rowIsEmpty = count(array_filter($data, fn($v) => trim($v) !== '')) === 0;
             if ($rowIsEmpty) {
                 continue;
             }
-
             $facultyId    = isset($data[0]) ? trim($data[0]) : "";
             $academicYear = isset($data[1]) ? trim($data[1]) : "";
             $facultyName  = isset($data[2]) ? trim($data[2]) : "";
@@ -540,12 +503,10 @@
             $endDateRaw   = isset($data[7]) ? trim($data[7]) : "";
             $duration     = isset($data[8]) ? trim($data[8]) : "";
             $fundingType  = isset($data[9]) ? trim($data[9]) : "";
-
             $startDate = parseFlexibleDate($startDateRaw);
             $endDate   = parseFlexibleDate($endDateRaw);
-            $startDateSql = $startDate; // null -> stored as NULL via bind_param
+            $startDateSql = $startDate; 
             $endDateSql   = $endDate;
-
             $rowHasBadDate = false;
             if ($startDateRaw !== '' && $startDate === null) {
                 $unparsedDates[] = "Row $rowNum, Start Date: \"$startDateRaw\" (bytes: " . debugRawBytes($startDateRaw) . ")";
@@ -555,7 +516,6 @@
                 $unparsedDates[] = "Row $rowNum, End Date: \"$endDateRaw\" (bytes: " . debugRawBytes($endDateRaw) . ")";
                 $rowHasBadDate = true;
             }
-
             echo '<tr>';
             foreach ($data as $colIndex => $value) {
                 $cellClass = '';
@@ -565,7 +525,6 @@
                 echo '<td' . $cellClass . '>' . htmlspecialchars($value) . '</td>';
             }
             echo '</tr>';
-
             if ($stmt->execute()) {
                 $success++;
             } else {
@@ -573,15 +532,11 @@
                 echo "<p class='status-error'>MySQL Error : " . htmlspecialchars($stmt->error) . "</p>";
             }
         }
-
         $stmt->close();
         fclose($handle);
-
         echo '</table>';
         echo '</div>';
-
         echo "<br>";
-
         if ($success > 0) {
             echo '<p class="status-success"><i class="fa fa-check-circle"></i> CSV Data Uploaded Successfully. Inserted: ' . $success . '</p>';
         } else {
@@ -600,14 +555,11 @@
             }
             echo '</ul></div>';
         }
-
         echo '</div>';
     } elseif (isset($_FILES['csvFile'])) {
         echo '<div class="preview-wrap"><p class="status-error"><i class="fa fa-times-circle"></i> Error uploading the CSV file.</p></div>';
     }
-
     $conn->close();
     ?>
 </body>
-
 </html>

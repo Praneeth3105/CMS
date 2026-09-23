@@ -1,7 +1,6 @@
 <?php
 include "db_conn.php";
 session_start();
-
 if (!isset($_SESSION['id'])) {
     header("Location: login.php");
     exit;
@@ -15,7 +14,6 @@ if (isset($_POST['submit'])) {
     $achievement_date  = mysqli_real_escape_string($conn, $_POST['achievement_date']);
     $organization      = mysqli_real_escape_string($conn, $_POST['organization']);
     $achievement_link  = mysqli_real_escape_string($conn, $_POST['achievement_link']);
-
     $sql = "INSERT INTO achievements (academic_year, faculty_name, award_name, description, achievement_date, organization, achievement_link, faculty_id)
             VALUES ('$academic_year', '$faculty_name', '$award_name', '$description', '$achievement_date', '$organization', '$achievement_link', '$faculty_id')";
     $res = mysqli_query($conn, $sql);

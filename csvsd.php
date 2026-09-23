@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>Student Details CSV Upload | Certificate Management System</title>
@@ -181,8 +180,6 @@
             color: var(--dark);
         }
 
-        /* ============ PREVIEW / TABLE SECTION — FIXED ============ */
-
         .preview-wrap {
             width: 100%;
             max-width: 1200px;
@@ -278,9 +275,7 @@
             }
         }
     </style>
-
 </head>
-
 <body>
 
     <div class="topbar">
@@ -303,12 +298,10 @@
     </div>
     <?php
     include "db_conn.php";
-    // Check if a file is uploaded
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
         $file = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
         $columns = fgetcsv($handle, 1000, ",");
-
         echo '<div class="preview-wrap">';
         echo '<h3>CSV Preview</h3>';
         echo '<div class="table-scroll">';
@@ -337,24 +330,18 @@
             $id = isset($data[11]) ? $data[10] : '';
             $department = isset($data[2]) ? $data[2] : '';
             $filelinkd = isset($data[10]) ? $data[10] : '';
-
             $sql = "INSERT INTO fdp (name, fdpname, org, domain, startdate, enddate, duration, place, id, department,file) VALUES ('$name', '$fdpname', '$org', '$domain', '$startdate', '$enddate', '$duration', '$place', '$id', '$department','$filelinkd')";
             $conn->query($sql);
         }
-
         echo '</table>';
         echo '</div>';
         fclose($handle);
-
         echo '<p class="status-success"><i class="fa fa-check-circle"></i> CSV Data Uploaded Successfully.</p>';
         echo '</div>';
     } elseif (isset($_FILES['csvFile'])) {
         echo '<div class="preview-wrap"><p class="status-error"><i class="fa fa-times-circle"></i> Error uploading the CSV file.</p></div>';
     }
-
     $conn->close();
     ?>
-
 </body>
-
 </html>

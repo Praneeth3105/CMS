@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>Textbook CSV Upload | Certificate Management System</title>
@@ -181,8 +180,6 @@
             color: var(--dark);
         }
 
-        /* ============ PREVIEW / TABLE SECTION ============ */
-
         .preview-wrap {
             width: 100%;
             max-width: 1200px;
@@ -216,8 +213,6 @@
             border-radius: var(--radius);
             overflow: hidden;
         }
-
-        /* Per-column widths tuned for the 8 textbook CSV fields (incl. faculty_id) */
         col.col-facultyid {
             width: 120px;
         }
@@ -316,9 +311,7 @@
             }
         }
     </style>
-
 </head>
-
 <body>
 
     <div class="topbar">
@@ -341,16 +334,11 @@
     </div>
     <?php
     include "db_conn.php";
-
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
-
         $file = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
-
         if ($handle) {
-
             $columns = fgetcsv($handle, 1000, ",");
-
             echo '<div class="preview-wrap">';
             echo '<h3>CSV Preview</h3>';
             echo '<div class="table-scroll">';
@@ -370,24 +358,19 @@
                 echo '<th>' . htmlspecialchars($column) . '</th>';
             }
             echo '</tr>';
-
             $success = 0;
             $failed = 0;
 
             while (($data = fgetcsv($handle, 1000, ",")) !== false) {
-
-                // Skip only rows that are completely blank across every column
                 $rowIsEmpty = count(array_filter($data, fn($v) => trim($v) !== '')) === 0;
                 if ($rowIsEmpty) {
                     continue;
                 }
-
                 echo '<tr>';
                 foreach ($data as $value) {
                     echo '<td>' . htmlspecialchars($value) . '</td>';
                 }
                 echo '</tr>';
-
                 $facultyId      = mysqli_real_escape_string($conn, isset($data[0]) ? trim($data[0]) : "");
                 $academicYear   = mysqli_real_escape_string($conn, isset($data[1]) ? trim($data[1]) : "");
                 $month          = mysqli_real_escape_string($conn, isset($data[2]) ? trim($data[2]) : "");
@@ -396,7 +379,6 @@
                 $textbookName   = mysqli_real_escape_string($conn, isset($data[5]) ? trim($data[5]) : "");
                 $publisherName  = mysqli_real_escape_string($conn, isset($data[6]) ? trim($data[6]) : "");
                 $url            = mysqli_real_escape_string($conn, isset($data[7]) ? trim($data[7]) : "");
-
                 $sql = "INSERT INTO textbook
         (
             faculty_id,
@@ -431,17 +413,13 @@
             }
 
             fclose($handle);
-
             echo '</table>';
             echo '</div>';
-
             echo "<br>";
-
             echo '<p class="status-success"><i class="fa fa-check-circle"></i> CSV Data Uploaded Successfully.</p>';
             if ($failed > 0) {
                 echo "<p class='status-error'>Failed : $failed</p>";
             }
-
             echo '</div>';
         } else {
             echo '<div class="preview-wrap"><p class="status-error">Unable to open CSV file.</p></div>';
@@ -449,9 +427,7 @@
     } elseif (isset($_FILES['csvFile'])) {
         echo '<div class="preview-wrap"><p class="status-error"><i class="fa fa-times-circle"></i> Error uploading the CSV file.</p></div>';
     }
-
     $conn->close();
     ?>
 </body>
-
 </html>

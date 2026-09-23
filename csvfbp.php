@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>Books Published CSV Upload | Certificate Management System</title>
@@ -181,8 +180,6 @@
             color: var(--dark);
         }
 
-        /* ============ PREVIEW / TABLE SECTION ============ */
-
         .preview-wrap {
             width: 100%;
             max-width: 1350px;
@@ -224,75 +221,54 @@
             white-space: nowrap;
         }
 
-        /* Academic Year */
         th:nth-child(1),
         td:nth-child(1) {
             min-width: 110px;
         }
-
-        /* Month */
         th:nth-child(2),
         td:nth-child(2) {
             min-width: 90px;
         }
 
-        /* Faculty */
         th:nth-child(3),
         td:nth-child(3) {
             min-width: 180px;
-        }
-
-        /* Authors */
-        th:nth-child(4),
+        }th:nth-child(4),
         td:nth-child(4) {
             min-width: 90px;
             text-align: center;
         }
-
-        /* Main Author */
         th:nth-child(5),
         td:nth-child(5) {
             min-width: 150px;
         }
-
-        /* Title */
         th:nth-child(6),
         td:nth-child(6) {
             min-width: 260px;
         }
-
-        /* Publisher */
         th:nth-child(7),
         td:nth-child(7) {
             min-width: 180px;
         }
-
-        /* Scopus */
         th:nth-child(8),
         td:nth-child(8) {
             min-width: 120px;
             text-align: center;
         }
-
-        /* URL */
         th:nth-child(9),
         td:nth-child(9) {
             min-width: 180px;
         }
 
-        /* ISBN */
+
         th:nth-child(10),
         td:nth-child(10) {
             min-width: 180px;
         }
-
-        /* DOI */
         th:nth-child(11),
         td:nth-child(11) {
             min-width: 180px;
         }
-
-        /* Proof */
         th:nth-child(12),
         td:nth-child(12) {
             min-width: 180px;
@@ -303,7 +279,6 @@
             .preview-wrap {
                 padding: 0 10px;
             }
-
             table {
                 min-width: 1800px;
             }
@@ -317,7 +292,6 @@
             }
 
         }
-
         td {
             padding: 12px;
             font-size: 14px;
@@ -329,11 +303,9 @@
             word-break: normal;
             overflow-wrap: anywhere;
         }
-
         tr:nth-child(even) td {
             background: #faf6ec;
         }
-
         tr:hover td {
             background: var(--gold-pale);
         }
@@ -365,16 +337,13 @@
             margin: 20px auto;
             text-align: center;
         }
-
         @media (max-width: 600px) {
             .preview-wrap {
                 padding: 0 14px;
             }
         }
     </style>
-
 </head>
-
 <body>
 
     <div class="topbar">
@@ -397,12 +366,10 @@
     </div>
     <?php
     include "db_conn.php";
-
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
         $file = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
         $columns = fgetcsv($handle, 1000, ",");
-
         echo '<div class="preview-wrap">';
         echo '<h3>CSV Preview</h3>';
         echo '<div class="table-scroll">';
@@ -412,7 +379,6 @@
             echo '<th>' . htmlspecialchars($column) . '</th>';
         }
         echo '</tr>';
-
         $stmt = $conn->prepare(
             "INSERT INTO bookpublish
                 (academic_year, month, faculty_name, no_of_authors, author_position,
@@ -435,16 +401,13 @@
             $proof_link,
             $faculty_id
         );
-
         $rowCount = 0;
-
         while (($data = fgetcsv($handle, 1000, ",")) !== false) {
             echo '<tr>';
             foreach ($data as $value) {
                 echo '<td>' . htmlspecialchars($value) . '</td>';
             }
             echo '</tr>';
-
             $academic_year   = isset($data[1]) ? trim($data[1]) : '';
             $month           = isset($data[2]) ? trim($data[2]) : '';
             $faculty_name    = isset($data[3]) ? trim($data[3]) : '';
@@ -458,35 +421,26 @@
             $doi             = isset($data[11]) ? trim($data[11]) : '';
             $proof_link      = isset($data[12]) ? trim($data[12]) : '';
             $faculty_id      = isset($data[0]) ? trim($data[0]) : '';
-
             if ($academic_year === '' && $faculty_name === '' && $title === '') {
                 continue;
             }
-
             $stmt->execute();
             $rowCount++;
         }
-
         $stmt->close();
         fclose($handle);
-
         echo '</table>';
         echo '</div>';
-
         if ($rowCount > 0) {
             echo '<p class="status-success"><i class="fa fa-check-circle"></i> CSV Data Uploaded Successfully.</p>';
         } else {
             echo '<p class="status-error"><i class="fa fa-times-circle"></i> No valid rows found in the CSV.</p>';
         }
-
         echo '</div>';
     } elseif (isset($_FILES['csvFile'])) {
         echo '<div class="preview-wrap"><p class="status-error"><i class="fa fa-times-circle"></i> Error uploading the CSV file.</p></div>';
     }
-
     $conn->close();
     ?>
-
 </body>
-
 </html>

@@ -215,12 +215,9 @@
         </select>
         <label for="number">Upload File</label>
         <input type="file" name="file" id="number">
-
         <input type='submit' value='Update' name='submit'>
       </form>
     </div>
   </div>
-
 </body>
-
 </html>

@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>PhD Details CSV Upload | Certificate Management System</title>
@@ -181,8 +180,6 @@
             color: var(--dark);
         }
 
-        /* ============ PREVIEW / TABLE SECTION ============ */
-
         .preview-wrap {
             width: 100%;
             max-width: 1300px;
@@ -216,8 +213,6 @@
             border-radius: var(--radius);
             overflow: hidden;
         }
-
-        /* Per-column widths tuned for the 9 PhD-details CSV fields */
         col.col-facultyid {
             width: 110px;
         }
@@ -352,14 +347,9 @@
 
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
         $file = $_FILES['csvFile']['tmp_name'];
-
-        // Handle files that use old Mac (\r only) or Windows (\r\n) line endings
-        // so fgetcsv doesn't read the whole file as one line or leave stray blank rows.
         ini_set('auto_detect_line_endings', '1');
-
         $handle = fopen($file, "r");
         fgetcsv($handle, 1000, ",");
-
         echo '<div class="preview-wrap">';
         echo '<h3>CSV Preview</h3>';
         echo '<div class="table-scroll">';
@@ -397,10 +387,6 @@
         $failed = 0;
 
         while (($data = fgetcsv($handle, 1000, ",")) !== false) {
-
-            // Clean each field: trim whitespace and collapse any stray line breaks
-            // that sneak in from multi-line CSV cells, which is what was causing
-            // the tall/empty-looking rows.
             $data = array_map(function ($v) {
                 $v = trim((string) $v);
                 $v = preg_replace('/\s+/', ' ', $v);

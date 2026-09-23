@@ -1,12 +1,10 @@
 <?php
 include "db_conn.php";
 session_start();
-
 if (!isset($_SESSION['id'])) {
     header("Location: login.php");
     exit;
 }
-
 if (isset($_POST['submit'])) {
     $faculty_id     = $_SESSION['id'];
     $faculty_name   = $_SESSION['name'];
@@ -16,7 +14,6 @@ if (isset($_POST['submit'])) {
     $students_count = mysqli_real_escape_string($conn, $_POST['students_count']);
     $domain_name    = mysqli_real_escape_string($conn, $_POST['domain_name']);
     $proof_link     = mysqli_real_escape_string($conn, $_POST['proof_link']);
-
     $sql = "INSERT INTO working_models (academic_year, model_name, duration, students_count, domain_name, proof_link, faculty_id)
             VALUES ('$academic_year', '$model_name', '$duration', '$students_count', '$domain_name', '$proof_link', '$faculty_id')";
     $res = mysqli_query($conn, $sql);

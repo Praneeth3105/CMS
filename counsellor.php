@@ -1,12 +1,6 @@
 <?php
 include_once('db_conn.php');
 session_start();
-
-// Resolve where a student's saved photo actually lives on disk.
-// Photos may be in the current student_profile/ folder, directly in
-// images/, or some other legacy subfolder — so after checking the two
-// known spots, fall back to searching the whole images/ tree for a
-// file with this exact name.
 function resolveStudentPicUrl($pic)
 {
   if (empty($pic)) {
@@ -265,8 +259,6 @@ function resolveStudentPicUrl($pic)
           <option value="CSD">CSD</option>
         </select>
       </div>
-
-
       <h1>STUDENT DETAILS</h1>
       <div class="container">
 
@@ -389,7 +381,6 @@ function resolveStudentPicUrl($pic)
           }
         }
       }
-      // reset select-all when the filter changes, so it doesn't look stuck checked
       var selectAll = document.getElementById("selectAll");
       if (selectAll) {
         selectAll.checked = false;
@@ -400,10 +391,8 @@ function resolveStudentPicUrl($pic)
       var table = document.getElementById("myTable");
       var tr = table.getElementsByTagName("tr");
       for (var i = 0; i < tr.length; i++) {
-        // skip the header row and any row hidden by the year/branch filter
         if (tr[i].classList.contains('header')) continue;
         if (tr[i].style.display === "none") continue;
-
         var checkbox = tr[i].querySelector("input[type='checkbox']");
         if (checkbox) {
           checkbox.checked = source.checked;
@@ -412,5 +401,4 @@ function resolveStudentPicUrl($pic)
     }
   </script>
 </body>
-
 </html>

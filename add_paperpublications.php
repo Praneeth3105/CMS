@@ -1,17 +1,13 @@
 <?php
 include "db_conn.php";
 session_start();
-
 if (!isset($_SESSION['id'])) {
     header("Location: login.php");
     exit;
 }
-
 if (isset($_POST['submit'])) {
-
     $faculty_id   = $_SESSION['id'];
     $faculty_name = $_SESSION['name'];
-
     $title          = mysqli_real_escape_string($conn, $_POST['title']);
     $journal        = mysqli_real_escape_string($conn, $_POST['journal']);
     $indexing_type  = mysqli_real_escape_string($conn, $_POST['indexing_type']);
@@ -21,15 +17,12 @@ if (isset($_POST['submit'])) {
     $academic_year  = mysqli_real_escape_string($conn, $_POST['academic_year']);
     $month          = mysqli_real_escape_string($conn, $_POST['month']);
     $proof_link     = mysqli_real_escape_string($conn, $_POST['proof_link']);
-
     $sql = "INSERT INTO paperpublications (faculty_id, faculty_name, title, journal, indexing_type, volume, number, url_doi, academic_year, month, proof_link)
             VALUES ('$faculty_id', '$faculty_name', '$title', '$journal', '$indexing_type', '$volume', '$number', '$url_doi', '$academic_year', '$month', '$proof_link')";
-
     $res = mysqli_query($conn, $sql);
     if (!$res) {
         die("SQL ERROR: " . mysqli_error($conn));
     }
-
     echo "<script>alert('Data Uploaded Successfully');window.location='facultyadd.php';</script>";
     exit;
 }

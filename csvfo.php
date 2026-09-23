@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>Faculty Others CSV Upload | Certificate Management System</title>
@@ -180,9 +179,6 @@
             background: var(--gold);
             color: var(--dark);
         }
-
-        /* ============ PREVIEW / TABLE SECTION — FIXED ============ */
-
         .preview-wrap {
             width: 100%;
             max-width: 1200px;
@@ -278,9 +274,7 @@
             }
         }
     </style>
-
 </head>
-
 <body>
 
     <div class="topbar">
@@ -303,12 +297,10 @@
     </div>
     <?php
     include "db_conn.php";
-
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
         $file = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
         $columns = fgetcsv($handle, 1000, ",");
-
         echo '<div class="preview-wrap">';
         echo '<h3>CSV Preview</h3>';
         echo '<div class="table-scroll">';
@@ -318,14 +310,12 @@
             echo '<th>' . htmlspecialchars($column) . '</th>';
         }
         echo '</tr>';
-
         while (($data = fgetcsv($handle, 1000, ",")) !== false) {
             echo '<tr>';
             foreach ($data as $value) {
                 echo '<td>' . htmlspecialchars($value) . '</td>';
             }
             echo '</tr>';
-
             $id = isset($data[1]) ? $data[1] : '';
             $name = isset($data[2]) ? $data[2] : '';
             $ah = isset($data[3]) ? $data[3] : '';
@@ -335,24 +325,18 @@
             $ed = isset($data[7]) ? date('Y-m-d', strtotime($data[7])) : '';
             $filename = isset($data[8]) ? $data[8] : '';
             $durt = isset($data[9]) ? $data[9] : '';
-
             $sql = "INSERT INTO others (rollno,name,cname,ooffered,place,startdate,enddate,file,duration) VALUES ('$id','$name','$ah','$oo','$pl','$sd','$ed','$filename','$durt')";
             $conn->query($sql);
         }
-
         echo '</table>';
         echo '</div>';
         fclose($handle);
-
         echo '<p class="status-success"><i class="fa fa-check-circle"></i> CSV Data Uploaded Successfully.</p>';
         echo '</div>';
     } elseif (isset($_FILES['csvFile'])) {
         echo '<div class="preview-wrap"><p class="status-error"><i class="fa fa-times-circle"></i> Error uploading the CSV file.</p></div>';
     }
-
     $conn->close();
     ?>
-
 </body>
-
 </html>

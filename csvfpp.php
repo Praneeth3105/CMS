@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>Paper Publications CSV Upload | Certificate Management System</title>
@@ -304,13 +303,10 @@
     </div>
     <?php
     include "db_conn.php";
-
-    // Check if a file is uploaded
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
         $file = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
         $columns = fgetcsv($handle, 1000, ",");
-
         echo '<div class="preview-wrap">';
         echo '<h3>CSV Preview</h3>';
         echo '<div class="table-scroll">';
@@ -339,8 +335,6 @@
             $url_doi        = isset($data[9]) ? $data[9] : '';
             $proof_link     = isset($data[10]) ? $data[10] : '';
             $faculty_id     = isset($data[0]) ? $data[0] : '';
-
-            // Escape values before inserting (basic protection against SQL injection)
             $academic_year  = $conn->real_escape_string($academic_year);
             $month          = $conn->real_escape_string($month);
             $faculty_name   = $conn->real_escape_string($faculty_name);
@@ -352,27 +346,21 @@
             $url_doi        = $conn->real_escape_string($url_doi);
             $proof_link     = $conn->real_escape_string($proof_link);
             $faculty_id     = $conn->real_escape_string($faculty_id);
-
             $sql = "INSERT INTO paperpublications
                         (academic_year, month, faculty_name, title, journal, number, volume, indexing_type, url_doi, proof_link, faculty_id)
                     VALUES
                         ('$academic_year','$month','$faculty_name','$title','$journal','$number','$volume','$indexing_type','$url_doi','$proof_link','$faculty_id')";
             $conn->query($sql);
         }
-
         echo '</table>';
         echo '</div>';
         fclose($handle);
-
         echo '<p class="status-success"><i class="fa fa-check-circle"></i> CSV Data Uploaded Successfully.</p>';
         echo '</div>';
     } elseif (isset($_FILES['csvFile'])) {
         echo '<div class="preview-wrap"><p class="status-error"><i class="fa fa-times-circle"></i> Error uploading the CSV file.</p></div>';
     }
-
     $conn->close();
     ?>
-
 </body>
-
 </html>

@@ -1,22 +1,13 @@
 <?php
-
 include "db_conn.php";
 session_start();
-
-// Resolve where a student's saved photo actually lives on disk.
-// Photos may be in the current student_profile/ folder, directly in
-// images/, or some other legacy subfolder — so after checking the two
-// known spots, fall back to searching the whole images/ tree for a
-// file with this exact name.
 function resolveStudentPicUrl($pic)
 {
   if (empty($pic)) {
     return null;
   }
-
   $picClean = ltrim(str_replace('\\', '/', $pic), '/');
   $needle = basename($picClean);
-
   $candidates = [
     'images/student_profile/' . $needle,
     'images/' . $picClean,
@@ -27,7 +18,6 @@ function resolveStudentPicUrl($pic)
       return $rel;
     }
   }
-
   $imagesRoot = __DIR__ . '/images';
   if (is_dir($imagesRoot)) {
     $it = new RecursiveIteratorIterator(
@@ -39,7 +29,6 @@ function resolveStudentPicUrl($pic)
       }
     }
   }
-
   return null;
 }
 ?>
@@ -234,7 +223,6 @@ function resolveStudentPicUrl($pic)
         <select name='faculty' required>
           <option selected disabled value="">Faculties</option>
           <?php
-
           $query = "SELECT * FROM faculty";
           $result = mysqli_query($conn, $query);
           while ($rows = mysqli_fetch_assoc($result)) {
@@ -265,14 +253,10 @@ function resolveStudentPicUrl($pic)
           <option value="CSD">CSD</option>
         </select>
       </div>
-
-
       <h1>STUDENT DETAILS</h1>
       <div class="container">
-
         <div class="login-content">
           <div class="scroll">
-
             <table id="myTable">
               <tr class="header">
                 <th><input type='checkbox' id='selectAll' onclick='toggleAll(this)'> Check All</th>
@@ -288,7 +272,6 @@ function resolveStudentPicUrl($pic)
                 <th>Photo</th>
               </tr>
               <?php
-
               $query = "SELECT * FROM studentdetails ";
               $result = mysqli_query($conn, $query);
               while ($rows = mysqli_fetch_assoc($result)) {
@@ -312,20 +295,16 @@ function resolveStudentPicUrl($pic)
                         echo "&mdash;";
                       }
                       ?></td>
-
                 </tr>
               <?php
               }
               ?>
-
             </table>
           </div>
           <br>
           <input type='submit' value='Assign' name='submit'>
         </div>
-
       </div>
-
     </form>
   </div>
   <script src="mainl.js"></script>
@@ -333,29 +312,20 @@ function resolveStudentPicUrl($pic)
     function filterTable() {
       var yearInput = document.getElementById("year");
       var branchInput = document.getElementById("year1");
-
       var yearFilter = yearInput.value === "year" ? "" : yearInput.value.trim().toUpperCase();
       var branchFilter = branchInput.value === "Branch" ? "" : branchInput.value.trim().toUpperCase();
-
       var table = document.getElementById("myTable");
       var tr = table.getElementsByTagName("tr");
-
       for (var i = 0; i < tr.length; i++) {
         if (tr[i].classList.contains("header")) continue; // skip header row
-
         var tds = tr[i].getElementsByTagName("td");
         if (tds.length < 6) continue;
-
         var yearVal = (tds[5].textContent || tds[5].innerText).trim().toUpperCase();
         var branchVal = (tds[4].textContent || tds[4].innerText).trim().toUpperCase();
-
         var yearMatch = yearFilter === "" || yearVal === yearFilter;
         var branchMatch = branchFilter === "" || branchVal === branchFilter;
-
         tr[i].style.display = (yearMatch && branchMatch) ? "" : "none";
       }
-
-      // reset select-all when the filter changes, so it doesn't look stuck checked
       var selectAll = document.getElementById("selectAll");
       if (selectAll) {
         selectAll.checked = false;
@@ -366,7 +336,6 @@ function resolveStudentPicUrl($pic)
       var table = document.getElementById("myTable");
       var tr = table.getElementsByTagName("tr");
       for (var i = 0; i < tr.length; i++) {
-        // skip the header row and any row hidden by the year/branch filter
         if (tr[i].classList.contains('header')) continue;
         if (tr[i].style.display === "none") continue;
 
@@ -378,5 +347,4 @@ function resolveStudentPicUrl($pic)
     }
   </script>
 </body>
-
 </html>

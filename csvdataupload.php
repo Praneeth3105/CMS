@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <link rel="icon" type="image/x-icon" href="icon2.png">
@@ -8,7 +7,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap');
 
@@ -43,7 +41,6 @@
             text-decoration: none;
         }
 
-        /* ---------- Top bar ---------- */
         .topbar {
             background: linear-gradient(135deg, var(--dark) 0%, var(--dark-2) 100%);
             padding: 18px 28px;
@@ -96,8 +93,6 @@
         .topbar .btn {
             margin: 0;
         }
-
-        /* ---------- Panels ---------- */
         .panel {
             background: var(--cream-card);
             margin: 28px 32px;
@@ -106,7 +101,6 @@
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
         }
-
         .panel h3 {
             font-family: 'Playfair Display', serif;
             font-size: 2rem;
@@ -119,8 +113,6 @@
         .panel h3 .accent {
             color: var(--gold-soft);
         }
-
-        /* ---------- CSV card grid ---------- */
         .group {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -233,7 +225,6 @@
                 <div class="csv-text">FDP Organized CSV Upload</div>
             </a>
 
-
             <a href="csvfw.php" class="csv-card">
                 <div class="csv-icon"><i class="fas fa-chalkboard-teacher"></i></div>
                 <div class="csv-text">Faculty Workshop CSV</div>
@@ -312,9 +303,6 @@
                 <div class="csv-icon"><i class="fa-solid fa-person-circle-plus"></i></div>
                 <div class="csv-text">Funding Projects CSV</div>
             </a>
-
-
-
         </div>
     </div>
 
@@ -334,7 +322,5 @@
 
         </div>
     </div>
-
 </body>
-
 </html>

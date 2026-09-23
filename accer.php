@@ -21,11 +21,9 @@
       --text-muted: #6b6155;
       --border: #e6ddc9;
     }
-
     * {
       box-sizing: border-box;
     }
-
     body {
       margin: 0;
       font-family: Georgia, 'Times New Roman', serif;
@@ -359,7 +357,5 @@
       }
     }
   </script>
-
 </body>
-
 </html>

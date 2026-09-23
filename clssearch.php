@@ -37,8 +37,6 @@ include_once('db_conn.php');
 		* {
 			box-sizing: border-box;
 		}
-
-
 		html,
 		body {
 			width: 100% !important;
@@ -61,8 +59,6 @@ include_once('db_conn.php');
 		.n {
 			text-decoration: none;
 		}
-
-		/* ---------- Top bar ---------- */
 		html body .topbar {
 			display: flex;
 			justify-content: space-between;
@@ -115,8 +111,6 @@ include_once('db_conn.php');
 			transform: translateY(-1px);
 			box-shadow: 0 8px 18px rgba(212, 175, 55, 0.3);
 		}
-
-		/* download icon buttons inside tables */
 		#myTable .btn,
 		#myTable1 .btn,
 		#myTable2 .btn,
@@ -126,8 +120,6 @@ include_once('db_conn.php');
 			padding: 8px 14px;
 			font-size: 0.8rem;
 		}
-
-		/* ---------- Hero ---------- */
 		html body .page-hero {
 			text-align: center;
 			padding: 22px 20px 8px;
@@ -151,7 +143,6 @@ include_once('db_conn.php');
 			color: var(--dark);
 			margin: 0 0 8px;
 		}
-
 		.page-hero h1 .accent {
 			color: var(--gold-soft);
 		}
@@ -163,7 +154,6 @@ include_once('db_conn.php');
 			font-size: 0.95rem;
 		}
 
-		/* ---------- Container / sections ---------- */
 		html body .container {
 			max-width: 1300px !important;
 			width: 100% !important;
@@ -215,8 +205,6 @@ include_once('db_conn.php');
 			margin-right: 10px;
 			vertical-align: middle;
 		}
-
-		/* ---------- Search inputs ---------- */
 		#myInput,
 		#myInput1,
 		#myInput2,
@@ -378,21 +366,17 @@ include_once('db_conn.php');
 				flex-wrap: wrap;
 				gap: 10px;
 			}
-
 			.btn,
 			#btn1 {
 				width: 100% !important;
 				justify-content: center;
 			}
-
 			html body .container {
 				padding: 0 14px !important;
 			}
-
 			.scroll {
 				max-height: 340px;
 			}
-
 			#myInput,
 			#myInput1,
 			#myInput2,
@@ -401,16 +385,13 @@ include_once('db_conn.php');
 			#myInput5 {
 				max-width: 100%;
 			}
-
 			.wave {
 				display: none;
 			}
 		}
 	</style>
 </head>
-
 <body>
-
 	<div class="topbar">
 		<a href="facultydat.php" class="n"><button type="button" class="btn" id="btn1">Back</button></a>
 		<a href="logout.php" class="n"><button type="button" class="btn">Logout</button></a>
@@ -489,7 +470,6 @@ include_once('db_conn.php');
 					</table>
 				</div>
 			</div>
-
 			<div class="record-section">
 				<h1>Internship</h1>
 				<input type="text" id="myInput1" onkeyup="myFunction1()" placeholder="search by Internship Name.." title="Type in a name">
@@ -555,7 +535,6 @@ include_once('db_conn.php');
 					</table>
 				</div>
 			</div>
-
 			<div class="record-section">
 				<h1>Project</h1>
 				<input type="text" id="myInput2" onkeyup="myFunction2()" placeholder="search by Project Name.." title="Type in a name">
@@ -708,7 +687,6 @@ include_once('db_conn.php');
 					</table>
 				</div>
 			</div>
-
 			<div class="record-section">
 				<h1>Co Circular</h1>
 				<input type="text" id="myInput5" onkeyup="myFunction5()" placeholder="search for Name of Event.." title="Type in a name">
@@ -895,5 +873,4 @@ include_once('db_conn.php');
 		}
 	</script>
 </body>
-
 </html>

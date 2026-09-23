@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>FDP Organized CSV Upload | Certificate Management System</title>
@@ -335,21 +334,13 @@
         if ($dateStr === '') {
             return null;
         }
-
-        // Remove ordinal suffixes: "10th" -> "10"
         $dateStr = preg_replace('/(\d+)(st|nd|rd|th)\b/i', '$1', $dateStr);
-
-        // Normalize spaced-out dashes: "19 -Dec-23" -> "19-Dec-23"
         $dateStr = preg_replace('/\s*-\s*/', '-', $dateStr);
-
-        // Trim stray leading/trailing dashes, spaces
         $dateStr = trim($dateStr, "- \t\n\r\0\x0B");
         $dateStr = preg_replace('/\s+/', ' ', $dateStr);
-
         if ($dateStr === '') {
             return null;
         }
-
         $formats = [
             'Y-m-d',
             'Y/m/d',
@@ -367,7 +358,6 @@
             'j F Y',
             'd F Y',
         ];
-
         foreach ($formats as $fmt) {
             $d = DateTime::createFromFormat($fmt, $dateStr);
             if ($d !== false) {
@@ -377,31 +367,24 @@
                 }
             }
         }
-
-        // "Month Year" only, e.g. "June 2025" -> 1st of that month
         if (preg_match('/^[A-Za-z]+ \d{4}$/', $dateStr)) {
             $d = DateTime::createFromFormat('F Y', $dateStr);
             if ($d !== false) {
                 return $d->format('Y-m-01');
             }
         }
-
-        // Last resort: PHP's own guesser
         $timestamp = strtotime($dateStr);
         if ($timestamp !== false) {
             return date('Y-m-d', $timestamp);
         }
-
         return null;
     }
-
     function parseDateOrRange($raw)
     {
         $raw = trim((string) $raw);
         if ($raw === '') {
             return [null, null];
         }
-
         if (preg_match('/^(\d{1,2})-(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})$/', $raw, $m)) {
             $start = parseFlexibleDate($m[1] . ' ' . $m[3] . ' ' . $m[4]);
             $end = parseFlexibleDate($m[2] . ' ' . $m[3] . ' ' . $m[4]);
@@ -409,7 +392,6 @@
                 return [$start, $end];
             }
         }
-
         $parts = preg_split('/\s+(?:to|–|—)\s+|\s+-\s+/i', $raw);
         if (count($parts) === 2) {
             $start = parseFlexibleDate($parts[0]);
@@ -421,12 +403,10 @@
         $single = parseFlexibleDate($raw);
         return [$single, $single];
     }
-
     if (isset($_FILES['csvFile']) && $_FILES['csvFile']['error'] == 0) {
         $file = $_FILES['csvFile']['tmp_name'];
         $handle = fopen($file, "r");
         $columns = fgetcsv($handle, 1000, ",");
-
         echo '<div class="preview-wrap">';
         echo '<h3>CSV Preview</h3>';
         echo '<div class="table-scroll">';
@@ -456,14 +436,11 @@
             $certificate_link,
             $faculty_id
         );
-
         $rowCount = 0;
         $rowNum = 1; 
         $unparsedDates = [];
-
         while (($data = fgetcsv($handle, 1000, ",")) !== false) {
             $rowNum++;
-
             $academic_year    = isset($data[1]) ? trim($data[1]) : '';
             $faculty_name     = isset($data[2]) ? trim($data[2]) : '';
             $fdp_name         = isset($data[3]) ? trim($data[3]) : '';
@@ -473,19 +450,15 @@
             $duration         = isset($data[7]) ? trim($data[7]) : '';
             $certificate_link = isset($data[8]) ? trim($data[8]) : '';
             $faculty_id       = isset($data[0]) ? trim($data[0]) : '';
-
             if ($academic_year === '' && $faculty_name === '' && $fdp_name === '') {
                 continue;
             }
-
             [$start_date, $end_date] = parseDateOrRange($dates_raw);
-
             $rowHasBadDate = false;
             if ($dates_raw !== '' && $start_date === null) {
                 $unparsedDates[] = "Row $rowNum, Date(s): \"$dates_raw\"";
                 $rowHasBadDate = true;
             }
-
             echo '<tr>';
             foreach ($data as $colIndex => $value) {
                 $cellClass = '';
@@ -495,23 +468,18 @@
                 echo '<td' . $cellClass . '>' . htmlspecialchars($value) . '</td>';
             }
             echo '</tr>';
-
             $stmt->execute();
             $rowCount++;
         }
-
         $stmt->close();
         fclose($handle);
-
         echo '</table>';
         echo '</div>';
-
         if ($rowCount > 0) {
             echo '<p class="status-success"><i class="fa fa-check-circle"></i> CSV Data Uploaded Successfully.</p>';
         } else {
             echo '<p class="status-error"><i class="fa fa-times-circle"></i> No valid rows found in the CSV.</p>';
         }
-
         if (!empty($unparsedDates)) {
             echo '<div class="status-warning"><i class="fa fa-exclamation-triangle"></i> ';
             echo count($unparsedDates) . ' Date(s) value(s) could not be understood and were saved as empty (highlighted above). The original text is still kept in dates_raw in the database, so nothing is lost — you can fix these manually:';
@@ -521,15 +489,11 @@
             }
             echo '</ul></div>';
         }
-
         echo '</div>';
     } elseif (isset($_FILES['csvFile'])) {
         echo '<div class="preview-wrap"><p class="status-error"><i class="fa fa-times-circle"></i> Error uploading the CSV file.</p></div>';
     }
-
     $conn->close();
     ?>
-
 </body>
-
 </html>

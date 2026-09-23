@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <link rel="icon" type="image/x-icon" href="icon2.png">
@@ -254,7 +253,6 @@
                     <label for="email">Email</label>
                     <input type="email" placeholder="Enter Email" name="email" id="email" required>
                 </div>
-
             </div>
 
             <div class="button-area">
@@ -262,7 +260,5 @@
             </div>
         </form>
     </div>
-
 </body>
-
 </html>
