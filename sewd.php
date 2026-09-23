@@ -1,117 +1,267 @@
-<!DOCTYPE html>
-<html>
-<head>
-	<link rel="icon" type="image/x-icon" href="icon2.png">
-	<title>CERTIFICATE MAINTANCE SYSTEM</title>
-	<link rel="stylesheet" href="style2.css">
-	<link rel="stylesheet" href="style1.css">
-	<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
-	<link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet">
-	<script src="https://kit.fontawesome.com/a81368914c.js"></script>
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<style>
-.n{
-    text-decoration: none;
-}
-#btn1{
-	float: right;
- 
-}
-#btn1{
-    width: 10%;
-}
-#btn2{
-    width: 10%;
-    float: left;
-}
-h3{
-    display: inline-block;
-    margin-top: 1%;
-}
-.info{
-    margin-left: 30%;
-}
-body{
-    overflow-y: scroll;
-  
-}
-.note {
-  width: 100%;
-}
-#note1 {
- margin-left:40%;
-text-align: center;
-}
-select{
-	background-color: #2AC48F;
-	color: black;
-}
-@media only screen and (max-width: 900px) {
-   #btn1, #btn2{
-    width: 30%;
-   } 
-   .info{
-    margin-left: 20%;
+<?php
+include_once('db_conn.php');
+if (session_status() === PHP_SESSION_NONE) session_start();
+
+$rollno = $_SESSION['username'] ?? null;
+if (!$rollno) {
+    header('Location: index.php');
+    exit;
 }
 
-}
-	</style>
-</head>
-<body>
-    <a href="logout.php" class="n" ><button type="button" class="btn" id="btn1" >Logout</button></a>
-    <a href="ssearch.php" class="n" ><button type="button" class="btn" id="btn2" >Back</button></a>
-<?php
-		 include "db_conn.php";
-         session_start();
-         $uname=$_SESSION['username'];
-         $wnn=$_GET['editwn'];
-         $query="select * from course where RollNo='$uname' and  CourseName='$wnn'";
-         $result=mysqli_query($conn,$query);
-         while($row=mysqli_fetch_array($result)){
-		?>
- <form method='post' action='' id='note1' class='w3-container' enctype='multipart/form-data'><h4><p><label>Name of Institution: </label><input class='w3-input' type='text' value='<?php echo $row['OrganisationName'];?>' name='ni' required></p><br><br><p><label>Name of the Course:</label><input class='w3-input' type='text' value='<?php echo $row['CourseName'];?>' name='nc' required></p><br><p><label>Starting Date:</label><input class='w3-input' type='date' name='sd' value='<?php echo $row['StartDate'];?>' required></p><br><p><label>Ending Date:</label><input class='w3-input' type='date' name='ed' value='<?php echo $row['EndDate'];?>' required></p><br><label for='academic'>Academic Year</label><br><select class='btn' style='width:60%;' id='academic' onclick='my()' name='acc' required><option value=''>Academic Year</option><option value='2019-2020'>2019-2020</option><option value='2020-2021'>2020-2021</option><option value='2021-2022'>2021-2022</option><option value='2022-2023'>2022-2023</option><option value='2023-2024'>2023-2024</option><option value='2024-2025'>2024-2025</option><option value='2025-2026'>2025-2026</option><option value='2026-2027'>2026-2027</option><option value='2027-2028'>2027-2028</option><option value='2028-2029'>2028-2029</option><option value='2029-2030'>2029-2030</option></select><br><input type='file' name='file' required><br><input type='hidden' name='oldimage' value='<?php echo $row['file'];?>'><br><input type='submit' class='btn' value='submit' name='submit'></h4></form>
-<?php } ?>
-</body>
-</html>
+$original = $_GET['editwn'] ?? ($_POST['original_name'] ?? '');
+$error = '';
 
-<?php
-    include "db_conn.php";
-    session_start();
-    $_SESSION['ni'] = $_POST['ni'];
-    $_SESSION['nc'] = $_POST['nc'];
-    $_SESSION['sd'] = $_POST['sd'];
-    $_SESSION['ed'] = $_POST['ed'];
-    $_SESSION['ay'] = $_POST['ay'];
-$_SESSION['acc'] = $_POST['acc'];
-$oldimage=$_POST['oldimage'];
-    $filename = $_FILES["file"]["name"];
-    $tempname = $_FILES["file"]["tmp_name"];
-    $folder = "images/".$filename;  
-    $name=$_SESSION['name'];
-    $rollno=$_SESSION['username'];
-    $year=$_SESSION['year'];	
-    $branch=$_SESSION['department'];
-    $counsular=$_SESSION['counsular'];
-    $classteacher=$_SESSION['classteacher'];
-    $ni=$_SESSION['ni'];
-    $nc=$_SESSION['nc'];
-    $sd=$_SESSION['sd'];
-    $ed=$_SESSION['ed'];
-    $ay=$_SESSION['ay'];
-$acc=$_SESSION['acc'];
-    $datetime1 = date_create($sd);
-$datetime2 = date_create($ed);
-$durt = date_diff($datetime1, $datetime2);
-$durt=$durt->format('%m months, %d days');
-if(isset($_POST['submit'])){
-    $sql = "UPDATE course SET CourseName='$nc', OrganisationName='$ni', StartDate='$sd', EndDate='$ed', Duration='$durt', file='$filename', academicyear='$acc' WHERE RollNo='$uname' and  CourseName='$wnn'";
-    // Execute query
-    $res=mysqli_query($conn, $sql);
-    if($res and move_uploaded_file($tempname, $folder)) {
-        echo "<script>alert('Data Uploaded Successfully');window.location='ssearch.php';</script>";
-        unlink("images/".$oldimage);
-    }else{
-        echo "<script>alert('Data not Uploaded')</script>";
+$stmt = mysqli_prepare($conn, "SELECT * FROM course WHERE RollNo=? AND CourseName=? LIMIT 1");
+mysqli_stmt_bind_param($stmt, "ss", $rollno, $original);
+mysqli_stmt_execute($stmt);
+$row = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+
+if (!$row) {
+    die("Record not found, or you don't have permission to edit it.");
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $coursename   = trim($_POST['coursename']);
+    $orgname      = trim($_POST['orgname']);
+    $startdate    = trim($_POST['startdate']);
+    $enddate      = trim($_POST['enddate']);
+    $duration     = trim($_POST['duration']);
+    $academicyear = trim($_POST['academicyear']);
+    $branch       = trim($_POST['branch']);
+    $filename     = $row['file'];
+
+    if (!empty($_FILES['file']['name'])) {
+        $newfile = time() . '_' . basename($_FILES['file']['name']);
+        if (move_uploaded_file($_FILES['file']['tmp_name'], __DIR__ . '/images/' . $newfile)) {
+            if (!empty($row['file']) && file_exists(__DIR__ . '/images/' . $row['file'])) {
+                @unlink(__DIR__ . '/images/' . $row['file']);
+            }
+            $filename = $newfile;
+        }
+    }
+
+    $upd = mysqli_prepare($conn, "UPDATE course SET CourseName=?, OrganisationName=?, StartDate=?, EndDate=?, Duration=?, academicyear=?, branch=?, file=? WHERE RollNo=? AND CourseName=?");
+    mysqli_stmt_bind_param($upd, "ssssssssss", $coursename, $orgname, $startdate, $enddate, $duration, $academicyear, $branch, $filename, $rollno, $original);
+
+    if (mysqli_stmt_execute($upd)) {
+        header("Location: ssearch.php?updated=certificate");
+        exit;
+    } else {
+        $error = "Update failed: " . mysqli_error($conn);
     }
 }
 ?>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Certificate</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --dark: #1a120b;
+            --dark-2: #2b1d13;
+            --gold: #d4af37;
+            --gold-soft: #c9a227;
+            --gold-pale: #f0e2b8;
+            --cream: #f2ece1;
+            --cream-card: #fffdf9;
+            --border: #e8dfc9;
+            --muted: #8a7d6b;
+            --danger: #b6432f;
+            --radius: 16px;
+            --shadow: 0 10px 28px rgba(120, 100, 60, .10);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: var(--cream);
+            color: var(--dark);
+        }
+
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 28px;
+            background: linear-gradient(120deg, var(--dark), var(--dark-2));
+        }
+
+        .brand {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            color: #fff;
+            font-size: 1.2rem;
+        }
+
+        .brand span {
+            color: var(--gold);
+        }
+
+        .navbar a button {
+            padding: 9px 18px;
+            background: transparent;
+            color: var(--gold-pale);
+            border: 1px solid var(--gold-soft);
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: .75rem;
+            text-transform: uppercase;
+            cursor: pointer;
+        }
+
+        .wrap {
+            max-width: 640px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: var(--cream-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 30px;
+        }
+
+        .card h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            margin: 0 0 20px;
+        }
+
+        .field {
+            margin-bottom: 16px;
+        }
+
+        .field label {
+            display: block;
+            font-size: .72rem;
+            font-weight: 700;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        .field input {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            font-size: .9rem;
+            background: #fff;
+        }
+
+        .field input:focus {
+            outline: none;
+            border-color: var(--gold-soft);
+        }
+
+        .current-file {
+            margin-bottom: 16px;
+        }
+
+        .current-file img,
+        .current-file embed {
+            max-width: 220px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            padding: 11px 26px;
+            border-radius: 999px;
+            font-weight: 600;
+            font-size: .8rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            border: 1px solid transparent;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-primary {
+            background: var(--gold);
+            color: var(--dark);
+            border-color: var(--gold);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--dark);
+            border-color: var(--border);
+        }
+
+        .error {
+            background: rgba(182, 67, 47, .08);
+            color: var(--danger);
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: .85rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="navbar">
+        <div class="brand">Certificate <span>Management</span> System</div>
+        <a href="ssearch.php"><button type="button">Back</button></a>
+    </div>
+    <div class="wrap">
+        <div class="card">
+            <h1>Edit Certificate</h1>
+            <?php if ($error): ?><div class="error"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
+
+            <?php
+            $ext = pathinfo($row['file'] ?? '', PATHINFO_EXTENSION);
+            if (!empty($row['file'])) {
+                echo '<div class="current-file">';
+                if (strtolower($ext) === 'pdf') {
+                    echo '<embed src="images/' . htmlspecialchars($row['file']) . '" type="application/pdf" width="220" height="130">';
+                } else {
+                    echo '<img src="images/' . htmlspecialchars($row['file']) . '" alt="Current file">';
+                }
+                echo '</div>';
+            }
+            ?>
+
+            <form method="post" enctype="multipart/form-data">
+                <input type="hidden" name="original_name" value="<?php echo htmlspecialchars($original); ?>">
+
+                <div class="field"><label>Course Name</label><input type="text" name="coursename" value="<?php echo htmlspecialchars($row['CourseName']); ?>" required></div>
+                <div class="field"><label>Organisation</label><input type="text" name="orgname" value="<?php echo htmlspecialchars($row['OrganisationName']); ?>"></div>
+                <div class="field"><label>Start Date</label><input type="date" name="startdate" value="<?php echo htmlspecialchars($row['StartDate']); ?>" required></div>
+                <div class="field"><label>End Date</label><input type="date" name="enddate" value="<?php echo htmlspecialchars($row['EndDate']); ?>" required></div>
+                <div class="field"><label>Duration</label><input type="text" name="duration" value="<?php echo htmlspecialchars($row['Duration']); ?>"></div>
+                <div class="field"><label>Academic Year</label><input type="text" name="academicyear" value="<?php echo htmlspecialchars($row['academicyear']); ?>"></div>
+                <div class="field"><label>Branch</label><input type="text" name="branch" value="<?php echo htmlspecialchars($row['branch']); ?>"></div>
+                <div class="field"><label>Replace File (optional)</label><input type="file" name="file"></div>
+
+                <div class="btn-row">
+                    <button type="submit" class="btn btn-primary">Update</button>
+                    <a href="ssearch.php" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>
