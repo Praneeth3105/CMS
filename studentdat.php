@@ -1,19 +1,48 @@
 <?php
-include "db_conn.php";
 session_start();
-
+include "db_conn.php";
+if (!isset($_SESSION['username']) || empty($_SESSION['username'])) {
+  header("Location: login1.php");
+  exit();
+}
+$studentUsername = $_SESSION['username'];
+$stmt = mysqli_prepare(
+  $conn,
+  "SELECT * FROM studentdetails WHERE username = ? LIMIT 1"
+);
+if (!$stmt) {
+  die("Database error while preparing student query.");
+}
+mysqli_stmt_bind_param($stmt, "s", $studentUsername);
+if (!mysqli_stmt_execute($stmt)) {
+  die("Unable to load student details.");
+}
+$result = mysqli_stmt_get_result($stmt);
+$studentRow = mysqli_fetch_assoc($result);
+if (!$studentRow) {
+  session_unset();
+  session_destroy();
+ header("Location: login1.php");
+  exit();
+}
+$_SESSION['username'] = $studentRow['username'];
+$_SESSION['name'] = $studentRow['name'];
+$_SESSION['rollno'] = $studentRow['username'];
+$_SESSION['classteacher_id'] = $studentRow['classteacher_id'];
+$_SESSION['counsular_id'] = $studentRow['counsular_id'];
 function resolveStudentPicUrl($pic)
 {
   if (empty($pic)) {
     return null;
   }
-
-  $picClean = ltrim(str_replace('\\', '/', $pic), '/');
+  $picClean = ltrim(
+    str_replace('\\', '/', $pic),
+    '/'
+  );
   $needle = basename($picClean);
-
   $candidates = [
     'images/student_profile/' . $needle,
-    'images/' . $picClean, // in case the DB value already includes a subfolder
+    'images/' . $picClean,
     'images/' . $needle,
   ];
   foreach ($candidates as $rel) {
@@ -21,39 +50,65 @@ function resolveStudentPicUrl($pic)
       return $rel;
     }
   }
-
-  // Fallback: search every subfolder under images/ for this filename.
   $imagesRoot = __DIR__ . '/images';
   if (is_dir($imagesRoot)) {
     $it = new RecursiveIteratorIterator(
-      new RecursiveDirectoryIterator($imagesRoot, FilesystemIterator::SKIP_DOTS)
+      new RecursiveDirectoryIterator(
+        $imagesRoot,
+        FilesystemIterator::SKIP_DOTS
+      )
     );
     foreach ($it as $file) {
-      if ($file->isFile() && strcasecmp($file->getFilename(), $needle) === 0) {
-        $relPath = str_replace('\\', '/', substr($file->getPathname(), strlen(__DIR__) + 1));
+      if (
+        $file->isFile() &&
+        strcasecmp(
+          $file->getFilename(),
+          $needle
+        ) === 0
+      ) {
+        $relPath = str_replace(
+          '\\',
+          '/',
+          substr(
+            $file->getPathname(),
+            strlen(__DIR__) + 1
+          )
+        );
         return $relPath;
       }
     }
   }
-
   return null;
 }
 ?>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" type="image/x-icon" href="icon2.png">
-  <title>CERTIFICATE MANAGEMENT SYSTEM</title>
-  <link rel="stylesheet" href="style2.css">
-  <link rel="stylesheet" href="lightbox.min.css">
+  <link
+    rel="icon"
+    type="image/x-icon"
+    href="icon2.png">
+  <title>
+    CERTIFICATE MANAGEMENT SYSTEM
+  </title>
+  <link
+    rel="stylesheet"
+    href="style2.css">
+  <link
+    rel="stylesheet"
+    href="lightbox.min.css">
   <script src="lightbox-plus-jquery.min.js"></script>
-  <link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap"
+    rel="stylesheet">
   <script src="https://kit.fontawesome.com/a81368914c.js"></script>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap'
+    );
 
     :root {
       --dark: #1a120b;
@@ -70,7 +125,6 @@ function resolveStudentPicUrl($pic)
       --radius: 20px;
       --shadow: 0 10px 28px rgba(120, 100, 60, 0.10);
     }
-
     * {
       box-sizing: border-box;
     }
@@ -86,12 +140,9 @@ function resolveStudentPicUrl($pic)
       background: var(--cream);
       color: var(--dark);
     }
-
     .n {
       text-decoration: none;
     }
-
-    /* ---------- Top navbar ---------- */
     .navbar {
       display: flex;
       align-items: center;
@@ -99,10 +150,12 @@ function resolveStudentPicUrl($pic)
       flex-wrap: wrap;
       gap: 14px;
       padding: 18px 32px;
-      background: linear-gradient(120deg, var(--dark) 0%, var(--dark-2) 100%);
+      background:
+        linear-gradient(120deg,
+          var(--dark) 0%,
+          var(--dark-2) 100%);
       width: 100%;
     }
-
     .brand {
       font-family: 'Playfair Display', serif;
       font-weight: 700;
@@ -110,17 +163,14 @@ function resolveStudentPicUrl($pic)
       color: #fff;
       letter-spacing: 0.3px;
     }
-
     .brand span {
       color: var(--gold);
     }
-
     .nav-actions {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
     }
-
     .nav-actions #btn1 {
       display: inline-flex;
       align-items: center;
@@ -139,21 +189,17 @@ function resolveStudentPicUrl($pic)
       text-transform: uppercase;
       white-space: nowrap;
     }
-
     .nav-actions #btn1:hover {
       background: var(--gold);
       color: var(--dark);
       border-color: var(--gold);
     }
-
     .nav-actions .logout-btn {
       background: var(--gold) !important;
       color: var(--dark) !important;
       border-color: var(--gold) !important;
       font-weight: 700 !important;
     }
-
-    /* ---------- Page layout ---------- */
     .container {
       width: 100%;
       max-width: 900px;
@@ -162,7 +208,6 @@ function resolveStudentPicUrl($pic)
       display: flex;
       justify-content: center;
     }
-
     .profile-card {
       width: 100%;
       background: var(--cream-card);
@@ -171,8 +216,6 @@ function resolveStudentPicUrl($pic)
       box-shadow: var(--shadow);
       padding: 44px 48px;
     }
-
-    /* ---------- Header: avatar + label + name ---------- */
     .profile-header {
       display: flex;
       align-items: center;
@@ -180,7 +223,6 @@ function resolveStudentPicUrl($pic)
       gap: 22px;
       margin-bottom: 36px;
     }
-
     .avatar {
       width: 96px;
       height: 96px;
@@ -195,14 +237,12 @@ function resolveStudentPicUrl($pic)
       flex-shrink: 0;
       position: relative;
     }
-
     .avatar img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       border-radius: 50%;
     }
-
     .avatar .camera-badge {
       position: absolute;
       bottom: -2px;
@@ -218,16 +258,13 @@ function resolveStudentPicUrl($pic)
       box-shadow: 0 3px 8px rgba(26, 18, 11, .25);
       transition: background .2s ease, transform .2s ease;
     }
-
     .avatar .camera-badge:hover {
       background: var(--accent);
       transform: scale(1.08);
     }
-
     .profile-header .who {
       text-align: left;
     }
-
     .profile-header .tag {
       font-size: 0.72rem;
       font-weight: 700;
@@ -236,22 +273,18 @@ function resolveStudentPicUrl($pic)
       text-transform: uppercase;
       margin-bottom: 4px;
     }
-
     .profile-header .name {
       font-family: 'Playfair Display', serif;
       font-weight: 700;
       font-size: 1.9rem;
       color: var(--dark);
     }
-
-    /* ---------- Info grid ---------- */
     .info-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 16px;
       margin-bottom: 36px;
     }
-
     .info-box {
       background: var(--box);
       border-left: 4px solid var(--accent);
@@ -268,7 +301,6 @@ function resolveStudentPicUrl($pic)
       text-transform: uppercase;
       margin-bottom: 6px;
     }
-
     .info-box .value {
       font-family: 'Playfair Display', serif;
       font-weight: 700;
@@ -278,14 +310,11 @@ function resolveStudentPicUrl($pic)
       overflow: hidden;
       text-overflow: ellipsis;
     }
-
     .divider {
       border: none;
       border-top: 1px dashed var(--border);
       margin: 0 0 32px;
     }
-
-
     .section-title {
       text-align: center;
       font-family: 'Playfair Display', serif;
@@ -294,18 +323,15 @@ function resolveStudentPicUrl($pic)
       color: var(--dark);
       margin: 0 0 8px;
     }
-
     .section-title span {
       color: var(--gold-soft);
     }
-
     .section-sub {
       text-align: center;
       font-size: 0.92rem;
       color: var(--muted);
       margin: 0 0 26px;
     }
-
     .action-cards {
       display: flex;
       gap: 18px;
@@ -325,13 +351,11 @@ function resolveStudentPicUrl($pic)
       cursor: pointer;
       transition: all 0.25s ease;
     }
-
     .action-card:hover {
       border-color: var(--gold-soft);
       transform: translateY(-3px);
       box-shadow: var(--shadow);
     }
-
     .action-card i {
       font-size: 1.7rem;
       color: var(--accent);
@@ -344,17 +368,14 @@ function resolveStudentPicUrl($pic)
       font-size: 0.95rem;
       color: var(--dark);
     }
-
     .add-section {
       text-align: center;
     }
-
     .add-section p {
       font-size: 0.92rem;
       color: var(--muted);
       margin: 0 0 18px;
     }
-
     .add-btn {
       display: inline-flex;
       align-items: center;
@@ -372,22 +393,19 @@ function resolveStudentPicUrl($pic)
       transition: all 0.25s ease;
       text-transform: uppercase;
     }
-
     .add-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 18px rgba(212, 175, 55, 0.35);
+      box-shadow:
+        0 8px 18px rgba(212, 175, 55, 0.35);
     }
-
     @media only screen and (max-width: 720px) {
       .navbar {
         justify-content: center;
         text-align: center;
       }
-
       .profile-card {
         padding: 32px 22px;
       }
-
       .profile-header {
         flex-direction: column;
         text-align: center;
@@ -396,119 +414,189 @@ function resolveStudentPicUrl($pic)
       .profile-header .who {
         text-align: center;
       }
-
       .info-grid {
         grid-template-columns: 1fr 1fr;
       }
     }
-
     @media only screen and (max-width: 460px) {
       .info-grid {
         grid-template-columns: 1fr;
+
       }
+
     }
   </style>
 </head>
-
 <body>
   <div class="navbar">
-    <div class="brand">Certificate <span>Management</span> System</div>
+    <div class="brand">
+      Certificate <span>Management</span> System
+    </div>
     <div class="nav-actions">
-      <a href="accer.php" class="n"><button type="button" id="btn1">Academic Certificates</button></a>
-      <a href="ustudedet.php" class="n"><button type="button" id="btn1">Update Details</button></a>
-      <a href="chnpsw.php" class="n"><button type="button" id="btn1">Change Password</button></a>
-      <a href="logout.php" class="n"><button type="button" id="btn1" class="logout-btn">Logout</button></a>
+      <a href="accer.php" class="n">
+        <button type="button" id="btn1">
+          Academic Certificates
+        </button>
+      </a>
+      <a href="ustudedet.php" class="n">
+        <button type="button" id="btn1">
+          Update Details
+        </button>
+      </a>
+      <a href="chnpsw.php" class="n">
+        <button type="button" id="btn1">
+          Change Password
+        </button>
+      </a>
+      <a href="logout.php" class="n">
+        <button
+          type="button"
+          id="btn1"
+          class="logout-btn">
+          Logout
+        </button>
+      </a>
     </div>
   </div>
-
   <div class="container">
     <?php
-    $uname = $_SESSION['username'];
-    $query = "select * from studentdetails where username=?";
-    $stmt = mysqli_prepare($conn, $query);
-    mysqli_stmt_bind_param($stmt, "s", $uname);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
-    while ($row = mysqli_fetch_array($result)) {
-      $_SESSION['name'] = $row['name'];
-      $_SESSION['rollno'] = $row['username'];
-      $_SESSION['classteacher_id'] = $row['classteacher_id'];   // ADD
-      $_SESSION['counsular_id'] = $row['counsular_id'];          // ADD
+    $row = $studentRow;
     ?>
-      <div class="profile-card">
-
-        <div class="profile-header">
-          <div class="avatar">
-            <?php $picUrl = resolveStudentPicUrl($row['pic'] ?? null); ?>
-            <?php if ($picUrl): ?>
-              <img src="<?php echo htmlspecialchars($picUrl); ?>" alt="Profile photo">
-            <?php else: ?>
-              <i class="fa-solid fa-user"></i>
-            <?php endif; ?>
-
-            <a href="student_profile_pic.php" class="n camera-badge" title="Change profile picture">
-              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--dark)" stroke-width="2">
-                <path d="M4 8h3l2-2h6l2 2h3v11H4z" stroke-linejoin="round" />
-                <circle cx="12" cy="13.5" r="3.2" />
-              </svg>
-            </a>
-          </div>
-          <div class="who">
-            <div class="tag">Student Profile</div>
-            <div class="name"><?php echo htmlspecialchars($row['name']); ?></div>
-          </div>
-        </div>
-
-        <div class="info-grid">
-          <div class="info-box">
-            <div class="label">Roll No.</div>
-            <div class="value"><?php echo htmlspecialchars($row['username']); ?></div>
-          </div>
-          <div class="info-box">
-            <div class="label">Branch</div>
-            <div class="value"><?php echo htmlspecialchars($row['department']); ?></div>
-          </div>
-          <div class="info-box">
-            <div class="label">Year of Studying</div>
-            <div class="value"><?php echo htmlspecialchars($row['year']); ?></div>
-          </div>
-          <div class="info-box">
-            <div class="label">Counsular</div>
-            <div class="value"><?php echo htmlspecialchars($row['counsular']); ?></div>
-          </div>
-          <div class="info-box">
-            <div class="label">Class Incharge</div>
-            <div class="value"><?php echo htmlspecialchars($row['classteacher']); ?></div>
-          </div>
-        </div>
-
-        <hr class="divider">
-
-        <div class="section-title">Search <span>Certificate</span></div>
-        <p class="section-sub">Find and view your certificates instantly</p>
-
-        <div class="action-cards">
-          <a href="ssearch.php" class="n">
-            <div class="action-card">
-              <i class="fa-solid fa-file-lines"></i>
-              <div class="label-text">Your Certificates</div>
-            </div>
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="avatar">
+          <?php
+          $picUrl = resolveStudentPicUrl(
+            $row['pic'] ?? null
+          );
+          ?>
+          <?php if ($picUrl): ?>
+            <img
+              src="<?php echo htmlspecialchars($picUrl); ?>"
+              alt="Profile photo">
+          <?php else: ?>
+            <i class="fa-solid fa-user"></i>
+          <?php endif; ?>
+          <a
+            href="student_profile_pic.php"
+            class="n camera-badge"
+            title="Change profile picture">
+            <svg
+              viewBox="0 0 24 24"
+              width="15"
+              height="15"
+              fill="none"
+              stroke="var(--dark)"
+              stroke-width="2">
+              <path
+                d="M4 8h3l2-2h6l2 2h3v11H4z"
+                stroke-linejoin="round" />
+              <circle
+                cx="12"
+                cy="13.5"
+                r="3.2" />
+            </svg>
           </a>
         </div>
-
-        <hr class="divider">
-
-        <div class="add-section">
-          <p>To add your certificate to your collection, click Add</p>
-          <a href="studentadd.php" class="n"><button type="button" class="add-btn">Add</button></a>
+        <div class="who">
+          <div class="tag">
+            Student Profile
+          </div>
+          <div class="name">
+            <?php
+            echo htmlspecialchars($row['name']);
+            ?>
+          </div>
         </div>
-
       </div>
-    <?php
-    } ?>
+      <div class="info-grid">
+        <div class="info-box">
+          <div class="label">
+            Roll No.
+          </div>
+          <div class="value">
+            <?php
+            echo htmlspecialchars($row['username']);
+            ?>
+          </div>
+        </div>
+        <div class="info-box">
+          <div class="label">
+            Branch
+          </div>
+          <div class="value">
+            <?php
+            echo htmlspecialchars($row['department']);
+            ?>
+          </div>
+        </div>
+        <div class="info-box">
+          <div class="label">
+            Year of Studying
+          </div>
+          <div class="value">
+            <?php
+            echo htmlspecialchars($row['year']);
+            ?>
+          </div>
+        </div>
+        <div class="info-box">
+          <div class="label">
+            Counsular
+          </div>
+          <div class="value">
+            <?php
+            echo htmlspecialchars($row['counsular']);
+            ?>
+          </div>
+        </div>
+        <div class="info-box">
+          <div class="label">
+            Class Incharge
+          </div>
+          <div class="value">
+            <?php
+            echo htmlspecialchars($row['classteacher']);
+            ?>
+          </div>
+        </div>
+      </div>
+      <hr class="divider">
+      <div class="section-title">
+        Search <span>Certificate</span>
+      </div>
+      <p class="section-sub">
+        Find and view your certificates instantly
+      </p>
+      <div class="action-cards">
+        <a
+          href="ssearch.php"
+          class="n">
+          <div class="action-card">
+            <i class="fa-solid fa-file-lines"></i>
+            <div class="label-text">
+              Your Certificates
+            </div>
+          </div>
+        </a>
+      </div>
+      <hr class="divider">
+      <div class="add-section">
+        <p>
+          To add your certificate to your collection, click Add
+        </p>
+        <a
+          href="studentadd.php"
+          class="n">
+          <button
+            type="button"
+            class="add-btn">
+            Add
+          </button>
+        </a>
+      </div>
+    </div>
   </div>
-
   <script src="mainl.js"></script>
 </body>
-
 </html>

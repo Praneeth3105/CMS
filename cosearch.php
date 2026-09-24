@@ -1,7 +1,19 @@
 <?php
+
 error_reporting(E_ERROR | E_PARSE);
+
 session_start();
+
 include_once('db_conn.php');
+
+if (!isset($_SESSION['id'])) {
+
+	header("Location: login2.php");
+	exit();
+}
+
+$facid = $_SESSION['id'];
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -124,6 +136,7 @@ include_once('db_conn.php');
 			padding: 8px 14px;
 			font-size: 0.8rem;
 		}
+
 		html body .page-hero {
 			text-align: center;
 			padding: 22px 20px 8px;
@@ -367,6 +380,7 @@ include_once('db_conn.php');
 			border: 1px solid var(--border);
 			display: block;
 		}
+
 		.file-cell {
 			position: relative;
 			width: 100%;
@@ -941,4 +955,5 @@ include_once('db_conn.php');
 		}
 	</script>
 </body>
+
 </html>

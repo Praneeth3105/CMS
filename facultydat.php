@@ -1,14 +1,75 @@
 <?php
 session_start();
 include "db_conn.php";
+
+/*
+|--------------------------------------------------------------------------
+| FACULTY SESSION CHECK
+|--------------------------------------------------------------------------
+*/
+
+if (!isset($_SESSION['username']) || empty($_SESSION['username'])) {
+    header("Location: login2.php");
+    exit();
+}
+
+$facultyUsername = $_SESSION['username'];
+
+/*
+|--------------------------------------------------------------------------
+| GET FACULTY DETAILS
+|--------------------------------------------------------------------------
+*/
+
+$stmt = mysqli_prepare(
+    $conn,
+    "SELECT * FROM faculty WHERE id = ? LIMIT 1"
+);
+
+if (!$stmt) {
+    die("Database error while preparing faculty query.");
+}
+
+mysqli_stmt_bind_param($stmt, "s", $facultyUsername);
+
+if (!mysqli_stmt_execute($stmt)) {
+    die("Unable to load faculty details.");
+}
+
+$result = mysqli_stmt_get_result($stmt);
+$facultyRow = mysqli_fetch_assoc($result);
+
+if (!$facultyRow) {
+
+    session_unset();
+    session_destroy();
+
+    header("Location: login2.php");
+    exit();
+}
+
+/*
+|--------------------------------------------------------------------------
+| STORE FACULTY DETAILS IN SESSION
+|--------------------------------------------------------------------------
+*/
+
+$_SESSION['username'] = $facultyRow['id'];
+$_SESSION['id']       = $facultyRow['id'];
+$_SESSION['name']     = $facultyRow['name'];
+
 ?>
 <!DOCTYPE html>
 <html>
 
 <head>
+
     <link rel="icon" type="image/x-icon" href="icon2.png">
+
     <title>CERTIFICATE MAINTANCE SYSTEM</title>
+
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap');
 
@@ -47,6 +108,7 @@ include "db_conn.php";
         }
 
         /* ---------- Top bar ---------- */
+
         .topbar {
             background: linear-gradient(135deg, var(--dark) 0%, var(--dark-2) 100%);
             padding: 18px 28px;
@@ -92,7 +154,8 @@ include "db_conn.php";
             flex-wrap: wrap;
         }
 
-        /* ---------- Buttons (unified, smoother hover) ---------- */
+        /* ---------- Buttons ---------- */
+
         .btn,
         button {
             display: inline-flex;
@@ -109,11 +172,11 @@ include "db_conn.php";
             letter-spacing: 0.3px;
             text-transform: uppercase;
             cursor: pointer;
-            transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease,
-                transform 0.2s ease, box-shadow 0.25s ease;
+            transition: background 0.25s ease, color 0.25s ease,
+                border-color 0.25s ease, transform 0.2s ease,
+                box-shadow 0.25s ease;
         }
 
-        /* Buttons that sit on the dark topbar */
         .topbar .btn {
             background: rgba(255, 255, 255, 0.04);
         }
@@ -140,7 +203,6 @@ include "db_conn.php";
             box-shadow: 0 8px 18px rgba(212, 175, 55, 0.35);
         }
 
-        /* Buttons that sit on the light cream panel (e.g. inside #button, .add-row) */
         .panel .btn {
             background: var(--dark);
             color: var(--gold-pale);
@@ -166,7 +228,8 @@ include "db_conn.php";
             box-shadow: 0 10px 22px rgba(212, 175, 55, 0.4);
         }
 
-        /* ---------- Page wrap / panel ---------- */
+        /* ---------- Page ---------- */
+
         .page-wrap {
             max-width: 900px;
             margin: 0 auto;
@@ -197,7 +260,8 @@ include "db_conn.php";
             color: var(--gold-soft);
         }
 
-        /* ---------- Faculty info card ---------- */
+        /* ---------- Faculty info ---------- */
+
         .profile-block {
             padding-bottom: 36px;
             margin-bottom: 36px;
@@ -221,7 +285,9 @@ include "db_conn.php";
             align-items: center;
             justify-content: center;
             flex-shrink: 0;
-            box-shadow: 0 0 0 5px #fff, 0 0 0 6px var(--gold-soft), var(--shadow);
+            box-shadow: 0 0 0 5px #fff,
+                0 0 0 6px var(--gold-soft),
+                var(--shadow);
         }
 
         .icon-circle svg {
@@ -266,7 +332,9 @@ include "db_conn.php";
             padding: 14px 18px;
             position: relative;
             overflow: hidden;
-            transition: border-color 0.25s ease, transform 0.2s ease, box-shadow 0.25s ease;
+            transition: border-color 0.25s ease,
+                transform 0.2s ease,
+                box-shadow 0.25s ease;
         }
 
         .info-badge::before {
@@ -301,22 +369,8 @@ include "db_conn.php";
             font-weight: 700;
         }
 
-        @media only screen and (max-width: 700px) {
-            .profile-header {
-                flex-direction: column;
-                text-align: center;
-            }
+        /* ---------- Search ---------- */
 
-            .profile-header .headline {
-                text-align: center;
-            }
-
-            .info-badges {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        /* ---------- Search section ---------- */
         .section-head {
             text-align: center;
             margin-bottom: 28px;
@@ -350,8 +404,10 @@ include "db_conn.php";
             border-radius: var(--radius-sm);
             padding: 24px 16px;
             cursor: pointer;
-            transition: background 0.25s ease, border-color 0.25s ease,
-                transform 0.2s ease, box-shadow 0.25s ease;
+            transition: background 0.25s ease,
+                border-color 0.25s ease,
+                transform 0.2s ease,
+                box-shadow 0.25s ease;
         }
 
         .option-card svg {
@@ -374,7 +430,6 @@ include "db_conn.php";
             pointer-events: none;
         }
 
-        /* Gentle gold highlight on hover, not black */
         .option-card:hover {
             border-color: var(--gold-soft);
             background: var(--gold-pale);
@@ -382,9 +437,10 @@ include "db_conn.php";
             box-shadow: var(--shadow);
         }
 
-        /* Selected state stays warm gold, not stark black */
         .option-card:has(input:checked) {
-            background: linear-gradient(145deg, var(--gold-pale) 0%, var(--gold) 100%);
+            background: linear-gradient(145deg,
+                    var(--gold-pale) 0%,
+                    var(--gold) 100%);
             border-color: var(--gold);
             box-shadow: 0 10px 24px rgba(212, 175, 55, 0.35);
         }
@@ -402,7 +458,6 @@ include "db_conn.php";
             text-align: center;
         }
 
-        /* ---------- Add certificate ---------- */
         .add-row {
             text-align: center;
             margin-top: 40px;
@@ -416,7 +471,26 @@ include "db_conn.php";
             margin-bottom: 18px;
         }
 
+        /* ---------- Responsive ---------- */
+
+        @media only screen and (max-width: 700px) {
+
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .profile-header .headline {
+                text-align: center;
+            }
+
+            .info-badges {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
         @media only screen and (max-width: 900px) {
+
             .panel {
                 margin: 18px;
                 padding: 30px 22px;
@@ -443,161 +517,373 @@ include "db_conn.php";
             }
         }
     </style>
+
 </head>
 
 <body>
 
     <div class="topbar">
-        <h1 class="brand">
 
+        <h1 class="brand">
             Certificate <span>Management</span> System
         </h1>
+
         <div class="topbar-actions">
-            <a href="studentdetails.php" class="n"><button type="button" class="btn">Student Details</button></a>
-            <a href="updatepsw.php" class="n"><button type="button" class="btn">Update Password</button></a>
-            <a href="logout.php" class="n"><button type="button" class="btn solid">Logout</button></a>
+
+            <a href="studentdetails.php" class="n">
+                <button type="button" class="btn">
+                    Student Details
+                </button>
+            </a>
+
+            <a href="updatepsw.php" class="n">
+                <button type="button" class="btn">
+                    Update Password
+                </button>
+            </a>
+
+            <a href="logout.php" class="n">
+                <button type="button" class="btn solid">
+                    Logout
+                </button>
+            </a>
+
         </div>
+
     </div>
+
 
     <div class="page-wrap">
+
         <div class="panel">
-            <?php
-            $uname = $_SESSION['username'];
 
-            $query = "select * from faculty where id='$uname'";
-            $result = mysqli_query($conn, $query);
-            while ($row = mysqli_fetch_array($result)) {
+            <?php
+            $row = $facultyRow;
             ?>
-                <div class="login-content">
 
-                    <div class="profile-block">
-                        <div class="profile-header">
-                            <div class="icon-circle" style="position:relative;">
-                                <?php if (!empty($row['profile_pic'])): ?>
-                                    <img src="images/profile/<?php echo htmlspecialchars($row['profile_pic']); ?>"
-                                        alt="Profile photo"
-                                        style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
-                                <?php else: ?>
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="#b5502e" stroke-width="1.6">
-                                        <circle cx="12" cy="8" r="4" />
-                                        <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7" stroke-linecap="round" />
-                                    </svg>
-                                <?php endif; ?>
+            <div class="login-content">
 
-                                <a href="profile_pic.php" class="n"
-                                    title="Change profile picture"
-                                    style="
-                                     position:absolute;
-                                     bottom:-2px;
-                                     right:-2px;
-                                     width:30px;
-                                     height:30px;
-                                     border-radius:50%;
-                                     background: var(--gold);
-                                     border: 2px solid #fff;
-                                     display:flex;
-                                     align-items:center;
-                                     justify-content:center;
-                                     box-shadow: 0 3px 8px rgba(26,18,11,.25);
-                                     transition: background .2s ease, transform .2s ease;
-                                   "
-                                    onmouseover="this.style.background='#b5502e';this.style.transform='scale(1.08)';"
-                                    onmouseout="this.style.background='var(--gold)';this.style.transform='scale(1)';">
-                                    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="var(--dark)" stroke-width="2">
-                                        <path d="M4 8h3l2-2h6l2 2h3v11H4z" stroke-linejoin="round" />
-                                        <circle cx="12" cy="13.5" r="3.2" />
-                                    </svg>
-                                </a>
-                            </div>
-                            <div class="headline">
-                                <p class="eyebrow">Faculty Profile</p>
-                                <p class="faculty-name"><?php echo $_SESSION['name'] = $row['name']; ?></p>
-                            </div>
+                <div class="profile-block">
+
+                    <div class="profile-header">
+
+                        <div class="icon-circle" style="position:relative;">
+
+                            <?php if (!empty($row['profile_pic'])): ?>
+
+                                <img
+                                    src="images/profile/<?php echo htmlspecialchars($row['profile_pic']); ?>"
+                                    alt="Profile photo"
+                                    style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+
+                            <?php else: ?>
+
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="#b5502e"
+                                    stroke-width="1.6">
+                                    <circle cx="12" cy="8" r="4" />
+                                    <path
+                                        d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"
+                                        stroke-linecap="round" />
+                                </svg>
+
+                            <?php endif; ?>
+
+
+                            <a
+                                href="profile_pic.php"
+                                class="n"
+                                title="Change profile picture"
+                                style="
+                                    position:absolute;
+                                    bottom:-2px;
+                                    right:-2px;
+                                    width:30px;
+                                    height:30px;
+                                    border-radius:50%;
+                                    background:var(--gold);
+                                    border:2px solid #fff;
+                                    display:flex;
+                                    align-items:center;
+                                    justify-content:center;
+                                    box-shadow:0 3px 8px rgba(26,18,11,.25);
+                                    transition:background .2s ease, transform .2s ease;
+                                "
+                                onmouseover="this.style.background='#b5502e';this.style.transform='scale(1.08)';"
+                                onmouseout="this.style.background='var(--gold)';this.style.transform='scale(1)';">
+
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    width="15"
+                                    height="15"
+                                    fill="none"
+                                    stroke="var(--dark)"
+                                    stroke-width="2">
+                                    <path
+                                        d="M4 8h3l2-2h6l2 2h3v11H4z"
+                                        stroke-linejoin="round" />
+                                    <circle
+                                        cx="12"
+                                        cy="13.5"
+                                        r="3.2" />
+                                </svg>
+
+                            </a>
+
                         </div>
 
-                        <div class="info-badges">
-                            <div class="info-badge">
-                                <span class="label">Id. No</span>
-                                <b><?php echo $_SESSION['id'] = $row['id']; ?></b>
-                            </div>
-                            <div class="info-badge">
-                                <span class="label">Branch</span>
-                                <b><?php echo $row['department']; ?></b>
-                            </div>
-                            <div class="info-badge">
-                                <span class="label">Year of Joining</span>
-                                <b><?php echo $row['year']; ?></b>
-                            </div>
-                            <div class="info-badge">
-                                <span class="label">Role</span>
-                                <b>Faculty</b>
-                            </div>
+
+                        <div class="headline">
+
+                            <p class="eyebrow">
+                                Faculty Profile
+                            </p>
+
+                            <p class="faculty-name">
+                                <?php echo htmlspecialchars($row['name']); ?>
+                            </p>
+
                         </div>
+
                     </div>
 
-                    <div class="section-head">
-                        <h3>Search <span class="accent">Certificate</span></h3>
-                        <div class="section-sub">Choose which set of certificates you'd like to look up</div>
+
+                    <div class="info-badges">
+
+                        <div class="info-badge">
+
+                            <span class="label">
+                                Id. No
+                            </span>
+
+                            <b>
+                                <?php echo htmlspecialchars($row['id']); ?>
+                            </b>
+
+                        </div>
+
+
+                        <div class="info-badge">
+
+                            <span class="label">
+                                Branch
+                            </span>
+
+                            <b>
+                                <?php echo htmlspecialchars($row['department']); ?>
+                            </b>
+
+                        </div>
+
+
+                        <div class="info-badge">
+
+                            <span class="label">
+                                Year of Joining
+                            </span>
+
+                            <b>
+                                <?php echo htmlspecialchars($row['year']); ?>
+                            </b>
+
+                        </div>
+
+
+                        <div class="info-badge">
+
+                            <span class="label">
+                                Role
+                            </span>
+
+                            <b>
+                                Faculty
+                            </b>
+
+                        </div>
+
                     </div>
 
-                    <div id="quick-book">
-                        <form onchange="myFunction()" name="frmRadio" id="radio-buttons" action="">
-                            <div class="option-grid">
-                                <label class="option-card">
-                                    <input type="radio" id="fsearch" name="option" onclick="document.getElementById('radio-buttons').action='';">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                                        <path d="M6 3h9l3 3v15H6z" stroke-linejoin="round" />
-                                        <path d="M9 11h6M9 15h6M9 7h3" stroke-linecap="round" />
-                                    </svg>
-                                    <span>Your Certificates</span>
-                                </label>
-                                <label class="option-card">
-                                    <input type="radio" id="clssearch" name="option" onclick="document.getElementById('radio-buttons').action='';">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                                        <circle cx="9" cy="8" r="3" />
-                                        <circle cx="17" cy="9" r="2.4" />
-                                        <path d="M3.5 19c0-3.3 2.7-5.5 5.5-5.5s5.5 2.2 5.5 5.5" stroke-linecap="round" />
-                                        <path d="M15.2 14.6c2.2.3 3.8 2 3.8 4.4" stroke-linecap="round" />
-                                    </svg>
-                                    <span>Your Class Certificates</span>
-                                </label>
-                                <label class="option-card">
-                                    <input type="radio" id="cosearch" name="option" onclick="document.getElementById('radio-buttons').action='';">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                                        <path d="M4 18v-1a5 5 0 0 1 5-5h1a5 5 0 0 1 5 5v1" stroke-linecap="round" />
-                                        <circle cx="9.5" cy="7" r="3" />
-                                        <path d="M16 4.2c1.5.5 2.6 2 2.6 3.6 0 1.7-1.1 3.1-2.6 3.6" stroke-linecap="round" />
-                                    </svg>
-                                    <span>Your Counseling Certificates</span>
-                                </label>
-                            </div>
-                        </form>
-                        <div id="button"></div>
-                    </div>
-
-                    <div class="add-row">
-                        <p>To add your certificate to your collection, click Add</p>
-                        <a href="facultyadd.php" class="n"><button type="button" class="btn">Add</button></a>
-                    </div>
                 </div>
-            <?php
-            } ?>
+
+
+                <div class="section-head">
+
+                    <h3>
+                        Search <span class="accent">Certificate</span>
+                    </h3>
+
+                    <div class="section-sub">
+                        Choose which set of certificates you'd like to look up
+                    </div>
+
+                </div>
+
+
+                <div id="quick-book">
+
+                    <form
+                        onchange="myFunction()"
+                        name="frmRadio"
+                        id="radio-buttons"
+                        action="">
+
+                        <div class="option-grid">
+
+                            <label class="option-card">
+
+                                <input
+                                    type="radio"
+                                    id="fsearch"
+                                    name="option">
+
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.6">
+                                    <path
+                                        d="M6 3h9l3 3v15H6z"
+                                        stroke-linejoin="round" />
+                                    <path
+                                        d="M9 11h6M9 15h6M9 7h3"
+                                        stroke-linecap="round" />
+                                </svg>
+
+                                <span>
+                                    Your Certificates
+                                </span>
+
+                            </label>
+
+
+                            <label class="option-card">
+
+                                <input
+                                    type="radio"
+                                    id="clssearch"
+                                    name="option">
+
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.6">
+                                    <circle cx="9" cy="8" r="3" />
+                                    <circle cx="17" cy="9" r="2.4" />
+
+                                    <path
+                                        d="M3.5 19c0-3.3 2.7-5.5 5.5-5.5s5.5 2.2 5.5 5.5"
+                                        stroke-linecap="round" />
+
+                                    <path
+                                        d="M15.2 14.6c2.2.3 3.8 2 3.8 4.4"
+                                        stroke-linecap="round" />
+                                </svg>
+
+                                <span>
+                                    Your Class Certificates
+                                </span>
+
+                            </label>
+
+
+                            <label class="option-card">
+
+                                <input
+                                    type="radio"
+                                    id="cosearch"
+                                    name="option">
+
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    stroke-width="1.6">
+                                    <path
+                                        d="M4 18v-1a5 5 0 0 1 5-5h1a5 5 0 0 1 5 5v1"
+                                        stroke-linecap="round" />
+
+                                    <circle cx="9.5" cy="7" r="3" />
+
+                                    <path
+                                        d="M16 4.2c1.5.5 2.6 2 2.6 3.6 0 1.7-1.1 3.1-2.6 3.6"
+                                        stroke-linecap="round" />
+                                </svg>
+
+                                <span>
+                                    Your Counseling Certificates
+                                </span>
+
+                            </label>
+
+                        </div>
+
+                    </form>
+
+
+                    <div id="button"></div>
+
+                </div>
+
+
+                <div class="add-row">
+
+                    <p>
+                        To add your certificate to your collection, click Add
+                    </p>
+
+                    <a href="facultyadd.php" class="n">
+
+                        <button
+                            type="button"
+                            class="btn">
+                            Add
+                        </button>
+
+                    </a>
+
+                </div>
+
+            </div>
+
         </div>
+
     </div>
+
 
     <script>
         function myFunction() {
+
             if (document.getElementById("fsearch").checked) {
-                document.getElementById("button").innerHTML = "<a href='fsearch.php' class='n' ><button type='button' class='btn' >search your certificates</button></a><br>";
+
+                document.getElementById("button").innerHTML =
+                    "<a href='fsearch.php' class='n'>" +
+                    "<button type='button' class='btn'>" +
+                    "search your certificates" +
+                    "</button></a><br>";
+
             }
+
             if (document.getElementById("clssearch").checked) {
-                document.getElementById("button").innerHTML = "<a href='clssearch.php' class='n' ><button type='button' class='btn' >search your class students certificates</button></a><br>";
+
+                document.getElementById("button").innerHTML =
+                    "<a href='clssearch.php' class='n'>" +
+                    "<button type='button' class='btn'>" +
+                    "search your class students certificates" +
+                    "</button></a><br>";
+
             }
+
             if (document.getElementById("cosearch").checked) {
-                document.getElementById("button").innerHTML = "<a href='cosearch.php' class='n' ><button type='button' class='btn' >search your counsiling students certificates</button></a><br>";
+                document.getElementById("button").innerHTML =
+                    "<a href='cosearch.php' class='n'>" +
+                    "<button type='button' class='btn'>" +
+                    "search your counsiling students certificates" +
+                    "</button></a><br>";
             }
         }
     </script>
 </body>
-
 </html>

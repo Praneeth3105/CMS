@@ -1,52 +1,134 @@
 <?php
+
 include "db_conn.php";
 session_start();
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit']) && isset($_POST['check'])) {
-    $facultyId = $_POST['faculty']; // now the faculty's id, selected from the dropdown
-    $selected  = $_POST['check'];
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header("Location: counsellor.php");
+    exit();
+}
 
-    // Look up the faculty's name once, just to keep the display column in sync
-    $fq = mysqli_prepare($conn, "SELECT name FROM faculty WHERE id = ?");
-    mysqli_stmt_bind_param($fq, "s", $facultyId);
-    mysqli_stmt_execute($fq);
-    $facultyRow = mysqli_stmt_get_result($fq)->fetch_assoc();
-    $facultyName = $facultyRow['name'] ?? '';
+if (!isset($_POST['submit'], $_POST['faculty'], $_POST['check'])) {
 
-    if ($facultyName === '') {
-        echo "<script>alert('Invalid faculty selected');window.location='counsellor.php';</script>";
-        exit;
-    }
+    echo "<script>
+        alert('Please select a counsellor and at least one student.');
+        window.location='counsellor.php';
+    </script>";
 
-    $tables = [
-        ['table' => 'studentdetails', 'col' => 'username'],
-        ['table' => 'sworkshop',      'col' => 'RollNo'],
-        ['table' => 'sinternship',    'col' => 'rollno'],
-        ['table' => 'sproject',       'col' => 'Roll_Number'],
-        ['table' => 'extracircular',  'col' => 'rollno'],
-        ['table' => 'cocircular',     'col' => 'rollno'],
-        ['table' => 'course',         'col' => 'RollNo'],
-    ];
+    exit();
+}
 
-    $ok = true;
-    foreach ($selected as $update) {
+$facultyId = trim($_POST['faculty']);
+$selected = $_POST['check'];
+
+
+/* -----------------------------------------
+   GET FACULTY DETAILS
+----------------------------------------- */
+
+$fq = mysqli_prepare(
+    $conn,
+    "SELECT id, name FROM faculty WHERE id = ? LIMIT 1"
+);
+
+mysqli_stmt_bind_param($fq, "s", $facultyId);
+mysqli_stmt_execute($fq);
+
+$facultyResult = mysqli_stmt_get_result($fq);
+$facultyRow = mysqli_fetch_assoc($facultyResult);
+
+if (!$facultyRow) {
+
+    echo "<script>
+        alert('Invalid faculty selected.');
+        window.location='counsellor.php';
+    </script>";
+
+    exit();
+}
+
+$facultyName = $facultyRow['name'];
+
+
+/* -----------------------------------------
+   TABLES
+----------------------------------------- */
+
+$tables = [
+
+    ['table' => 'studentdetails', 'col' => 'username'],
+
+    ['table' => 'sworkshop', 'col' => 'RollNo'],
+
+    ['table' => 'sinternship', 'col' => 'rollno'],
+
+    ['table' => 'sproject', 'col' => 'Roll_Number'],
+
+    ['table' => 'extracircular', 'col' => 'rollno'],
+
+    ['table' => 'cocircular', 'col' => 'rollno'],
+
+    ['table' => 'course', 'col' => 'RollNo']
+
+];
+
+
+/* -----------------------------------------
+   START TRANSACTION
+----------------------------------------- */
+
+mysqli_begin_transaction($conn);
+
+try {
+
+    foreach ($selected as $studentRollNo) {
+
         foreach ($tables as $t) {
-            $sql = "UPDATE `{$t['table']}` SET counsular_id = ?, counsular = ? WHERE `{$t['col']}` = ?";
+
+            $sql = "
+                UPDATE `{$t['table']}`
+                SET
+                    counsular_id = ?,
+                    counsular = ?
+                WHERE `{$t['col']}` = ?
+            ";
+
             $stmt = mysqli_prepare($conn, $sql);
-            mysqli_stmt_bind_param($stmt, "sss", $facultyId, $facultyName, $update);
-            if (!mysqli_stmt_execute($stmt)) {
-                $ok = false;
+
+            if (!$stmt) {
+                throw new Exception(mysqli_error($conn));
             }
+
+            mysqli_stmt_bind_param(
+                $stmt,
+                "sss",
+                $facultyId,
+                $facultyName,
+                $studentRollNo
+            );
+
+            if (!mysqli_stmt_execute($stmt)) {
+                throw new Exception(mysqli_stmt_error($stmt));
+            }
+
+            mysqli_stmt_close($stmt);
         }
     }
 
-    if ($ok) {
-        echo "<script>alert('Counsellor assigned successfully');window.location='counsellor.php';</script>";
-    } else {
-        echo "<script>alert('Some records could not be updated');window.location='counsellor.php';</script>";
-    }
-    exit;
+    mysqli_commit($conn);
+
+    echo "<script>
+        alert('Counsellor assigned successfully.');
+        window.location='counsellor.php';
+    </script>";
+} catch (Exception $e) {
+
+    mysqli_rollback($conn);
+
+    echo "<script>
+        alert('Assignment failed. No changes were saved.');
+        window.location='counsellor.php';
+    </script>";
 }
 
-header("Location: counsellor.php");
-exit;
+exit();

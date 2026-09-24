@@ -1,7 +1,61 @@
 <?php
+
 error_reporting(E_ERROR | E_PARSE);
+
 session_start();
+
 include_once('db_conn.php');
+
+
+/* -----------------------------------------
+   CHECK FACULTY LOGIN
+----------------------------------------- */
+
+if (!isset($_SESSION['id'])) {
+
+	header("Location: login2.php");
+	exit();
+}
+
+
+/* -----------------------------------------
+   GET LOGGED-IN FACULTY ID
+----------------------------------------- */
+
+$facid = $_SESSION['id'];
+
+
+/* -----------------------------------------
+   VERIFY FACULTY
+----------------------------------------- */
+
+$facultyStmt = mysqli_prepare(
+	$conn,
+	"SELECT id, name FROM faculty WHERE id = ? LIMIT 1"
+);
+
+mysqli_stmt_bind_param(
+	$facultyStmt,
+	"s",
+	$facid
+);
+
+mysqli_stmt_execute($facultyStmt);
+
+$facultyResult = mysqli_stmt_get_result($facultyStmt);
+
+$faculty = mysqli_fetch_assoc($facultyResult);
+
+if (!$faculty) {
+
+	session_destroy();
+
+	header("Location: login2.php");
+	exit();
+}
+
+$facultyName = $faculty['name'];
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -17,6 +71,7 @@ include_once('db_conn.php');
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<style>
 		@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap');
+
 		:root {
 			--dark: #1a120b;
 			--dark-2: #2b1d13;
@@ -37,6 +92,7 @@ include_once('db_conn.php');
 		* {
 			box-sizing: border-box;
 		}
+
 		html,
 		body {
 			width: 100% !important;
@@ -59,6 +115,7 @@ include_once('db_conn.php');
 		.n {
 			text-decoration: none;
 		}
+
 		html body .topbar {
 			display: flex;
 			justify-content: space-between;
@@ -111,6 +168,7 @@ include_once('db_conn.php');
 			transform: translateY(-1px);
 			box-shadow: 0 8px 18px rgba(212, 175, 55, 0.3);
 		}
+
 		#myTable .btn,
 		#myTable1 .btn,
 		#myTable2 .btn,
@@ -120,6 +178,7 @@ include_once('db_conn.php');
 			padding: 8px 14px;
 			font-size: 0.8rem;
 		}
+
 		html body .page-hero {
 			text-align: center;
 			padding: 22px 20px 8px;
@@ -143,6 +202,7 @@ include_once('db_conn.php');
 			color: var(--dark);
 			margin: 0 0 8px;
 		}
+
 		.page-hero h1 .accent {
 			color: var(--gold-soft);
 		}
@@ -205,6 +265,7 @@ include_once('db_conn.php');
 			margin-right: 10px;
 			vertical-align: middle;
 		}
+
 		#myInput,
 		#myInput1,
 		#myInput2,
@@ -245,6 +306,7 @@ include_once('db_conn.php');
 		#myInput5::placeholder {
 			color: var(--muted);
 		}
+
 		html body .scroll {
 			height: auto;
 			max-height: 420px;
@@ -366,17 +428,21 @@ include_once('db_conn.php');
 				flex-wrap: wrap;
 				gap: 10px;
 			}
+
 			.btn,
 			#btn1 {
 				width: 100% !important;
 				justify-content: center;
 			}
+
 			html body .container {
 				padding: 0 14px !important;
 			}
+
 			.scroll {
 				max-height: 340px;
 			}
+
 			#myInput,
 			#myInput1,
 			#myInput2,
@@ -385,12 +451,14 @@ include_once('db_conn.php');
 			#myInput5 {
 				max-width: 100%;
 			}
+
 			.wave {
 				display: none;
 			}
 		}
 	</style>
 </head>
+
 <body>
 	<div class="topbar">
 		<a href="facultydat.php" class="n"><button type="button" class="btn" id="btn1">Back</button></a>
@@ -428,10 +496,20 @@ include_once('db_conn.php');
 						</tr>
 						<?php
 						$name = $_SESSION['name'];
-						$stmt = mysqli_prepare($conn, "SELECT * FROM sworkshop WHERE classteacher_id = ?");
+						$stmt = mysqli_prepare(
+							$conn,
+							"SELECT *
+     FROM sworkshop
+     WHERE classteacher_id = ?
+     ORDER BY StartDate DESC"
+						);
+
 						mysqli_stmt_bind_param($stmt, "s", $facid);
+
 						mysqli_stmt_execute($stmt);
+
 						$result = mysqli_stmt_get_result($stmt);
+
 						while ($rows = mysqli_fetch_assoc($result)) {
 						?>
 							<tr>
@@ -493,8 +571,20 @@ include_once('db_conn.php');
 							<th>Download</th>
 						</tr>
 						<?php
-						$query = "SELECT * FROM sinternship WHERE classteacher='$name'";
-						$result = mysqli_query($conn, $query);
+						$stmt = mysqli_prepare(
+							$conn,
+							"SELECT *
+     FROM sinternship
+     WHERE classteacher_id = ?
+     ORDER BY startdate DESC"
+						);
+
+						mysqli_stmt_bind_param($stmt, "s", $facid);
+
+						mysqli_stmt_execute($stmt);
+
+						$result = mysqli_stmt_get_result($stmt);
+
 						while ($rows = mysqli_fetch_assoc($result)) {
 						?>
 							<tr>
@@ -550,8 +640,20 @@ include_once('db_conn.php');
 							<th>Class Teacher</th>
 						</tr>
 						<?php
-						$query = "SELECT * FROM sproject WHERE classteacher='$name'";
-						$result = mysqli_query($conn, $query);
+						$stmt = mysqli_prepare(
+							$conn,
+							"SELECT *
+     FROM sproject
+     WHERE classteacher_id = ?
+     ORDER BY academicyear DESC"
+						);
+
+						mysqli_stmt_bind_param($stmt, "s", $facid);
+
+						mysqli_stmt_execute($stmt);
+
+						$result = mysqli_stmt_get_result($stmt);
+
 						while ($rows = mysqli_fetch_assoc($result)) {
 						?>
 							<tr>
@@ -589,8 +691,20 @@ include_once('db_conn.php');
 							<th>Download</th>
 						</tr>
 						<?php
-						$query = "SELECT * FROM course WHERE classteacher='$name'";
-						$result = mysqli_query($conn, $query);
+						$stmt = mysqli_prepare(
+							$conn,
+							"SELECT *
+     FROM course
+     WHERE classteacher_id = ?
+     ORDER BY StartDate DESC"
+						);
+
+						mysqli_stmt_bind_param($stmt, "s", $facid);
+
+						mysqli_stmt_execute($stmt);
+
+						$result = mysqli_stmt_get_result($stmt);
+
 						while ($rows = mysqli_fetch_assoc($result)) {
 						?>
 							<tr>
@@ -648,8 +762,20 @@ include_once('db_conn.php');
 							<th>Download</th>
 						</tr>
 						<?php
-						$query = "SELECT * FROM extracircular WHERE classteacher='$name'";
-						$result = mysqli_query($conn, $query);
+						$stmt = mysqli_prepare(
+							$conn,
+							"SELECT *
+     FROM extracircular
+     WHERE classteacher_id = ?
+     ORDER BY dates DESC"
+						);
+
+						mysqli_stmt_bind_param($stmt, "s", $facid);
+
+						mysqli_stmt_execute($stmt);
+
+						$result = mysqli_stmt_get_result($stmt);
+
 						while ($rows = mysqli_fetch_assoc($result)) {
 						?>
 							<tr>
@@ -707,8 +833,20 @@ include_once('db_conn.php');
 							<th>Download</th>
 						</tr>
 						<?php
-						$query = "SELECT * FROM cocircular WHERE classteacher='$name'";
-						$result = mysqli_query($conn, $query);
+						$stmt = mysqli_prepare(
+							$conn,
+							"SELECT *
+     FROM cocircular
+     WHERE classteacher_id = ?
+     ORDER BY dates DESC"
+						);
+
+						mysqli_stmt_bind_param($stmt, "s", $facid);
+
+						mysqli_stmt_execute($stmt);
+
+						$result = mysqli_stmt_get_result($stmt);
+
 						while ($rows = mysqli_fetch_assoc($result)) {
 						?>
 							<tr>
@@ -873,4 +1011,5 @@ include_once('db_conn.php');
 		}
 	</script>
 </body>
+
 </html>
