@@ -8,7 +8,6 @@ session_start();
 <head>
   <link rel="icon" type="image/x-icon" href="icon2.png">
   <title>CERTIFICATE MAINTANCE SYSTEM</title>
-  <link rel="stylesheet" href="lightbox.min.css">
   <script src="lightbox-plus-jquery.min.js"></script>
   <script src="https://kit.fontawesome.com/a81368914c.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1">

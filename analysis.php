@@ -8,7 +8,6 @@ session_start();
 <head>
 	<link rel="icon" type="image/x-icon" href="icon2.png">
 	<title>CERTIFICATE MAINTANCE SYSTEM</title>
-	<link rel="stylesheet" href="lightbox.min.css">
 	<script src="lightbox-plus-jquery.min.js"></script>
 	<script src="https://kit.fontawesome.com/a81368914c.js"></script>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">

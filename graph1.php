@@ -9,7 +9,6 @@ session_start();
 	<meta charset="UTF-8">
 	<link rel="icon" type="image/x-icon" href="icon2.png">
 	<title>Academic Year Analysis | Certificate Management System</title>
-	<link rel="stylesheet" href="lightbox.min.css">
 	<script src="lightbox-plus-jquery.min.js"></script>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" />
 	<meta name="viewport" content="width=device-width, initial-scale=1">

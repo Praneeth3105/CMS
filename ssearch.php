@@ -14,7 +14,6 @@ $rollno = $_SESSION['username'];
   <link rel="icon" type="image/x-icon" href="icon2.png">
   <title>CERTIFICATE MANAGEMENT SYSTEM</title>
   <link rel="stylesheet" href="style2.css">
-  <link rel="stylesheet" href="lightbox.min.css">
   <script src="lightbox-plus-jquery.min.js"></script>
   <link href="https://fonts.googleapis.com/css?family=Poppins:600&display=swap" rel="stylesheet">
   <script src="https://kit.fontawesome.com/a81368914c.js"></script>
