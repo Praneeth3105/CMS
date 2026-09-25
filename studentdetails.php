@@ -22,7 +22,6 @@ function resolveStudentPicUrl($pic)
     }
   }
 
-  // Fallback: search every subfolder under images/ for this filename.
   $imagesRoot = __DIR__ . '/images';
   if (is_dir($imagesRoot)) {
     $it = new RecursiveIteratorIterator(
