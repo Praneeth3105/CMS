@@ -12,9 +12,5 @@
 <body>
 <a href="studentadd.php" class="n" ><button type="button" class="btn" id="btn1" style="width: 10%;" >Back</button></a>
 <center><h1>Data Uploaded Successfully...............</h1></center>
-
 </body>
-
-
-
 </html>
