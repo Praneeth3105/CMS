@@ -19,10 +19,6 @@ if (!isset($_POST['submit'], $_POST['faculty'], $_POST['check'])) {
 $facultyId = trim($_POST['faculty']);
 $selected = $_POST['check'];
 
-/* -----------------------------------------
-   GET FACULTY NAME USING FACULTY ID
------------------------------------------ */
-
 $fq = mysqli_prepare(
     $conn,
     "SELECT id, name FROM faculty WHERE id = ? LIMIT 1"
