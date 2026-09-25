@@ -18,8 +18,6 @@ if(isset($_POST['submit']))
 	if($fire)
 	{
 		move_uploaded_file($file_tmp1, $location.$file1);
-		
-		
 		echo "<script>alert('Data Uploaded Successfully');window.location='accer.php';</script>";
 	}
 	else
