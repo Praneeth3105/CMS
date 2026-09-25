@@ -32,26 +32,19 @@ $query1="UPDATE academic SET semot='$file1' WHERE rollno='$uname'";
 	if($fire1)
 	{
 		move_uploaded_file($file_tmp1, $location.$file1);
-		
-		
 		echo "<script>alert('Data Uploaded Successfully');window.location='accer.php';</script>";
 	}
 	else
 	{
 		 echo "<script>alert('Data not Uploaded 2');window.location='accer.php';</script>";
 	}
-
-
 }
 elseif($i=='semto'){
-
 $query2="UPDATE academic SET semto='$file1' WHERE rollno='$uname'";
 	$fire2=mysqli_query($conn,$query2);
 	if($fire2)
 	{
 		move_uploaded_file($file_tmp1, $location.$file1);
-		
-		
 		echo "<script>alert('Data Uploaded Successfully');window.location='accer.php';</script>";
 	}
 	else
@@ -60,58 +53,43 @@ $query2="UPDATE academic SET semto='$file1' WHERE rollno='$uname'";
 	}
 }
 elseif($i=='semtt'){
-
 $query3="UPDATE academic SET semtt='$file1' WHERE rollno='$uname'";
 	$fire3=mysqli_query($conn,$query3);
 	if($fire3)
 	{
 		move_uploaded_file($file_tmp1, $location.$file1);
-		
-		
 		echo "<script>alert('Data Uploaded Successfully');window.location='accer.php';</script>";
 	}
 	else
 	{
 		 echo "<script>alert('Data not Uploaded 4');window.location='accer.php';</script>";
 	}
-
-
 }
 elseif($i=='semtho'){
-
 $query4="UPDATE academic SET semtho='$file1' WHERE rollno='$uname'";
 	$fire4=mysqli_query($conn,$query4);
 	if($fire4)
 	{
 		move_uploaded_file($file_tmp1, $location.$file1);
-		
-		
 		echo "<script>alert('Data Uploaded Successfully');window.location='accer.php';</script>";
 	}
 	else
 	{
 		 echo "<script>alert('Data not Uploaded 5');window.location='accer.php';</script>";
 	}
-
-
 }
 elseif($i=='semtht'){
-
 $query5="UPDATE academic SET semtht='$file1' WHERE rollno='$uname'";
 	$fire5=mysqli_query($conn,$query5);
 	if($fire5)
 	{
 		move_uploaded_file($file_tmp1, $location.$file1);
-		
-		
 		echo "<script>alert('Data Uploaded Successfully');window.location='accer.php';</script>";
 	}
 	else
 	{
 		 echo "<script>alert('Data not Uploaded 6');window.location='accer.php';</script>";
 	}
-
-
 }
 elseif($i=='semfo'){
 $query6="UPDATE academic SET semfo='$file1' WHERE rollno='$uname'";
