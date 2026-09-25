@@ -13,7 +13,7 @@ function resolveStudentPicUrl($pic)
 
   $candidates = [
     'images/student_profile/' . $needle,
-    'images/' . $picClean, // in case the DB value already includes a subfolder
+    'images/' . $picClean, 
     'images/' . $needle,
   ];
   foreach ($candidates as $rel) {
