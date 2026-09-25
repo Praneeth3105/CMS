@@ -58,7 +58,6 @@ $rollno = $_SESSION['username'];
       text-decoration: none;
     }
 
-    /* ---------- Navbar ---------- */
     .navbar {
       display: flex;
       align-items: center;
