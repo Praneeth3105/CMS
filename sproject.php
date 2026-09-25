@@ -9,11 +9,6 @@ if (!isset($_SESSION['username'])) {
 }
 
 $rollno = $_SESSION['username'];
-
-/* -----------------------------------------
-   GET CURRENT STUDENT DETAILS
------------------------------------------ */
-
 $stmtStudent = mysqli_prepare(
     $conn,
     "SELECT
