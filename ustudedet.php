@@ -172,6 +172,7 @@ $picUrl = resolveStudentPicUrl($row['pic'] ?? null);
 <head>
     <meta charset="UTF-8">
     <title>CERTIFICATE MAINTENANCE SYSTEM</title>
+    <link rel="icon" type="image/x-icon" href="icon2.png">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         :root {
