@@ -1,13 +1,15 @@
 <?php
-          include "db_conn.php";
-          session_start();
+include "db_conn.php";
+session_start();
 ?>
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="UTF-8">
   <title>CERTIFICATE MAINTENANCE SYSTEM</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="icon2.png">
   <script src="lightbox-plus-jquery.min.js"></script>
   <style>
     :root {
@@ -21,9 +23,11 @@
       --text-muted: #6b6155;
       --border: #e6ddc9;
     }
+
     * {
       box-sizing: border-box;
     }
+
     body {
       margin: 0;
       font-family: Georgia, 'Times New Roman', serif;
@@ -31,6 +35,7 @@
       color: var(--text-dark);
       overflow-y: auto;
     }
+
     .topbar {
       background: linear-gradient(180deg, var(--dark) 0%, var(--dark-2) 100%);
       padding: 18px 32px;
@@ -358,4 +363,5 @@
     }
   </script>
 </body>
+
 </html>
