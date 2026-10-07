@@ -28,6 +28,7 @@ function renderFile($path)
   <script src="lightbox-plus-jquery.min.js"></script>
   <script src="https://kit.fontawesome.com/a81368914c.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <link rel="icon" type="image/x-icon" href="icon2.png">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap');
@@ -713,4 +714,5 @@ function renderFile($path)
     }
   </script>
 </body>
+
 </html>
