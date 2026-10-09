@@ -11,7 +11,6 @@ if (!$rollno) {
 $name = $_GET['editwn'] ?? ($_POST['name'] ?? '');
 $file = $_GET['edi']    ?? ($_POST['file'] ?? '');
 $error = '';
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm'])) {
     $stmt = mysqli_prepare($conn, "DELETE FROM course WHERE RollNo=? AND CourseName=?");
     mysqli_stmt_bind_param($stmt, "ss", $rollno, $name);
@@ -28,7 +27,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm'])) {
 ?>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>Delete Certificate</title>

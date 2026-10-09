@@ -19,7 +19,6 @@ $row = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
 if (!$row) {
     die("Record not found, or you don't have permission to edit it.");
 }
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $workshopname = trim($_POST['workshopname']);
     $orgname      = trim($_POST['orgname']);
@@ -43,7 +42,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $upd = mysqli_prepare($conn, "UPDATE sworkshop SET WorkShopName=?, OrgName=?, StartDate=?, EndDate=?, Duration=?, Place=?, branch=?, year=?, file=? WHERE RollNo=? AND WorkShopName=?");
     mysqli_stmt_bind_param($upd, "sssssssssss", $workshopname, $orgname, $startdate, $enddate, $duration, $place, $branch, $year, $filename, $rollno, $original);
-
     if (mysqli_stmt_execute($upd)) {
         header("Location: ssearch.php?updated=workshop");
         exit;
