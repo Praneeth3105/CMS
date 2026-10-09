@@ -478,7 +478,6 @@ session_start();
                         <h2 style="font-family:'Playfair Display', serif; margin:0;"><?php echo $row['name']; ?></h2>
                     </div>
                 </div>
-
                 <div class="info">
                     <h3>Roll No<br><?php echo $row['username']; ?></h3>
                     <h3>Year of Studying<br><?php echo $row['year']; ?></h3>
@@ -489,12 +488,10 @@ session_start();
             } ?>
 
             <hr class="divider">
-
             <div class="section-title">
                 <h2>Add <span>Achievement</span></h2>
             </div>
             <p class="section-sub">Choose which type of achievement/certificate you'd like to submit</p>
-
             <div class="login-content">
                 <div id="quick-book">
                     <form onchange="myFunction()" name="frmRadio" id="radio-buttons" action="" class="note"><br>
