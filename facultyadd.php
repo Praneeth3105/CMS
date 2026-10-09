@@ -493,12 +493,10 @@ if (!isset($_SESSION['id'])) {
             ?>
 
             <hr class="divider">
-
             <div class="section-title">
                 <h2>Add <span>Record</span></h2>
             </div>
             <p class="section-sub">Choose which type of record you'd like to submit</p>
-
             <div class="login-content">
                 <div id="quick-book">
                     <form onchange="myFunction()" name="frmRadio" id="radio-buttons" action="" class="note"><br>
@@ -533,7 +531,6 @@ if (!isset($_SESSION['id'])) {
     <script>
         function myFunction() {
 
-            // 1. FDP Attended -> table: fdp
             if (document.getElementById("fdp").checked) {
                 document.getElementById("button").innerHTML = `
         <form method='post' action='fdp.php' id='note1' class='w3-container'>
