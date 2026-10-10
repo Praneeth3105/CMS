@@ -10,7 +10,6 @@ if (!$rollno) {
 
 $original = $_GET['editwn'] ?? ($_POST['original_name'] ?? '');
 $error = '';
-
 $stmt = mysqli_prepare($conn, "SELECT * FROM course WHERE RollNo=? AND CourseName=? LIMIT 1");
 mysqli_stmt_bind_param($stmt, "ss", $rollno, $original);
 mysqli_stmt_execute($stmt);
