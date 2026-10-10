@@ -10,7 +10,6 @@ if (!$rollno) {
 
 $original = $_GET['editwn'] ?? ($_POST['original_name'] ?? '');
 $error = '';
-
 $stmt = mysqli_prepare($conn, "SELECT * FROM extracircular WHERE rollno=? AND eventname=? LIMIT 1");
 mysqli_stmt_bind_param($stmt, "ss", $rollno, $original);
 mysqli_stmt_execute($stmt);
@@ -54,7 +53,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>Edit Extra Circular</title>
