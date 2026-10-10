@@ -32,41 +32,25 @@ mysqli_stmt_bind_param(
 );
 
 mysqli_stmt_execute($stmtStudent);
-
 $resultStudent = mysqli_stmt_get_result($stmtStudent);
-
 $student = mysqli_fetch_assoc($resultStudent);
 
 if (!$student) {
     die("Student details not found.");
 }
 
-/* -----------------------------------------
-   STUDENT INFORMATION
------------------------------------------ */
 
 $name = $student['name'];
 $year = $student['year'];
 $branch = $student['department'];
-
 $counsular = $student['counsular'];
 $counsular_id = $student['counsular_id'];
-
 $classteacher = $student['classteacher'];
 $classteacher_id = $student['classteacher_id'];
-
-/* -----------------------------------------
-   FORM DATA
------------------------------------------ */
-
 $tname = $_POST['tname'] ?? '';
 $bnum = $_POST['bnum'] ?? '';
 $accy = $_POST['acc'] ?? '';
 $link = $_POST['link'] ?? '';
-
-/* -----------------------------------------
-   INSERT
------------------------------------------ */
 
 if (isset($_POST['submit'])) {
 
