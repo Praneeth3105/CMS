@@ -13,9 +13,6 @@ if (!isset($_SESSION['username'])) {
 
 
 $rollno = $_SESSION['username'];
-
-
-
 $stmtStudent = mysqli_prepare(
     $conn,
     "SELECT
