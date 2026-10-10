@@ -486,7 +486,6 @@ session_start();
                 </div>
             <?php
             } ?>
-
             <hr class="divider">
             <div class="section-title">
                 <h2>Add <span>Achievement</span></h2>
