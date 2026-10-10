@@ -4,9 +4,6 @@ include "db_conn.php";
 session_start();
 
 
-/* ------------------------------------------------
-   CHECK STUDENT LOGIN
------------------------------------------------- */
 
 if (!isset($_SESSION['username'])) {
     header("Location: login1.php");
@@ -14,17 +11,10 @@ if (!isset($_SESSION['username'])) {
 }
 
 
-/* ------------------------------------------------
-   GET STUDENT ROLL NUMBER
------------------------------------------------- */
 
 $rollno = $_SESSION['username'];
 
 
-/* ------------------------------------------------
-   GET CURRENT STUDENT DETAILS
-   INCLUDING COUNSELLOR + CLASS INCHARGE IDs
------------------------------------------------- */
 
 $stmtStudent = mysqli_prepare(
     $conn,
