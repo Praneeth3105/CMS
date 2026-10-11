@@ -83,12 +83,8 @@ $durt = date_diff($datetime1, $datetime2);
 $durt = $durt->format('%m months, %d days');
 
 
-/* ------------------------------------------------
-   INSERT COURSE
------------------------------------------------- */
 
 if (isset($_POST['submit'])) {
-
     $sql = "
         INSERT INTO course
         (
@@ -130,14 +126,10 @@ if (isset($_POST['submit'])) {
 
 
     $stmt = mysqli_prepare($conn, $sql);
-
-
     if (!$stmt) {
 
         die("Database prepare error: " . mysqli_error($conn));
     }
-
-
     mysqli_stmt_bind_param(
         $stmt,
         "sssssssssssssss",
@@ -159,23 +151,12 @@ if (isset($_POST['submit'])) {
     );
 
 
-    /* ------------------------------------------------
-       EXECUTE INSERT
-    ------------------------------------------------ */
-
     $res = mysqli_stmt_execute($stmt);
-
-
-    /* ------------------------------------------------
-       UPLOAD FILE
-    ------------------------------------------------ */
-
     if ($res) {
 
         $uploadSuccess = true;
 
         if ($filename !== "") {
-
             $uploadSuccess = move_uploaded_file(
                 $tempname,
                 $folder
@@ -213,6 +194,5 @@ if (isset($_POST['submit'])) {
 
     mysqli_stmt_close($stmt);
 }
-
 
 mysqli_stmt_close($stmtStudent);
