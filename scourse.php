@@ -75,16 +75,11 @@ if (isset($_FILES["file"]) && $_FILES["file"]["error"] === UPLOAD_ERR_OK) {
 }
 
 
-/* ------------------------------------------------
-   CALCULATE DURATION
------------------------------------------------- */
+
 
 $datetime1 = date_create($sd);
-
 $datetime2 = date_create($ed);
-
 $durt = date_diff($datetime1, $datetime2);
-
 $durt = $durt->format('%m months, %d days');
 
 
