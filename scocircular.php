@@ -10,10 +10,6 @@ if (!isset($_SESSION['username'])) {
 
 $rollno = $_SESSION['username'];
 
-/* -----------------------------------------
-   GET CURRENT STUDENT DETAILS
------------------------------------------ */
-
 $stmtStudent = mysqli_prepare(
     $conn,
     "SELECT
@@ -46,23 +42,15 @@ if (!$student) {
     die("Student details not found.");
 }
 
-/* -----------------------------------------
-   STUDENT INFORMATION
------------------------------------------ */
 
 $name = $student['name'];
 $year = $student['year'];
 $branch = $student['department'];
-
 $counsular = $student['counsular'];
 $counsular_id = $student['counsular_id'];
-
 $classteacher = $student['classteacher'];
 $classteacher_id = $student['classteacher_id'];
 
-/* -----------------------------------------
-   FORM DATA
------------------------------------------ */
 
 $nevent = $_POST['nevent'] ?? '';
 $condclg = $_POST['condclg'] ?? '';
@@ -71,9 +59,6 @@ $dates = $_POST['dates'] ?? '';
 $ie = $_POST['ie'] ?? '';
 $acc = $_POST['acc'] ?? '';
 
-/* -----------------------------------------
-   FILE
------------------------------------------ */
 
 $filename = "";
 $tempname = "";
@@ -86,9 +71,6 @@ if (isset($_FILES["file"]) && $_FILES["file"]["error"] === UPLOAD_ERR_OK) {
     $folder = "images/" . $filename;
 }
 
-/* -----------------------------------------
-   INSERT
------------------------------------------ */
 
 if (isset($_POST['submit'])) {
 
