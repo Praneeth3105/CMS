@@ -1,16 +1,10 @@
 <?php
-
 include "db_conn.php";
 session_start();
-
-
-
 if (!isset($_SESSION['username'])) {
     header("Location: login1.php");
     exit();
 }
-
-
 
 $rollno = $_SESSION['username'];
 $stmtStudent = mysqli_prepare(
@@ -36,38 +30,19 @@ mysqli_stmt_bind_param(
 );
 
 mysqli_stmt_execute($stmtStudent);
-
 $resultStudent = mysqli_stmt_get_result($stmtStudent);
-
 $student = mysqli_fetch_assoc($resultStudent);
-
-
-/* ------------------------------------------------
-   CHECK STUDENT EXISTS
------------------------------------------------- */
 
 if (!$student) {
     die("Student details not found.");
 }
 
 
-/* ------------------------------------------------
-   STUDENT DETAILS
------------------------------------------------- */
-
 $name = $student['name'];
-
 $year = $student['year'];
-
 $branch = $student['department'];
 
-
-/* ------------------------------------------------
-   COUNSELLOR DETAILS
------------------------------------------------- */
-
 $counsular = $student['counsular'];
-
 $counsular_id = $student['counsular_id'];
 
 
