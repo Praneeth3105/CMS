@@ -41,23 +41,12 @@ if (!$student) {
 $name = $student['name'];
 $year = $student['year'];
 $branch = $student['department'];
-
 $counsular = $student['counsular'];
 $counsular_id = $student['counsular_id'];
 
 
-/* ------------------------------------------------
-   CLASS INCHARGE DETAILS
------------------------------------------------- */
-
 $classteacher = $student['classteacher'];
-
 $classteacher_id = $student['classteacher_id'];
-
-
-/* ------------------------------------------------
-   GET FORM DATA
------------------------------------------------- */
 
 $_SESSION['ni'] = $_POST['ni'] ?? '';
 $_SESSION['nc'] = $_POST['nc'] ?? '';
@@ -66,37 +55,22 @@ $_SESSION['ed'] = $_POST['ed'] ?? '';
 $_SESSION['ay'] = $_POST['ay'] ?? '';
 $_SESSION['acc'] = $_POST['acc'] ?? '';
 
-
 $ni = $_SESSION['ni'];
-
 $nc = $_SESSION['nc'];
-
 $sd = $_SESSION['sd'];
-
 $ed = $_SESSION['ed'];
-
 $ay = $_SESSION['ay'];
-
 $acc = $_SESSION['acc'];
 
 
-/* ------------------------------------------------
-   FILE UPLOAD
------------------------------------------------- */
-
 $filename = "";
-
 $tempname = "";
-
 $folder = "";
 
 
 if (isset($_FILES["file"]) && $_FILES["file"]["error"] === UPLOAD_ERR_OK) {
-
     $filename = basename($_FILES["file"]["name"]);
-
     $tempname = $_FILES["file"]["tmp_name"];
-
     $folder = "images/" . $filename;
 }
 
