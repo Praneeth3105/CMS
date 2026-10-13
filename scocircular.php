@@ -124,21 +124,16 @@ if (isset($_POST['submit'])) {
         $classteacher,
         $classteacher_id
     );
-
     $res = mysqli_stmt_execute($stmt);
 
     if ($res) {
-
         $uploadSuccess = true;
-
         if ($filename !== "") {
-
             $uploadSuccess = move_uploaded_file(
                 $tempname,
                 $folder
             );
         }
-
         if ($uploadSuccess) {
 
             echo "
