@@ -15,7 +15,6 @@ session_start();
 
 	<style>
 		@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Poppins:wght@400;500;600;700&display=swap');
-
 		:root {
 			--dark: #1a120b;
 			--dark-2: #2b1d13;

@@ -3,9 +3,9 @@ session_start();
 include_once('db_conn.php');
 $id = $_SESSION['id'];
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <link rel="icon" type="image/x-icon" href="icon2.png">

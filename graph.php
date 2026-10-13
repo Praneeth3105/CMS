@@ -239,12 +239,9 @@ foreach ($facultyOrder as $fid) {
   <script>
     const facultyLabels = <?php echo json_encode($labels, JSON_UNESCAPED_UNICODE); ?>;
     const chartData = <?php echo json_encode($chartData, JSON_UNESCAPED_UNICODE); ?>;
-
     const palette = ["#d4af37", "#b5502e", "#2b1d13", "#c9a227", "#8a6d3b", "#7c9070", "#5b7c99", "#9c5b8f"];
     const barColors = facultyLabels.map((_, i) => palette[i % palette.length]);
-
     const grid = document.getElementById('chartGrid');
-
     const rowHeight = 30; 
     const chartPadding = 70;
     const cardHeight = Math.max(320, facultyLabels.length * rowHeight + chartPadding);
