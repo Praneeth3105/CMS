@@ -1,7 +1,6 @@
 <?php
 include "db_conn.php";
 session_start();
-
 $error = "";
 $success = "";
 
@@ -9,8 +8,6 @@ if (isset($_POST['submit'])) {
 
     $rollno = mysqli_real_escape_string($conn, $_POST['rollno']);
     $newpass = mysqli_real_escape_string($conn, $_POST['psw']);
-
-    // Check if the roll no (username) exists in studentdetails
     $checkQuery = "SELECT * FROM studentdetails WHERE username='$rollno'";
     $checkResult = mysqli_query($conn, $checkQuery);
 
