@@ -535,7 +535,5 @@ session_start();
         }
     </script>
     <script src="mainl.js"></script>
-
 </body>
-
 </html>

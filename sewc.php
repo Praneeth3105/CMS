@@ -10,7 +10,6 @@ if (!$rollno) {
 
 $original = $_GET['editwn'] ?? ($_POST['original_name'] ?? '');
 $error = '';
-
 $stmt = mysqli_prepare($conn, "SELECT * FROM sproject WHERE Roll_Number=? AND Project_title=? LIMIT 1");
 mysqli_stmt_bind_param($stmt, "ss", $rollno, $original);
 mysqli_stmt_execute($stmt);
@@ -26,7 +25,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $academicyear = trim($_POST['academicyear']);
     $drivelink    = trim($_POST['drivelink']);
     $branch       = trim($_POST['branch']);
-
     $upd = mysqli_prepare($conn, "UPDATE sproject SET Team_Number=?, Project_title=?, academicyear=?, Drive_link=?, branch=? WHERE Roll_Number=? AND Project_title=?");
     mysqli_stmt_bind_param($upd, "sssssss", $teamnumber, $projecttitle, $academicyear, $drivelink, $branch, $rollno, $original);
 
@@ -40,7 +38,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>Edit Project</title>
@@ -195,7 +192,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     </style>
 </head>
-
 <body>
     <div class="navbar">
         <div class="brand">Certificate <span>Management</span> System</div>
@@ -223,5 +219,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 </body>
-
 </html>
