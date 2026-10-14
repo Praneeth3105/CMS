@@ -250,11 +250,9 @@ foreach ($facultyOrder as $fid) {
       const card = document.createElement('div');
       card.className = 'chart-card';
       card.style.height = cardHeight + 'px';
-
       const inner = document.createElement('div');
       inner.className = 'chart-inner';
       inner.style.height = cardHeight - 44 + 'px';
-
       const canvas = document.createElement('canvas');
       canvas.id = 'chart_' + idx;
       inner.appendChild(canvas);
@@ -299,5 +297,4 @@ foreach ($facultyOrder as $fid) {
     });
   </script>
 </body>
-
 </html>

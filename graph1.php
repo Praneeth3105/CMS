@@ -167,7 +167,6 @@ session_start();
 			color: var(--dark);
 		}
 
-		/* ---------- Table ---------- */
 		.data-wrap {
 			max-width: 1300px;
 			margin: 34px auto 0;
@@ -240,9 +239,7 @@ session_start();
 		}
 	</style>
 </head>
-
 <body>
-
 	<div class="topbar">
 		<a href="admin.php" class="n"><button type="button" class="btn" id="btn2">Back</button></a>
 		<a href="logout.php" class="n"><button type="button" class="btn" id="btn1">Logout</button></a>
@@ -425,6 +422,5 @@ session_start();
 			</div>
 		</div>
 	<?php } ?>
-
 </body>
 </html>	
