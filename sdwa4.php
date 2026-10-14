@@ -28,7 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm'])) {
 ?>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>Delete Extra Circular</title>
@@ -165,7 +164,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm'])) {
         }
     </style>
 </head>
-
 <body>
     <div class="navbar">
         <div class="brand">Certificate <span>Management</span> System</div>
@@ -187,5 +185,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm'])) {
         </div>
     </div>
 </body>
-
 </html>
