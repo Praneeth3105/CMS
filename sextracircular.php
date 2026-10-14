@@ -9,11 +9,6 @@ if (!isset($_SESSION['username'])) {
 }
 
 $rollno = $_SESSION['username'];
-
-/* -----------------------------------------
-   GET CURRENT STUDENT DETAILS
------------------------------------------ */
-
 $stmtStudent = mysqli_prepare(
     $conn,
     "SELECT
@@ -39,16 +34,12 @@ mysqli_stmt_bind_param(
 mysqli_stmt_execute($stmtStudent);
 
 $resultStudent = mysqli_stmt_get_result($stmtStudent);
-
 $student = mysqli_fetch_assoc($resultStudent);
 
 if (!$student) {
     die("Student details not found.");
 }
 
-/* -----------------------------------------
-   STUDENT INFORMATION
------------------------------------------ */
 
 $name = $student['name'];
 $year = $student['year'];
@@ -60,9 +51,6 @@ $counsular_id = $student['counsular_id'];
 $classteacher = $student['classteacher'];
 $classteacher_id = $student['classteacher_id'];
 
-/* -----------------------------------------
-   FORM DATA
------------------------------------------ */
 
 $nevent = $_POST['nevent'] ?? '';
 $condclg = $_POST['condclg'] ?? '';
