@@ -10,10 +10,6 @@ if (!isset($_SESSION['username'])) {
 
 $rollno = $_SESSION['username'];
 
-/* -----------------------------------------
-   GET CURRENT STUDENT DETAILS
------------------------------------------ */
-
 $stmtStudent = mysqli_prepare(
     $conn,
     "SELECT
@@ -86,9 +82,6 @@ if (isset($_FILES["file"]) && $_FILES["file"]["error"] === UPLOAD_ERR_OK) {
     $folder = "images/" . $filename;
 }
 
-/* -----------------------------------------
-   DURATION
------------------------------------------ */
 
 $durt = "";
 
@@ -101,10 +94,6 @@ if (!empty($sd) && !empty($ed)) {
 
     $durt = $duration->format('%m months, %d days');
 }
-
-/* -----------------------------------------
-   INSERT
------------------------------------------ */
 
 if (isset($_POST['submit'])) {
 
