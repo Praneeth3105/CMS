@@ -89,9 +89,7 @@ if (!empty($sd) && !empty($ed)) {
 
     $datetime1 = date_create($sd);
     $datetime2 = date_create($ed);
-
     $duration = date_diff($datetime1, $datetime2);
-
     $durt = $duration->format('%m months, %d days');
 }
 
@@ -151,7 +149,6 @@ if (isset($_POST['submit'])) {
     );
 
     $res = mysqli_stmt_execute($stmt);
-
     if ($res) {
 
         $uploadSuccess = true;
@@ -163,7 +160,6 @@ if (isset($_POST['submit'])) {
                 $folder
             );
         }
-
         if ($uploadSuccess) {
 
             echo "
@@ -193,5 +189,4 @@ if (isset($_POST['submit'])) {
 
     mysqli_stmt_close($stmt);
 }
-
 mysqli_stmt_close($stmtStudent);
