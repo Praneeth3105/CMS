@@ -59,10 +59,6 @@ $dates = $_POST['dates'] ?? '';
 $ie = $_POST['ie'] ?? '';
 $acc = $_POST['acc'] ?? '';
 
-/* -----------------------------------------
-   FILE
------------------------------------------ */
-
 $filename = "";
 $tempname = "";
 $folder = "";
@@ -73,10 +69,6 @@ if (isset($_FILES["file"]) && $_FILES["file"]["error"] === UPLOAD_ERR_OK) {
     $tempname = $_FILES["file"]["tmp_name"];
     $folder = "images/" . $filename;
 }
-
-/* -----------------------------------------
-   INSERT
------------------------------------------ */
 
 if (isset($_POST['submit'])) {
 
