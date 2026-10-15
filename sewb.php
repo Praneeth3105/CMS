@@ -246,7 +246,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <form method="post" enctype="multipart/form-data">
                 <input type="hidden" name="original_name" value="<?php echo htmlspecialchars($original); ?>">
-
                 <div class="field"><label>Company Name</label><input type="text" name="companyname" value="<?php echo htmlspecialchars($row['companyname']); ?>" required></div>
                 <div class="field"><label>Branch</label><input type="text" name="branch" value="<?php echo htmlspecialchars($row['branch']); ?>"></div>
                 <div class="field"><label>Year</label><input type="text" name="year" value="<?php echo htmlspecialchars($row['year']); ?>"></div>

@@ -186,7 +186,6 @@ if (isset($_POST['submit'])) {
         </script>
         ";
     }
-
     mysqli_stmt_close($stmt);
 }
 mysqli_stmt_close($stmtStudent);
