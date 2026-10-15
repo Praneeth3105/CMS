@@ -4,7 +4,6 @@ session_start();
 ?>
 <!DOCTYPE html>
 <html>
-
 <head>
   <link rel="icon" type="image/x-icon" href="icon2.png">
   <title>CERTIFICATE MAINTANCE SYSTEM</title>
