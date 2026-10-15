@@ -254,7 +254,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="field"><label>Internal / External</label><input type="text" name="ie" value="<?php echo htmlspecialchars($row['ie']); ?>"></div>
                 <div class="field"><label>Academic Year</label><input type="text" name="academic_year" value="<?php echo htmlspecialchars($row['academic_year']); ?>"></div>
                 <div class="field"><label>Replace File (optional)</label><input type="file" name="file"></div>
-
                 <div class="btn-row">
                     <button type="submit" class="btn btn-primary">Update</button>
                     <a href="ssearch.php" class="btn btn-secondary">Cancel</a>
@@ -263,5 +262,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 </body>
-
 </html>
