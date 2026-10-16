@@ -98,9 +98,7 @@ if (isset($_POST['submit'])) {
         $classteacher_id,
         $accy
     );
-
     $res = mysqli_stmt_execute($stmt);
-
     if ($res) {
 
         echo "
@@ -121,5 +119,4 @@ if (isset($_POST['submit'])) {
 
     mysqli_stmt_close($stmt);
 }
-
 mysqli_stmt_close($stmtStudent);
