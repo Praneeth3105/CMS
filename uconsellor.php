@@ -45,25 +45,15 @@ $facultyName = $facultyRow['name'];
 $tables = [
 
     ['table' => 'studentdetails', 'col' => 'username'],
-
     ['table' => 'sworkshop', 'col' => 'RollNo'],
-
     ['table' => 'sinternship', 'col' => 'rollno'],
-
     ['table' => 'sproject', 'col' => 'Roll_Number'],
-
     ['table' => 'extracircular', 'col' => 'rollno'],
-
     ['table' => 'cocircular', 'col' => 'rollno'],
-
     ['table' => 'course', 'col' => 'RollNo']
 
 ];
 
-
-/* -----------------------------------------
-   START TRANSACTION
------------------------------------------ */
 
 mysqli_begin_transaction($conn);
 
