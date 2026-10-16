@@ -34,13 +34,11 @@ function resolveStudentPicUrl($pic)
       }
     }
   }
-
   return null;
 }
 ?>
 <!DOCTYPE html>
 <html>
-
 <head>
   <link rel="icon" type="image/x-icon" href="icon2.png">
   <title>CERTIFICATE MAINTANCE SYSTEM</title>
@@ -80,7 +78,6 @@ function resolveStudentPicUrl($pic)
       text-decoration: none;
     }
 
-    /* ---------- Top bar ---------- */
     .topbar {
       background: linear-gradient(135deg, var(--dark) 0%, var(--dark-2) 100%);
       padding: 18px 28px;
