@@ -9,7 +9,6 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 if (!isset($_POST['submit'], $_POST['faculty'], $_POST['check'])) {
-
     echo "<script>
         alert('Please select a counsellor and at least one student.');
         window.location='counsellor.php';
