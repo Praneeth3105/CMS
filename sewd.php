@@ -28,7 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $academicyear = trim($_POST['academicyear']);
     $branch       = trim($_POST['branch']);
     $filename     = $row['file'];
-
     if (!empty($_FILES['file']['name'])) {
         $newfile = time() . '_' . basename($_FILES['file']['name']);
         if (move_uploaded_file($_FILES['file']['tmp_name'], __DIR__ . '/images/' . $newfile)) {
@@ -38,7 +37,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $filename = $newfile;
         }
     }
-
     $upd = mysqli_prepare($conn, "UPDATE course SET CourseName=?, OrganisationName=?, StartDate=?, EndDate=?, Duration=?, academicyear=?, branch=?, file=? WHERE RollNo=? AND CourseName=?");
     mysqli_stmt_bind_param($upd, "ssssssssss", $coursename, $orgname, $startdate, $enddate, $duration, $academicyear, $branch, $filename, $rollno, $original);
 
