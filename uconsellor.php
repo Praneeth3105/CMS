@@ -56,7 +56,6 @@ $tables = [
 
 
 mysqli_begin_transaction($conn);
-
 try {
     foreach ($selected as $studentRollNo) {
         foreach ($tables as $t) {
@@ -91,7 +90,6 @@ try {
     }
 
     mysqli_commit($conn);
-
     echo "<script>
         alert('Counsellor assigned successfully.');
         window.location='counsellor.php';
