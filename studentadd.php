@@ -445,8 +445,6 @@ session_start();
 </head>
 
 <body>
-
-    <!-- ============ TOP BAR ============ -->
     <div class="topbar">
         <div class="brand">Certificate <span>Management</span> System</div>
         <div class="topbar-actions">
