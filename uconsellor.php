@@ -58,11 +58,8 @@ $tables = [
 mysqli_begin_transaction($conn);
 
 try {
-
     foreach ($selected as $studentRollNo) {
-
         foreach ($tables as $t) {
-
             $sql = "
                 UPDATE `{$t['table']}`
                 SET
