@@ -452,7 +452,6 @@ session_start();
             <a href="logout.php" class="n"><button type="button" class="btn" id="btn1">Logout</button></a>
         </div>
     </div>
-
     <div class="page-wrap">
         <div class="main-card">
 
