@@ -16,7 +16,6 @@ function resolveStudentPicUrl($pic)
     if (empty($pic)) {
         return null;
     }
-
     $picClean = ltrim(str_replace('\\', '/', $pic), '/');
     $needle = basename($picClean);
     $candidates = [
