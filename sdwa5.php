@@ -1,7 +1,6 @@
 <?php
 include_once('db_conn.php');
 if (session_status() === PHP_SESSION_NONE) session_start();
-
 $rollno = $_SESSION['username'] ?? null;
 if (!$rollno) {
     header('Location: index.php');
@@ -11,7 +10,6 @@ if (!$rollno) {
 $name = $_GET['editwn'] ?? ($_POST['name'] ?? '');
 $file = $_GET['edi']    ?? ($_POST['file'] ?? '');
 $error = '';
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm'])) {
     $stmt = mysqli_prepare($conn, "DELETE FROM cocircular WHERE rollno=? AND eventname=?");
     mysqli_stmt_bind_param($stmt, "ss", $rollno, $name);
@@ -28,7 +26,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm'])) {
 ?>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>Delete Co Circular</title>
