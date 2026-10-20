@@ -13,7 +13,6 @@ if (!isset($_POST['submit'], $_POST['faculty'], $_POST['check'])) {
         alert('Please select a counsellor and at least one student.');
         window.location='counsellor.php';
     </script>";
-
     exit();
 }
 
@@ -36,7 +35,6 @@ if (!$facultyRow) {
         alert('Invalid faculty selected.');
         window.location='counsellor.php';
     </script>";
-
     exit();
 }
 
