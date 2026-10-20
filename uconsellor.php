@@ -41,7 +41,6 @@ if (!$facultyRow) {
 }
 
 $facultyName = $facultyRow['name'];
-
 $tables = [
 
     ['table' => 'studentdetails', 'col' => 'username'],
