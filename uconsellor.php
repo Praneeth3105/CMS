@@ -14,7 +14,6 @@ if (!isset($_POST['submit'], $_POST['faculty'], $_POST['check'])) {
     </script>";
     exit();
 }
-
 $facultyId = trim($_POST['faculty']);
 $selected = $_POST['check'];
 $fq = mysqli_prepare(
