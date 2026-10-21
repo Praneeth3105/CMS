@@ -26,7 +26,6 @@ mysqli_stmt_execute($fq);
 
 $facultyResult = mysqli_stmt_get_result($fq);
 $facultyRow = mysqli_fetch_assoc($facultyResult);
-
 if (!$facultyRow) {
 
     echo "<script>
