@@ -34,7 +34,6 @@ if (!$facultyRow) {
     </script>";
     exit();
 }
-
 $facultyName = $facultyRow['name'];
 $tables = [
 
