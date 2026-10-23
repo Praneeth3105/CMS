@@ -36,7 +36,6 @@ if (!$facultyRow) {
 }
 $facultyName = $facultyRow['name'];
 $tables = [
-
     ['table' => 'studentdetails', 'col' => 'username'],
     ['table' => 'sworkshop', 'col' => 'RollNo'],
     ['table' => 'sinternship', 'col' => 'rollno'],
@@ -46,7 +45,6 @@ $tables = [
     ['table' => 'course', 'col' => 'RollNo']
 
 ];
-
 
 mysqli_begin_transaction($conn);
 try {
