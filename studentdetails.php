@@ -77,7 +77,6 @@ function resolveStudentPicUrl($pic)
     .n {
       text-decoration: none;
     }
-
     .topbar {
       background: linear-gradient(135deg, var(--dark) 0%, var(--dark-2) 100%);
       padding: 18px 28px;
