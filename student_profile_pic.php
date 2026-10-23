@@ -28,7 +28,6 @@ function resolveStudentPicUrl($pic)
             return $rel;
         }
     }
-
     $imagesRoot = __DIR__ . '/images';
     if (is_dir($imagesRoot)) {
         $it = new RecursiveIteratorIterator(
