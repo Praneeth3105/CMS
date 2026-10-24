@@ -1,6 +1,57 @@
 <?php
 include "db_conn.php";
 session_start();
+
+function resolveStudentPicUrl($pic)
+{
+    if (empty($pic)) {
+        return null;
+    }
+    $picClean = ltrim(
+        str_replace('\\', '/', $pic),
+        '/'
+    );
+    $needle = basename($picClean);
+    $candidates = [
+        'images/student_profile/' . $needle,
+        'images/' . $picClean,
+        'images/' . $needle,
+    ];
+    foreach ($candidates as $rel) {
+        if (file_exists(__DIR__ . '/' . $rel)) {
+            return $rel;
+        }
+    }
+    $imagesRoot = __DIR__ . '/images';
+    if (is_dir($imagesRoot)) {
+        $it = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator(
+                $imagesRoot,
+                FilesystemIterator::SKIP_DOTS
+            )
+        );
+        foreach ($it as $file) {
+            if (
+                $file->isFile() &&
+                strcasecmp(
+                    $file->getFilename(),
+                    $needle
+                ) === 0
+            ) {
+                $relPath = str_replace(
+                    '\\',
+                    '/',
+                    substr(
+                        $file->getPathname(),
+                        strlen(__DIR__) + 1
+                    )
+                );
+                return $relPath;
+            }
+        }
+    }
+    return null;
+}
 ?>
 <!DOCTYPE html>
 <html>
@@ -133,6 +184,14 @@ session_start();
             justify-content: center;
             color: var(--rust);
             font-size: 30px;
+            overflow: hidden;
+        }
+
+        .profile-icon img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
         }
 
         .profile-label {
@@ -177,6 +236,7 @@ session_start();
             border-top: 1px dashed var(--border);
             margin: 30px 0;
         }
+
         .section-title {
             text-align: center;
             margin-bottom: 6px;
@@ -467,9 +527,16 @@ session_start();
                 $_SESSION['counsular'] = $row['counsular'];
                 $_SESSION['classteacher'] = $row['classteacher'];
                 $_SESSION['academic_year'] = $row['academic_year'];
+                $picUrl = resolveStudentPicUrl($row['pic'] ?? null);
             ?>
                 <div class="profile-row">
-                    <div class="profile-icon"><i class="fa-solid fa-user"></i></div>
+                    <div class="profile-icon">
+                        <?php if ($picUrl) { ?>
+                            <img src="<?php echo htmlspecialchars($picUrl); ?>" alt="Profile Pic">
+                        <?php } else { ?>
+                            <i class="fa-solid fa-user"></i>
+                        <?php } ?>
+                    </div>
                     <div>
                         <div class="profile-label">Student Profile</div>
                         <h2 style="font-family:'Playfair Display', serif; margin:0;"><?php echo $row['name']; ?></h2>
@@ -510,6 +577,7 @@ session_start();
 
     <script>
         var academicYearOptions = "<option value=''>Academic Year</option><option value='2019-2020'>2019-2020</option><option value='2020-2021'>2020-2021</option><option value='2021-2022'>2021-2022</option><option value='2022-2023'>2022-2023</option><option value='2023-2024'>2023-2024</option><option value='2024-2025'>2024-2025</option><option value='2025-2026'>2025-2026</option><option value='2026-2027'>2026-2027</option><option value='2027-2028'>2027-2028</option><option value='2028-2029'>2028-2029</option><option value='2029-2030'>2029-2030</option>";
+
         function myFunction() {
             if (document.getElementById("workshop").checked) {
                 document.getElementById("button").innerHTML = "<form method='post' action='sworkshop.php' id='note1' class='w3-container' enctype='multipart/form-data'><h4><p><label>Workshop Name</label><input class='w3-input' type='text' name='wn' required></p><p><label>Name of the Organization</label><input class='w3-input' type='text' name='org' required></p><p><label>Place</label><input class='w3-input' type='text' name='place' required></p><p><label>Start Date</label><input class='w3-input' type='date' name='sd' required></p><p><label>End Date</label><input class='w3-input' type='date' name='ed' required></p><p><label for='academic'>Academic Year</label><select id='academic' onclick='my()' name='accy' required>" + academicYearOptions + "</select></p><p><label>Upload File</label><input class='w3-input' type='file' name='file' required></p><input type='submit' class='btn' value='submit' name='submit'></h4></form>";
@@ -533,4 +601,5 @@ session_start();
     </script>
     <script src="mainl.js"></script>
 </body>
+
 </html>
