@@ -2,11 +2,6 @@
 include "db_conn.php";
 session_start();
 
-// Resolve where a student's saved photo actually lives on disk.
-// Photos may be in the current student_profile/ folder, directly in
-// images/, or in some other legacy subfolder from before this upload
-// page existed — so after checking the two known spots, fall back to
-// searching the whole images/ tree for a file with this exact name.
 function resolveStudentPicUrl($pic)
 {
   if (empty($pic)) {
