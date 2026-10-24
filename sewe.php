@@ -1,7 +1,6 @@
 <?php
 include_once('db_conn.php');
 if (session_status() === PHP_SESSION_NONE) session_start();
-
 $rollno = $_SESSION['username'] ?? null;
 if (!$rollno) {
     header('Location: index.php');
