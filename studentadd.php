@@ -97,7 +97,6 @@ function resolveStudentPicUrl($pic)
             text-decoration: none;
         }
 
-        /* =================== TOP BAR =================== */
         .topbar {
             display: flex;
             align-items: center;
@@ -601,5 +600,4 @@ function resolveStudentPicUrl($pic)
     </script>
     <script src="mainl.js"></script>
 </body>
-
 </html>
