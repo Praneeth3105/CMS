@@ -47,6 +47,7 @@ function resolveStudentPicUrl($pic)
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <link rel="icon" type="image/x-icon" href="icon2.png">
@@ -257,7 +258,7 @@ function resolveStudentPicUrl($pic)
   </div>
 
   <div class="data-wrap">
-    <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search by student name...">
+    <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search by student name or roll number (e.g., 22KT, 23KT, 24KT)...">
 
     <div class="scroll">
       <table id="myTable">
@@ -309,20 +310,20 @@ function resolveStudentPicUrl($pic)
   <script src="mainl.js"></script>
   <script>
     function myFunction() {
-      var input, filter, table, tr, td, i, txtValue;
-      input = document.getElementById("myInput");
-      filter = input.value.toUpperCase();
-      table = document.getElementById("myTable");
-      tr = table.getElementsByTagName("tr");
-      for (i = 0; i < tr.length; i++) {
-        td = tr[i].getElementsByTagName("td")[0];
-        if (td) {
-          txtValue = td.textContent || td.innerText;
-          if (txtValue.toUpperCase().indexOf(filter) > -1) {
-            tr[i].style.display = "";
-          } else {
-            tr[i].style.display = "none";
-          }
+      const input = document.getElementById("myInput");
+      const filter = input.value.trim().toUpperCase();
+      const table = document.getElementById("myTable");
+      const rows = table.getElementsByTagName("tr");
+
+      // Search both Student Name (column 1) and Roll Number (column 2).
+      // Examples: Praneeth, 22KT, 23KT, 24KT, or a complete roll number.
+      for (let i = 1; i < rows.length; i++) {
+        const cells = rows[i].getElementsByTagName("td");
+        if (cells.length >= 2) {
+          const studentName = (cells[0].textContent || cells[0].innerText).toUpperCase();
+          const rollNumber = (cells[1].textContent || cells[1].innerText).toUpperCase();
+          const matches = studentName.includes(filter) || rollNumber.includes(filter);
+          rows[i].style.display = matches ? "" : "none";
         }
       }
     }
