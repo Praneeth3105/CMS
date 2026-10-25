@@ -141,7 +141,7 @@ function resolveStudentPicUrl($pic)
       margin: 0;
     }
 
-    /* ---------- Page heading ---------- */
+   
     .page-head {
       text-align: center;
       padding: 34px 20px 6px;
