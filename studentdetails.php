@@ -160,7 +160,7 @@ function resolveStudentPicUrl($pic)
       color: var(--rust);
     }
 
-    /* ---------- Panel ---------- */
+  
     .container {
       max-width: 1300px;
       margin: 0 auto;
