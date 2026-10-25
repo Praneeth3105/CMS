@@ -175,7 +175,6 @@ function resolveStudentPicUrl($pic)
       padding: 30px;
     }
 
-    /* ---------- Search input ---------- */
     #myInput {
       background-color: var(--cream);
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a7d6b' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='M21 21l-4.3-4.3' stroke-linecap='round'/%3E%3C/svg%3E");
