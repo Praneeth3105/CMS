@@ -100,7 +100,6 @@ if (isset($_POST['submit'])) {
     );
     $res = mysqli_stmt_execute($stmt);
     if ($res) {
-
         echo "
         <script>
             alert('Data Uploaded Successfully');
