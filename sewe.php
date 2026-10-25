@@ -240,7 +240,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 echo '</div>';
             }
             ?>
-
             <form method="post" enctype="multipart/form-data">
                 <input type="hidden" name="original_name" value="<?php echo htmlspecialchars($original); ?>">
 
