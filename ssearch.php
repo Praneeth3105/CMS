@@ -706,7 +706,6 @@ $rollno = $_SESSION['username'];
         </div>
       </div>
 
-      <!-- ════════════ CO CIRCULAR ════════════ -->
       <div id="sec_cocircular" class="section-card" style="display:none;">
         <h1>Co Circulars</h1>
         <p class="section-sub">All co-circular activities you've added to your collection</p>
@@ -763,9 +762,9 @@ $rollno = $_SESSION['username'];
         </div>
       </div>
 
-    </div><!-- end #demo -->
+    </div>
 
-  </div><!-- end .page -->
+  </div>
 
   <script>
     var sections = ['workshop', 'internship', 'project', 'certificate', 'extracircular', 'cocircular'];
