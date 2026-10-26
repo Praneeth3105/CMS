@@ -2,25 +2,12 @@
 session_start();
 include "db_conn.php";
 
-/*
-|--------------------------------------------------------------------------
-| FACULTY SESSION CHECK
-|--------------------------------------------------------------------------
-*/
-
 if (!isset($_SESSION['username']) || empty($_SESSION['username'])) {
     header("Location: login2.php");
     exit();
 }
 
 $facultyUsername = $_SESSION['username'];
-
-/*
-|--------------------------------------------------------------------------
-| GET FACULTY DETAILS
-|--------------------------------------------------------------------------
-*/
-
 $stmt = mysqli_prepare(
     $conn,
     "SELECT * FROM faculty WHERE id = ? LIMIT 1"
@@ -48,12 +35,6 @@ if (!$facultyRow) {
     exit();
 }
 
-/*
-|--------------------------------------------------------------------------
-| STORE FACULTY DETAILS IN SESSION
-|--------------------------------------------------------------------------
-*/
-
 $_SESSION['username'] = $facultyRow['id'];
 $_SESSION['id']       = $facultyRow['id'];
 $_SESSION['name']     = $facultyRow['name'];
@@ -61,7 +42,6 @@ $_SESSION['name']     = $facultyRow['name'];
 ?>
 <!DOCTYPE html>
 <html>
-
 <head>
 
     <link rel="icon" type="image/x-icon" href="icon2.png">
