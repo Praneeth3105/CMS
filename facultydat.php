@@ -609,68 +609,44 @@ $_SESSION['name']     = $facultyRow['name'];
                                         cy="13.5"
                                         r="3.2" />
                                 </svg>
-
                             </a>
-
                         </div>
-
-
                         <div class="headline">
 
                             <p class="eyebrow">
                                 Faculty Profile
                             </p>
-
                             <p class="faculty-name">
                                 <?php echo htmlspecialchars($row['name']); ?>
                             </p>
-
                         </div>
-
                     </div>
-
-
                     <div class="info-badges">
-
                         <div class="info-badge">
-
                             <span class="label">
                                 Id. No
                             </span>
-
                             <b>
                                 <?php echo htmlspecialchars($row['id']); ?>
                             </b>
-
-                        </div>
-
-
+                            </div>
                         <div class="info-badge">
-
                             <span class="label">
                                 Branch
                             </span>
-
                             <b>
                                 <?php echo htmlspecialchars($row['department']); ?>
                             </b>
-
                         </div>
-
-
                         <div class="info-badge">
-
                             <span class="label">
                                 Year of Joining
                             </span>
-
                             <b>
                                 <?php echo htmlspecialchars($row['year']); ?>
                             </b>
 
                         </div>
-
-
                         <div class="info-badge">
 
                             <span class="label">
@@ -680,44 +656,29 @@ $_SESSION['name']     = $facultyRow['name'];
                             <b>
                                 Faculty
                             </b>
-
                         </div>
-
                     </div>
-
                 </div>
-
-
                 <div class="section-head">
-
                     <h3>
                         Search <span class="accent">Certificate</span>
                     </h3>
-
                     <div class="section-sub">
                         Choose which set of certificates you'd like to look up
                     </div>
-
-                </div>
-
-
+                            </div>
                 <div id="quick-book">
-
                     <form
                         onchange="myFunction()"
                         name="frmRadio"
                         id="radio-buttons"
                         action="">
-
                         <div class="option-grid">
-
                             <label class="option-card">
-
                                 <input
                                     type="radio"
                                     id="fsearch"
                                     name="option">
-
                                 <svg
                                     viewBox="0 0 24 24"
                                     fill="none"
@@ -730,21 +691,15 @@ $_SESSION['name']     = $facultyRow['name'];
                                         d="M9 11h6M9 15h6M9 7h3"
                                         stroke-linecap="round" />
                                 </svg>
-
                                 <span>
                                     Your Certificates
                                 </span>
-
                             </label>
-
-
                             <label class="option-card">
-
                                 <input
                                     type="radio"
                                     id="clssearch"
                                     name="option">
-
                                 <svg
                                     viewBox="0 0 24 24"
                                     fill="none"
@@ -752,30 +707,22 @@ $_SESSION['name']     = $facultyRow['name'];
                                     stroke-width="1.6">
                                     <circle cx="9" cy="8" r="3" />
                                     <circle cx="17" cy="9" r="2.4" />
-
                                     <path
                                         d="M3.5 19c0-3.3 2.7-5.5 5.5-5.5s5.5 2.2 5.5 5.5"
                                         stroke-linecap="round" />
-
                                     <path
                                         d="M15.2 14.6c2.2.3 3.8 2 3.8 4.4"
                                         stroke-linecap="round" />
                                 </svg>
-
                                 <span>
                                     Your Class Certificates
                                 </span>
-
                             </label>
-
-
                             <label class="option-card">
-
                                 <input
                                     type="radio"
                                     id="cosearch"
                                     name="option">
-
                                 <svg
                                     viewBox="0 0 24 24"
                                     fill="none"
@@ -784,60 +731,37 @@ $_SESSION['name']     = $facultyRow['name'];
                                     <path
                                         d="M4 18v-1a5 5 0 0 1 5-5h1a5 5 0 0 1 5 5v1"
                                         stroke-linecap="round" />
-
                                     <circle cx="9.5" cy="7" r="3" />
-
                                     <path
                                         d="M16 4.2c1.5.5 2.6 2 2.6 3.6 0 1.7-1.1 3.1-2.6 3.6"
                                         stroke-linecap="round" />
                                 </svg>
-
                                 <span>
                                     Your Counseling Certificates
                                 </span>
-
                             </label>
-
                         </div>
-
                     </form>
-
-
                     <div id="button"></div>
-
-                </div>
-
-
+                            </div>
                 <div class="add-row">
-
                     <p>
                         To add your certificate to your collection, click Add
                     </p>
-
                     <a href="facultyadd.php" class="n">
-
                         <button
                             type="button"
                             class="btn">
                             Add
                         </button>
-
                     </a>
-
                 </div>
-
             </div>
-
         </div>
-
     </div>
-
-
     <script>
         function myFunction() {
-
             if (document.getElementById("fsearch").checked) {
-
                 document.getElementById("button").innerHTML =
                     "<a href='fsearch.php' class='n'>" +
                     "<button type='button' class='btn'>" +
@@ -845,7 +769,6 @@ $_SESSION['name']     = $facultyRow['name'];
                     "</button></a><br>";
 
             }
-
             if (document.getElementById("clssearch").checked) {
 
                 document.getElementById("button").innerHTML =
