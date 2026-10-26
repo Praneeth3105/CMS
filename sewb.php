@@ -243,7 +243,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 echo '</div>';
             }
             ?>
-
             <form method="post" enctype="multipart/form-data">
                 <input type="hidden" name="original_name" value="<?php echo htmlspecialchars($original); ?>">
                 <div class="field"><label>Company Name</label><input type="text" name="companyname" value="<?php echo htmlspecialchars($row['companyname']); ?>" required></div>
