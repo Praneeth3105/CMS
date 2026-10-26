@@ -118,14 +118,12 @@ $rollno = $_SESSION['username'];
       font-weight: 700;
     }
 
-    /* ---------- Page wrapper ---------- */
     .page {
       max-width: 1200px;
       margin: 0 auto;
       padding: 36px 24px 70px;
     }
 
-    /* ---------- Category selector ---------- */
     .selector-row {
       display: flex;
       justify-content: center;
@@ -173,7 +171,6 @@ $rollno = $_SESSION['username'];
       outline: 2px solid var(--gold-soft);
     }
 
-    /* ---------- Section card ---------- */
     .section-card {
       background: var(--cream-card);
       border: 1px solid var(--border);
@@ -197,7 +194,6 @@ $rollno = $_SESSION['username'];
       margin: 0 0 18px;
     }
 
-    /* ---------- Search input ---------- */
     .search-wrap {
       position: relative;
       max-width: 420px;
