@@ -44,7 +44,6 @@ function resolveStudentPicUrl($pic)
     return null;
 }
 
-// ---- Handle upload ----
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['pic'])) {
     $file = $_FILES['pic'];
 
@@ -65,8 +64,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['pic'])) {
                 mkdir($uploadDir, 0755, true);
             }
 
-            // Delete the old photo first, if one exists — check both the
-            // new folder and the legacy images/ root so nothing is left behind.
             $oldStmt = mysqli_prepare($conn, "SELECT pic FROM studentdetails WHERE username = ?");
             mysqli_stmt_bind_param($oldStmt, "s", $username);
             mysqli_stmt_execute($oldStmt);
