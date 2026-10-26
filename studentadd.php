@@ -468,7 +468,6 @@ function resolveStudentPicUrl($pic)
             transform: translateY(-1px);
         }
 
-        /* =================== RESPONSIVE =================== */
         @media only screen and (max-width: 900px) {
             .topbar {
                 flex-direction: column;
