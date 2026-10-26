@@ -256,7 +256,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="field"><label>Paid</label><input type="text" name="paid" value="<?php echo htmlspecialchars($row['paid']); ?>"></div>
                 <div class="field"><label>Tech / Non-Tech</label><input type="text" name="tech" value="<?php echo htmlspecialchars($row['tech']); ?>"></div>
                 <div class="field"><label>Replace File (optional)</label><input type="file" name="file"></div>
-
                 <div class="btn-row">
                     <button type="submit" class="btn btn-primary">Update</button>
                     <a href="ssearch.php" class="btn btn-secondary">Cancel</a>
