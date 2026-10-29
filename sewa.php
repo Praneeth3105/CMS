@@ -10,12 +10,10 @@ if (!$rollno) {
 
 $original = $_GET['editwn'] ?? ($_POST['original_name'] ?? '');
 $error = '';
-
 $stmt = mysqli_prepare($conn, "SELECT * FROM sworkshop WHERE RollNo=? AND WorkShopName=? LIMIT 1");
 mysqli_stmt_bind_param($stmt, "ss", $rollno, $original);
 mysqli_stmt_execute($stmt);
 $row = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
-
 if (!$row) {
     die("Record not found, or you don't have permission to edit it.");
 }
@@ -29,7 +27,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $branch       = trim($_POST['branch']);
     $year         = trim($_POST['year']);
     $filename     = $row['file'];
-
     if (!empty($_FILES['file']['name'])) {
         $newfile = time() . '_' . basename($_FILES['file']['name']);
         if (move_uploaded_file($_FILES['file']['tmp_name'], __DIR__ . '/images/' . $newfile)) {

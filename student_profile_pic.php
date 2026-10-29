@@ -100,14 +100,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['pic'])) {
     }
 }
 
-// ---- Fetch current photo to display ----
 $stmt = mysqli_prepare($conn, "SELECT name, pic FROM studentdetails WHERE username = ?");
 mysqli_stmt_bind_param($stmt, "s", $username);
 mysqli_stmt_execute($stmt);
 $res = mysqli_stmt_get_result($stmt);
 $row = mysqli_fetch_assoc($res);
 mysqli_stmt_close($stmt);
-
 $picUrl = resolveStudentPicUrl($row['pic'] ?? null);
 ?>
 <!DOCTYPE html>
@@ -331,7 +329,6 @@ $picUrl = resolveStudentPicUrl($row['pic'] ?? null);
                 <br>
                 <input type="submit" value="Upload Photo">
             </form>
-
             <a href="studentdat.php" class="back-link">&larr; Back to profile</a>
         </div>
     </div>
