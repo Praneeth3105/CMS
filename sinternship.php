@@ -56,41 +56,23 @@ $ed = $_POST['ed'] ?? '';
 $paid = $_POST['paid'] ?? '';
 $amount = $_POST['tamount'] ?? '';
 $accy = $_POST['acc'] ?? '';
-
-/* -----------------------------------------
-   FILE
------------------------------------------ */
-
 $filename = "";
 $tempname = "";
 $folder = "";
 
 if (isset($_FILES["file"]) && $_FILES["file"]["error"] === UPLOAD_ERR_OK) {
-
     $filename = basename($_FILES["file"]["name"]);
     $tempname = $_FILES["file"]["tmp_name"];
     $folder = "images/" . $filename;
 }
 
-/* -----------------------------------------
-   DURATION
------------------------------------------ */
-
 $durt = "";
-
 if (!empty($sd) && !empty($ed)) {
-
     $datetime1 = date_create($sd);
     $datetime2 = date_create($ed);
-
     $duration = date_diff($datetime1, $datetime2);
-
     $durt = $duration->format('%m months, %d days');
 }
-
-/* -----------------------------------------
-   INSERT
------------------------------------------ */
 
 if (isset($_POST['submit'])) {
 
