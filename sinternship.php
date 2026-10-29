@@ -136,9 +136,7 @@ if (isset($_POST['submit'])) {
     $res = mysqli_stmt_execute($stmt);
 
     if ($res) {
-
         $uploadSuccess = true;
-
         if ($filename !== "") {
 
             $uploadSuccess = move_uploaded_file(
@@ -146,7 +144,6 @@ if (isset($_POST['submit'])) {
                 $folder
             );
         }
-
         if ($uploadSuccess) {
 
             echo "
