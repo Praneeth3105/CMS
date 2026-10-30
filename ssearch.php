@@ -817,5 +817,4 @@ $rollno = $_SESSION['username'];
 
   <script src="mainl.js"></script>
 </body>
-
 </html>
