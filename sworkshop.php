@@ -9,7 +9,6 @@ if (!isset($_SESSION['username'])) {
 }
 
 $rollno = $_SESSION['username'];
-
 $stmtStudent = mysqli_prepare(
     $conn,
     "SELECT
@@ -42,9 +41,6 @@ if (!$student) {
     die("Student details not found.");
 }
 
-/* -----------------------------------------
-   STUDENT INFORMATION
------------------------------------------ */
 
 $name = $student['name'];
 $year = $student['year'];
@@ -56,9 +52,6 @@ $counsular_id = $student['counsular_id'];
 $classteacher = $student['classteacher'];
 $classteacher_id = $student['classteacher_id'];
 
-/* -----------------------------------------
-   FORM DATA
------------------------------------------ */
 
 $wn = $_POST['wn'] ?? '';
 $org = $_POST['org'] ?? '';
@@ -67,9 +60,6 @@ $ed = $_POST['ed'] ?? '';
 $place = $_POST['place'] ?? '';
 $accy = $_POST['accy'] ?? '';
 
-/* -----------------------------------------
-   FILE
------------------------------------------ */
 
 $filename = "";
 $tempname = "";
@@ -147,7 +137,6 @@ if (isset($_POST['submit'])) {
         $classteacher_id,
         $accy
     );
-
     $res = mysqli_stmt_execute($stmt);
     if ($res) {
 
