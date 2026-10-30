@@ -32,9 +32,7 @@ mysqli_stmt_bind_param(
 );
 
 mysqli_stmt_execute($stmtStudent);
-
 $resultStudent = mysqli_stmt_get_result($stmtStudent);
-
 $student = mysqli_fetch_assoc($resultStudent);
 
 if (!$student) {
@@ -45,22 +43,16 @@ if (!$student) {
 $name = $student['name'];
 $year = $student['year'];
 $branch = $student['department'];
-
 $counsular = $student['counsular'];
 $counsular_id = $student['counsular_id'];
-
 $classteacher = $student['classteacher'];
 $classteacher_id = $student['classteacher_id'];
-
-
 $wn = $_POST['wn'] ?? '';
 $org = $_POST['org'] ?? '';
 $sd = $_POST['sd'] ?? '';
 $ed = $_POST['ed'] ?? '';
 $place = $_POST['place'] ?? '';
 $accy = $_POST['accy'] ?? '';
-
-
 $filename = "";
 $tempname = "";
 $folder = "";
@@ -84,7 +76,6 @@ if (!empty($sd) && !empty($ed)) {
 }
 
 if (isset($_POST['submit'])) {
-
     $sql = "
         INSERT INTO sworkshop
         (
