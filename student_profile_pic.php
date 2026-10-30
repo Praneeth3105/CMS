@@ -294,7 +294,6 @@ $picUrl = resolveStudentPicUrl($row['pic'] ?? null);
         }
     </style>
 </head>
-
 <body>
     <div class="topbar">
         <div class="brand">Certificate <span>Management</span> System</div>
@@ -323,7 +322,6 @@ $picUrl = resolveStudentPicUrl($row['pic'] ?? null);
                     </svg>
                 <?php endif; ?>
             </div>
-
             <form method="POST" enctype="multipart/form-data">
                 <input type="file" name="pic" accept="image/jpeg,image/png,image/gif,image/webp" required>
                 <br>
