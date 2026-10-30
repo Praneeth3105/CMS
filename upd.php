@@ -3,7 +3,6 @@
 
 include "db_conn.php";
     session_start();
-
     $uname=$_SESSION['username'];
     $name=$_SESSION['name'];
 $i=$_POST['sem'];

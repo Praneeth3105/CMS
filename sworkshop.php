@@ -5,7 +5,6 @@ if (!isset($_SESSION['username'])) {
     header("Location: login1.php");
     exit();
 }
-
 $rollno = $_SESSION['username'];
 $stmtStudent = mysqli_prepare(
     $conn,
