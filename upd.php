@@ -1,6 +1,4 @@
-
 <?php 
-
 include "db_conn.php";
     session_start();
     $uname=$_SESSION['username'];
