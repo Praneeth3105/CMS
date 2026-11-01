@@ -228,7 +228,6 @@ function resolveStudentPicUrl($pic)
     }
   </style>
 </head>
-
 <body>
 
   <div class="topbar">
@@ -242,15 +241,12 @@ function resolveStudentPicUrl($pic)
       </a>
     </div>
   </div>
-
   <div class="page-hero">
     <div class="eyebrow">Student Records</div>
     <h2>Student <span class="accent">Details</span></h2>
   </div>
-
   <div class="data-wrap">
     <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search by student name or roll number (e.g., 22KT, 23KT, 24KT)...">
-
     <div class="scroll">
       <table id="myTable">
         <tr class="header">
@@ -297,7 +293,6 @@ function resolveStudentPicUrl($pic)
       </table>
     </div>
   </div>
-
   <script src="mainl.js"></script>
   <script>
     function myFunction() {
@@ -305,9 +300,6 @@ function resolveStudentPicUrl($pic)
       const filter = input.value.trim().toUpperCase();
       const table = document.getElementById("myTable");
       const rows = table.getElementsByTagName("tr");
-
-      // Search both Student Name (column 1) and Roll Number (column 2).
-      // Examples: Praneeth, 22KT, 23KT, 24KT, or a complete roll number.
       for (let i = 1; i < rows.length; i++) {
         const cells = rows[i].getElementsByTagName("td");
         if (cells.length >= 2) {
@@ -320,5 +312,4 @@ function resolveStudentPicUrl($pic)
     }
   </script>
 </body>
-
 </html>
