@@ -1,13 +1,11 @@
 <?php
 include_once('db_conn.php');
 if (session_status() === PHP_SESSION_NONE) session_start();
-
 $rollno = $_SESSION['username'] ?? null;
 if (!$rollno) {
     header('Location: index.php');
     exit;
 }
-
 $original = $_GET['editwn'] ?? ($_POST['original_name'] ?? '');
 $error = '';
 $stmt = mysqli_prepare($conn, "SELECT * FROM sproject WHERE Roll_Number=? AND Project_title=? LIMIT 1");
@@ -201,16 +199,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="card">
             <h1>Edit Project</h1>
             <?php if ($error): ?><div class="error"><?php echo htmlspecialchars($error); ?></div><?php endif; ?>
-
             <form method="post">
                 <input type="hidden" name="original_name" value="<?php echo htmlspecialchars($original); ?>">
-
                 <div class="field"><label>Team Number</label><input type="text" name="teamnumber" value="<?php echo htmlspecialchars($row['Team_Number']); ?>"></div>
                 <div class="field"><label>Project Title</label><input type="text" name="projecttitle" value="<?php echo htmlspecialchars($row['Project_title']); ?>" required></div>
                 <div class="field"><label>Academic Year</label><input type="text" name="academicyear" value="<?php echo htmlspecialchars($row['academicyear']); ?>"></div>
                 <div class="field"><label>Drive Link</label><input type="url" name="drivelink" value="<?php echo htmlspecialchars($row['Drive_link']); ?>"></div>
                 <div class="field"><label>Branch</label><input type="text" name="branch" value="<?php echo htmlspecialchars($row['branch']); ?>"></div>
-
                 <div class="btn-row">
                     <button type="submit" class="btn btn-primary">Update</button>
                     <a href="ssearch.php" class="btn btn-secondary">Cancel</a>
