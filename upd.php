@@ -94,8 +94,6 @@ $query6="UPDATE academic SET semfo='$file1' WHERE rollno='$uname'";
 	if($fire6)
 	{
 		move_uploaded_file($file_tmp1, $location.$file1);
-		
-		
 		echo "<script>alert('Data Uploaded Successfully');window.location='accer.php';</script>";
 	}
 	else
@@ -104,7 +102,6 @@ $query6="UPDATE academic SET semfo='$file1' WHERE rollno='$uname'";
 	}
 }
 elseif($i=='semft'){
-
 $query7="UPDATE academic SET semft='$file1' WHERE rollno='$uname'";
 	$fire7=mysqli_query($conn,$query7);
 	if($fire7)
