@@ -7,11 +7,9 @@ function resolveStudentPicUrl($pic)
   if (empty($pic)) {
     return null;
   }
-
   $picClean = ltrim(str_replace('\\', '/', $pic), '/');
   $needle = basename($picClean);
 
-  // Fast path: the two locations we expect.
   $candidates = [
     'images/student_profile/' . $needle,
     'images/' . $picClean, // in case the DB value already includes a subfolder
@@ -23,7 +21,6 @@ function resolveStudentPicUrl($pic)
     }
   }
 
-  // Fallback: search every subfolder under images/ for this filename.
   $imagesRoot = __DIR__ . '/images';
   if (is_dir($imagesRoot)) {
     $it = new RecursiveIteratorIterator(
@@ -36,7 +33,6 @@ function resolveStudentPicUrl($pic)
       }
     }
   }
-
   return null;
 }
 ?>
