@@ -3,25 +3,19 @@ include "db_conn.php";
 session_start();
 
 if (isset($_POST['submit'])) {
-
 	$uname = mysqli_real_escape_string($conn, $_POST['username']);
 	$pass  = mysqli_real_escape_string($conn, $_POST['password']);
 	$query  = "SELECT * FROM faculty WHERE id='$uname' AND password='$pass'";
 	$result = mysqli_query($conn, $query);
-
 	if ($result && mysqli_num_rows($result) == 1) {
-
 		$row = mysqli_fetch_assoc($result);
-
 		$_SESSION['username']   = $uname;
 		$_SESSION['id']         = $row['id'];
 		$_SESSION['name']       = $row['name'];
 		$_SESSION['department'] = $row['department'];
-
 		header("Location: facultydat.php");
 		exit();
 	} else {
-
 		header("Location: login2.php?error=Invalid username or password");
 		exit();
 	}
@@ -30,17 +24,14 @@ if (isset($_POST['submit'])) {
 
 <!DOCTYPE html>
 <html>
-
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Faculty Login | Certificate Management System</title>
-
 	<link rel="icon" href="icon2.png">
 	<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
 	<style>
 		:root {
 			--ink: #0d0d0d;
