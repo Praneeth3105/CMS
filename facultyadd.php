@@ -672,16 +672,15 @@ if (!isset($_SESSION['id'])) {
             }
 
             // 9. Textbook -> table: textbook
+            // 9. Textbook -> table: textbook
             if (document.getElementById("textbook").checked) {
                 document.getElementById("button").innerHTML = `
         <form method='post' action='add_textbook.php' id='note1' class='w3-container'>
             <p><label>Academic Year</label><input class='w3-input' type='text' name='academic_year' required></p>
-            <p><label>Month</label><input class='w3-input' type='text' name='month' required></p>
+            <p><label>ISBN Number</label><input class='w3-input' type='text' name='isbn_number' required></p>
             <p><label>Main Editor</label><input class='w3-input' type='text' name='main_editor' required></p>
             <p><label>Textbook Name</label><input class='w3-input' type='text' name='textbook_name' required></p>
             <p><label>Publisher Name</label><input class='w3-input' type='text' name='publisher_name' required></p>
-            <p><label>Start Date</label><input class='w3-input' type='text' name='start_date' placeholder='YYYY-MM-DD'></p>
-            <p><label>End Date</label><input class='w3-input' type='text' name='end_date' placeholder='YYYY-MM-DD'></p>
             <p><label>URL</label><input class='w3-input' type='text' name='url' required></p>
             <input type='submit' class='btn' value='submit' name='submit'>
         </form>`;
