@@ -2,7 +2,7 @@
 include "db_conn.php";
 session_start();
 if (!isset($_SESSION['id'])) {
-    header("Location: login.php");
+    header("Location: login2.php");
     exit;
 }
 if (isset($_POST['submit'])) {

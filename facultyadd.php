@@ -4,7 +4,7 @@ session_start();
 
 // ===== GUARD: must be logged in =====
 if (!isset($_SESSION['id'])) {
-    header("Location: login.php");
+    header("Location: login2.php");
     exit;
 }
 // =====================================
