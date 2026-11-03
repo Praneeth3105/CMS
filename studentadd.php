@@ -1,6 +1,12 @@
 <?php
-include "db_conn.php";
 session_start();
+
+if (!isset($_SESSION['id']) || empty($_SESSION['username'])) {
+    header("Location: login1.php");
+    exit();
+}
+
+include "db_conn.php";
 
 function resolveStudentPicUrl($pic)
 {
@@ -599,4 +605,5 @@ function resolveStudentPicUrl($pic)
     </script>
     <script src="mainl.js"></script>
 </body>
+
 </html>
