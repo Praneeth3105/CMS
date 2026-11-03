@@ -22,7 +22,7 @@ $studentRow = mysqli_fetch_assoc($result);
 if (!$studentRow) {
   session_unset();
   session_destroy();
- header("Location: login1.php");
+  header("Location: login1.php");
   exit();
 }
 $_SESSION['username'] = $studentRow['username'];
@@ -83,6 +83,7 @@ function resolveStudentPicUrl($pic)
 ?>
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <link
@@ -122,6 +123,7 @@ function resolveStudentPicUrl($pic)
       --radius: 20px;
       --shadow: 0 10px 28px rgba(120, 100, 60, 0.10);
     }
+
     * {
       box-sizing: border-box;
     }
@@ -137,9 +139,11 @@ function resolveStudentPicUrl($pic)
       background: var(--cream);
       color: var(--dark);
     }
+
     .n {
       text-decoration: none;
     }
+
     .navbar {
       display: flex;
       align-items: center;
@@ -153,6 +157,7 @@ function resolveStudentPicUrl($pic)
           var(--dark-2) 100%);
       width: 100%;
     }
+
     .brand {
       font-family: 'Playfair Display', serif;
       font-weight: 700;
@@ -160,14 +165,17 @@ function resolveStudentPicUrl($pic)
       color: #fff;
       letter-spacing: 0.3px;
     }
+
     .brand span {
       color: var(--gold);
     }
+
     .nav-actions {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
     }
+
     .nav-actions #btn1 {
       display: inline-flex;
       align-items: center;
@@ -186,17 +194,20 @@ function resolveStudentPicUrl($pic)
       text-transform: uppercase;
       white-space: nowrap;
     }
+
     .nav-actions #btn1:hover {
       background: var(--gold);
       color: var(--dark);
       border-color: var(--gold);
     }
+
     .nav-actions .logout-btn {
       background: var(--gold) !important;
       color: var(--dark) !important;
       border-color: var(--gold) !important;
       font-weight: 700 !important;
     }
+
     .container {
       width: 100%;
       max-width: 900px;
@@ -205,6 +216,7 @@ function resolveStudentPicUrl($pic)
       display: flex;
       justify-content: center;
     }
+
     .profile-card {
       width: 100%;
       background: var(--cream-card);
@@ -213,6 +225,7 @@ function resolveStudentPicUrl($pic)
       box-shadow: var(--shadow);
       padding: 44px 48px;
     }
+
     .profile-header {
       display: flex;
       align-items: center;
@@ -220,6 +233,7 @@ function resolveStudentPicUrl($pic)
       gap: 22px;
       margin-bottom: 36px;
     }
+
     .avatar {
       width: 96px;
       height: 96px;
@@ -234,12 +248,14 @@ function resolveStudentPicUrl($pic)
       flex-shrink: 0;
       position: relative;
     }
+
     .avatar img {
       width: 100%;
       height: 100%;
       object-fit: cover;
       border-radius: 50%;
     }
+
     .avatar .camera-badge {
       position: absolute;
       bottom: -2px;
@@ -255,13 +271,16 @@ function resolveStudentPicUrl($pic)
       box-shadow: 0 3px 8px rgba(26, 18, 11, .25);
       transition: background .2s ease, transform .2s ease;
     }
+
     .avatar .camera-badge:hover {
       background: var(--accent);
       transform: scale(1.08);
     }
+
     .profile-header .who {
       text-align: left;
     }
+
     .profile-header .tag {
       font-size: 0.72rem;
       font-weight: 700;
@@ -270,18 +289,21 @@ function resolveStudentPicUrl($pic)
       text-transform: uppercase;
       margin-bottom: 4px;
     }
+
     .profile-header .name {
       font-family: 'Playfair Display', serif;
       font-weight: 700;
       font-size: 1.9rem;
       color: var(--dark);
     }
+
     .info-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 16px;
       margin-bottom: 36px;
     }
+
     .info-box {
       background: var(--box);
       border-left: 4px solid var(--accent);
@@ -298,6 +320,7 @@ function resolveStudentPicUrl($pic)
       text-transform: uppercase;
       margin-bottom: 6px;
     }
+
     .info-box .value {
       font-family: 'Playfair Display', serif;
       font-weight: 700;
@@ -307,11 +330,13 @@ function resolveStudentPicUrl($pic)
       overflow: hidden;
       text-overflow: ellipsis;
     }
+
     .divider {
       border: none;
       border-top: 1px dashed var(--border);
       margin: 0 0 32px;
     }
+
     .section-title {
       text-align: center;
       font-family: 'Playfair Display', serif;
@@ -320,15 +345,18 @@ function resolveStudentPicUrl($pic)
       color: var(--dark);
       margin: 0 0 8px;
     }
+
     .section-title span {
       color: var(--gold-soft);
     }
+
     .section-sub {
       text-align: center;
       font-size: 0.92rem;
       color: var(--muted);
       margin: 0 0 26px;
     }
+
     .action-cards {
       display: flex;
       gap: 18px;
@@ -348,11 +376,13 @@ function resolveStudentPicUrl($pic)
       cursor: pointer;
       transition: all 0.25s ease;
     }
+
     .action-card:hover {
       border-color: var(--gold-soft);
       transform: translateY(-3px);
       box-shadow: var(--shadow);
     }
+
     .action-card i {
       font-size: 1.7rem;
       color: var(--accent);
@@ -365,14 +395,17 @@ function resolveStudentPicUrl($pic)
       font-size: 0.95rem;
       color: var(--dark);
     }
+
     .add-section {
       text-align: center;
     }
+
     .add-section p {
       font-size: 0.92rem;
       color: var(--muted);
       margin: 0 0 18px;
     }
+
     .add-btn {
       display: inline-flex;
       align-items: center;
@@ -390,19 +423,23 @@ function resolveStudentPicUrl($pic)
       transition: all 0.25s ease;
       text-transform: uppercase;
     }
+
     .add-btn:hover {
       transform: translateY(-2px);
       box-shadow:
         0 8px 18px rgba(212, 175, 55, 0.35);
     }
+
     @media only screen and (max-width: 720px) {
       .navbar {
         justify-content: center;
         text-align: center;
       }
+
       .profile-card {
         padding: 32px 22px;
       }
+
       .profile-header {
         flex-direction: column;
         text-align: center;
@@ -411,10 +448,12 @@ function resolveStudentPicUrl($pic)
       .profile-header .who {
         text-align: center;
       }
+
       .info-grid {
         grid-template-columns: 1fr 1fr;
       }
     }
+
     @media only screen and (max-width: 460px) {
       .info-grid {
         grid-template-columns: 1fr;
@@ -424,6 +463,7 @@ function resolveStudentPicUrl($pic)
     }
   </style>
 </head>
+
 <body>
   <div class="navbar">
     <div class="brand">
@@ -596,4 +636,5 @@ function resolveStudentPicUrl($pic)
   </div>
   <script src="mainl.js"></script>
 </body>
+
 </html>
