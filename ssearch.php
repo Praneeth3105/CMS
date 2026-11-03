@@ -1,9 +1,12 @@
 <?php
-include_once('db_conn.php');
-if (session_status() === PHP_SESSION_NONE) {
-  session_start();
+session_start();
+
+if (!isset($_SESSION['id']) || empty($_SESSION['username'])) {
+  header("Location: login1.php");
+  exit();
 }
 
+include_once('db_conn.php');
 $rollno = $_SESSION['username'];
 ?>
 <!DOCTYPE html>
@@ -514,7 +517,7 @@ $rollno = $_SESSION['username'];
               <th>File</th>
               <th>Counsellor</th>
               <th>Class Teacher</th>
-              <th>Download</th> 
+              <th>Download</th>
               <th>Edit</th>
               <th>Delete</th>
             </tr>
@@ -817,4 +820,5 @@ $rollno = $_SESSION['username'];
 
   <script src="mainl.js"></script>
 </body>
+
 </html>
