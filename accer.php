@@ -1,6 +1,13 @@
 <?php
-include "db_conn.php";
 session_start();
+
+if (!isset($_SESSION['id']) || empty($_SESSION['username'])) {
+  header("Location: login1.php");
+  exit();
+}
+
+include "db_conn.php";
+$uname = $_SESSION['username'];
 ?>
 <!DOCTYPE html>
 <html>
