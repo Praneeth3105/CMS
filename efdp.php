@@ -27,7 +27,6 @@ if (!$row) {
     die("Record not found for id: " . htmlspecialchars($id));
 }
 
-// Handle update submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim($_POST['name'] ?? '');
     $department = trim($_POST['department'] ?? '');
@@ -38,9 +37,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $duration = trim($_POST['duration'] ?? '');
     $startdate = trim($_POST['startdate'] ?? '');
     $enddate = trim($_POST['enddate'] ?? '');
-
-    // Certificate is now a plain URL/link entered by the user, not an uploaded file.
-    // Keep the existing link if the field is left blank.
     $certificate_link = trim($_POST['certificate_link'] ?? '');
     if ($certificate_link === '') {
         $certificate_link = $row['certificate_link'];
@@ -64,7 +60,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <title>Edit FDP (Old)</title>
@@ -285,18 +280,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     </style>
-
 </head>
-
 <body>
     <div class="wrap">
         <div class="topbar">
             <a href="fsearch.php" class="back-link">&larr; Back</a>
         </div>
-
         <h1>Edit FDP (Old)</h1>
         <div class="subtitle">Table: fdp &middot; Record ID: <?php echo htmlspecialchars($id); ?></div>
-
         <div class="card">
             <?php if ($successMsg): ?>
                 <div class="msg success"><?php echo htmlspecialchars($successMsg); ?></div>
@@ -304,30 +295,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php if ($errorMsg): ?>
                 <div class="msg error"><?php echo htmlspecialchars($errorMsg); ?></div>
             <?php endif; ?>
-
             <form method="POST">
                 <input type="hidden" name="id" value="<?php echo htmlspecialchars($id); ?>">
-
                 <div class="field">
                     <label for="name">Name</label>
                     <input type="text" name="name" id="name" value="<?php echo htmlspecialchars($row['name'] ?? ''); ?>">
                 </div>
-
                 <div class="field">
                     <label for="department">Department</label>
                     <input type="text" name="department" id="department" value="<?php echo htmlspecialchars($row['department'] ?? ''); ?>">
                 </div>
-
                 <div class="field">
                     <label for="fdpname">FDP Name</label>
                     <input type="text" name="fdpname" id="fdpname" value="<?php echo htmlspecialchars($row['fdpname'] ?? ''); ?>">
                 </div>
-
                 <div class="field">
                     <label for="academic_year">Academic Year</label>
                     <input type="text" name="academic_year" id="academic_year" placeholder="e.g. 2024-2025" value="<?php echo htmlspecialchars($row['academic_year'] ?? ''); ?>">
                 </div>
-
                 <div class="field">
                     <label for="org">Organisation</label>
                     <input type="text" name="org" id="org" value="<?php echo htmlspecialchars($row['org'] ?? ''); ?>">
@@ -337,22 +322,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label for="mode">Mode</label>
                     <input type="text" name="mode" id="mode" value="<?php echo htmlspecialchars($row['mode'] ?? ''); ?>">
                 </div>
-
                 <div class="field">
                     <label for="duration">Duration</label>
                     <input type="text" name="duration" id="duration" value="<?php echo htmlspecialchars($row['duration'] ?? ''); ?>">
                 </div>
-
                 <div class="field">
                     <label for="startdate">Start Date</label>
                     <input type="date" name="startdate" id="startdate" value="<?php echo htmlspecialchars($row['startdate'] ?? ''); ?>">
                 </div>
-
                 <div class="field">
                     <label for="enddate">End Date</label>
                     <input type="date" name="enddate" id="enddate" value="<?php echo htmlspecialchars($row['enddate'] ?? ''); ?>">
                 </div>
-
                 <div class="field full">
                     <label for="certificate_link">Proof / Certificate Link (paste a URL; leave empty to keep the current link)</label>
                     <input type="url" name="certificate_link" id="certificate_link" placeholder="https://...">
@@ -362,7 +343,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="field-hint">No link saved yet.</div>
                     <?php endif; ?>
                 </div>
-
                 <div class="actions">
                     <button type="submit" class="save">Save Changes</button>
                 </div>
@@ -370,5 +350,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 </body>
-
 </html>
