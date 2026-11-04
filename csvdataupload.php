@@ -93,6 +93,7 @@
         .topbar .btn {
             margin: 0;
         }
+
         .panel {
             background: var(--cream-card);
             margin: 28px 32px;
@@ -101,6 +102,7 @@
             box-shadow: var(--shadow);
             border: 1px solid var(--border);
         }
+
         .panel h3 {
             font-family: 'Playfair Display', serif;
             font-size: 2rem;
@@ -113,6 +115,7 @@
         .panel h3 .accent {
             color: var(--gold-soft);
         }
+
         .group {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -215,7 +218,6 @@
     <div class="panel">
         <h3>Faculty <span class="accent">CSV Uploads</span></h3>
         <div class="group">
-
             <a href="csvfdp.php" class="csv-card">
                 <div class="csv-icon"><i class="fas fa-folder"></i></div>
                 <div class="csv-text">FDP Attended CSV Upload</div>
@@ -224,37 +226,30 @@
                 <div class="csv-icon"><i class="fas fa-microphone"></i></div>
                 <div class="csv-text">FDP Organized CSV Upload</div>
             </a>
-
             <a href="csvfw.php" class="csv-card">
                 <div class="csv-icon"><i class="fas fa-chalkboard-teacher"></i></div>
                 <div class="csv-text">Faculty Workshop CSV</div>
             </a>
-
             <a href="csvfpp.php" class="csv-card">
                 <div class="csv-icon"><i class="fas fa-file-alt"></i></div>
                 <div class="csv-text">Paper Publications CSV</div>
             </a>
-
             <a href="csvconferences.php" class="csv-card">
                 <div class="csv-icon"><i class="fas fa-user-tie"></i></div>
                 <div class="csv-text">Conferences CSV</div>
             </a>
-
             <a href="csvfc.php" class="csv-card">
                 <div class="csv-icon"><i class="fas fa-award"></i></div>
                 <div class="csv-text">Faculty Certificates CSV</div>
             </a>
-
             <a href="csvfbp.php" class="csv-card">
                 <div class="csv-icon"><i class="fas fa-book"></i></div>
                 <div class="csv-text">Books Published CSV</div>
             </a>
-
             <a href="csvfbe.php" class="csv-card">
                 <div class="csv-icon"><i class="fas fa-book-open"></i></div>
                 <div class="csv-text">Books Edited CSV</div>
             </a>
-
             <a href="csvtextbook.php" class="csv-card">
                 <div class="csv-icon"><i class="fa-solid fa-book-open-reader"></i></div>
                 <div class="csv-text">Text Book CSV</div>
@@ -284,12 +279,10 @@
                 <div class="csv-icon"><i class="fa-solid fa-user-shield"></i></div>
                 <div class="csv-text">Professional Memberships CSV</div>
             </a>
-
             <a href="csvphd.php" class="csv-card">
                 <div class="csv-icon"><i class="fa-solid fa-user-tie"></i></div>
                 <div class="csv-text">PHD CSV</div>
             </a>
-
             <a href="csvcw.php" class="csv-card">
                 <div class="csv-icon"><i class="fa-solid fa-building"></i></div>
                 <div class="csv-text">Consultancy Works CSV</div>
@@ -298,28 +291,23 @@
                 <div class="csv-icon"><i class="fa-solid fa-hexagon-nodes-bolt"></i></div>
                 <div class="csv-text">Working Model CSV</div>
             </a>
-
             <a href="csvfunprj.php" class="csv-card">
                 <div class="csv-icon"><i class="fa-solid fa-person-circle-plus"></i></div>
                 <div class="csv-text">Funding Projects CSV</div>
             </a>
         </div>
     </div>
-
     <div class="panel">
         <h3>Student <span class="accent">CSV Uploads</span></h3>
         <div class="student-group">
-
             <a href="csvsd.php" class="csv-card">
                 <div class="csv-icon"><i class="fas fa-user-graduate"></i></div>
                 <div class="csv-text">Student Details CSV</div>
             </a>
-
             <a href="csvsw.php" class="csv-card">
                 <div class="csv-icon"><i class="fas fa-tools"></i></div>
                 <div class="csv-text">Student Workshops CSV</div>
             </a>
-
         </div>
     </div>
 </body>
