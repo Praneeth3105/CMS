@@ -8,12 +8,23 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 
+$message = "";
+$msgType = "";
+
 if (isset($_POST['submit'])) {
     $uname = $_SESSION['username'];
     $npsw = mysqli_real_escape_string($conn, $_POST['psw']);
     $sql = "UPDATE faculty SET password='$npsw' WHERE id='$uname'";
 
     $reso = mysqli_query($conn, $sql);
+
+    if ($reso) {
+        $message = "Password updated successfully.";
+        $msgType = "success";
+    } else {
+        $message = "Password not updated. Please try again.";
+        $msgType = "error";
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -257,6 +268,28 @@ if (isset($_POST['submit'])) {
             padding: 13px 26px;
         }
 
+        /* ---------- Status message (bottom of panel) ---------- */
+        .msg {
+            margin-top: 24px;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .msg.success {
+            background: #eef7e8;
+            color: #2f6b1f;
+            border: 1.5px solid #bfdcae;
+        }
+
+        .msg.error {
+            background: #fbeceb;
+            color: var(--rust);
+            border: 1.5px solid #e8c0b4;
+        }
+
         @media only screen and (max-width: 600px) {
             .panel {
                 margin: 20px;
@@ -300,19 +333,15 @@ if (isset($_POST['submit'])) {
                     <input type="submit" value="Update" name="submit">
                 </div>
             </form>
+
+            <?php if ($message !== "") { ?>
+                <div class="msg <?php echo $msgType; ?>">
+                    <?php echo htmlspecialchars($message); ?>
+                </div>
+            <?php } ?>
         </div>
     </div>
 
 </body>
 
 </html>
-
-<?php
-if (isset($_POST['submit'])) {
-    if ($reso) {
-        echo "<script>alert('Data Updated Successfully');window.location='facultydat.php';</script>";
-    } else {
-        echo "<script>alert('Data not Updated');window.location='facultydat.php';</script>";
-    }
-}
-?>
