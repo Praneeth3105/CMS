@@ -6,19 +6,18 @@ if (!isset($_SESSION['username'])) {
     exit();
 }
 $message = "";
+$msgType = "";
 if (isset($_POST['submit'])) {
     $uname = $_SESSION['username'];
     $npsw  = mysqli_real_escape_string($conn, $_POST['psw']);
     $sql  = "UPDATE studentdetails SET password='$npsw' WHERE username='$uname'";
     $reso = mysqli_query($conn, $sql);
     if ($reso) {
-        echo "<script>
-                alert('Password Updated Successfully');
-                window.location='studentdat.php';
-              </script>";
-        exit();
+        $message = "Password updated successfully.";
+        $msgType = "success";
     } else {
-        $message = "Password Not Updated. Please try again.";
+        $message = "Password not updated. Please try again.";
+        $msgType = "error";
     }
 }
 ?>
@@ -187,15 +186,26 @@ if (isset($_POST['submit'])) {
             background: var(--gold-light);
         }
 
-        .error {
-            background: #fde8e8;
-            color: #c0392b;
-            border-radius: 8px;
+        /* ---------- Status message (bottom of card) ---------- */
+        .msg {
+            margin-top: 24px;
             padding: 10px;
-            margin-bottom: 20px;
+            border-radius: 8px;
             text-align: center;
             font-family: Arial, sans-serif;
             font-size: 14px;
+        }
+
+        .msg.success {
+            background: #eef7e8;
+            color: #2f6b1f;
+            border: 1px solid #bfdcae;
+        }
+
+        .msg.error {
+            background: #fde8e8;
+            color: #c0392b;
+            border: 1px solid #f0c4c0;
         }
     </style>
 </head>
@@ -214,14 +224,17 @@ if (isset($_POST['submit'])) {
 
     <div class="form-container">
         <div class="form-card">
-            <?php if ($message) { ?>
-                <div class="error"><?php echo htmlspecialchars($message); ?></div>
-            <?php } ?>
             <form method='POST' action=''>
                 <label for="psw">New Password</label>
                 <input type="password" placeholder="Enter New Password" name="psw" id="psw" required>
                 <input type='submit' value='Update' name='submit'>
             </form>
+
+            <?php if ($message !== "") { ?>
+                <div class="msg <?php echo $msgType; ?>">
+                    <?php echo htmlspecialchars($message); ?>
+                </div>
+            <?php } ?>
         </div>
     </div>
 </body>
