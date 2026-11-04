@@ -28,7 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $ie            = trim($_POST['ie']);
     $academic_year = trim($_POST['academic_year']);
     $filename      = $row['file'];
-
     if (!empty($_FILES['file']['name'])) {
         $newfile = time() . '_' . basename($_FILES['file']['name']);
         if (move_uploaded_file($_FILES['file']['tmp_name'], __DIR__ . '/images/' . $newfile)) {
