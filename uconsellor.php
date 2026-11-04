@@ -86,13 +86,10 @@ try {
         window.location='counsellor.php';
     </script>";
 } catch (Exception $e) {
-
     mysqli_rollback($conn);
-
     echo "<script>
         alert('Assignment failed. No changes were saved.');
         window.location='counsellor.php';
     </script>";
 }
-
 exit();
