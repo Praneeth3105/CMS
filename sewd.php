@@ -250,7 +250,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="field"><label>Academic Year</label><input type="text" name="academicyear" value="<?php echo htmlspecialchars($row['academicyear']); ?>"></div>
                 <div class="field"><label>Branch</label><input type="text" name="branch" value="<?php echo htmlspecialchars($row['branch']); ?>"></div>
                 <div class="field"><label>Replace File (optional)</label><input type="file" name="file"></div>
-
                 <div class="btn-row">
                     <button type="submit" class="btn btn-primary">Update</button>
                     <a href="ssearch.php" class="btn btn-secondary">Cancel</a>
