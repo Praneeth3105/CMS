@@ -40,10 +40,8 @@ function resolveStudentPicUrl($pic)
             }
         }
     }
-
     return null;
 }
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['pic'])) {
     $file = $_FILES['pic'];
 
@@ -53,7 +51,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['pic'])) {
         $allowedExt = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
         $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
         $maxSize = 3 * 1024 * 1024; // 3MB
-
         if (!in_array($ext, $allowedExt)) {
             $errorMsg = "Only JPG, PNG, GIF, or WEBP images are allowed.";
         } elseif ($file['size'] > $maxSize) {
@@ -63,7 +60,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['pic'])) {
             if (!is_dir($uploadDir)) {
                 mkdir($uploadDir, 0755, true);
             }
-
             $oldStmt = mysqli_prepare($conn, "SELECT pic FROM studentdetails WHERE username = ?");
             mysqli_stmt_bind_param($oldStmt, "s", $username);
             mysqli_stmt_execute($oldStmt);
@@ -299,7 +295,6 @@ $picUrl = resolveStudentPicUrl($row['pic'] ?? null);
         <div class="brand">Certificate <span>Management</span> System</div>
         <a href="studentdat.php" class="btn">Back</a>
     </div>
-
     <div class="wrap">
         <div class="panel">
             <h2>Update Profile Picture</h2>
