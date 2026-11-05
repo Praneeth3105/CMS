@@ -15,6 +15,7 @@ Features
 - Displays the relevant form when a category is selected.
 - Supports file attachments for forms that request uploads.
 - Uses the logged-in student's session to retrieve their details. etc...
+- 
 Technologies Used
 - PHP
 - MySQL
