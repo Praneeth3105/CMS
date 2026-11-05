@@ -55,29 +55,64 @@ The Certificate Management System helps organize student and faculty information
 
 ## Project Structure
 
+The project is organized around separate login pages, role-based dashboards, and PHP modules for managing student and faculty records.
+
 ```text
 cms-main/
-├── index.php                 # Main page with role-based login links
-├── login1.php                # Student login
-├── login2.php                # Faculty login
-├── login3.php                # Admin login
-├── admin.php                 # Admin dashboard
-├── studentdat.php            # Student dashboard / data page
-├── facultydat.php            # Faculty dashboard / data page
-├── db_conn.php               # MySQL database connection
-├── faculty*.php              # Faculty-related modules
-├── student*.php              # Student-related modules
-├── add_*.php                 # Add academic/professional records
-├── e*.php                    # Edit/update record modules
-├── csv*.php                  # CSV import/export utilities
-├── graph*.php                # Reporting and graph pages
-├── images/                   # Images and project assets
-├── file/                     # Uploaded document files
-├── uploads/                  # Uploaded files
+│
+├── index.php
+├── login1.php
+├── login2.php
+├── login3.php
+│
+├── admin.php
+├── studentdat.php
+├── facultydat.php
+├── db_conn.php
+│
+├── Student Modules/
+│   ├── student*.php
+│   ├── add_*.php
+│   └── e*.php
+│
+├── Faculty Modules/
+│   ├── faculty*.php
+│   ├── add_*.php
+│   └── e*.php
+│
+├── CSV and Reports/
+│   ├── csv*.php
+│   └── graph*.php
+│
+├── images/
+├── file/
+├── uploads/
+│
 └── README.md
 ```
 
-*The structure above highlights the main groups of files; the repository contains additional PHP pages for individual modules.*
+### Main Files and Folders
+
+| File / Folder | Purpose |
+|---|---|
+| `index.php` | Main page with links to the role-based login pages |
+| `login1.php` | Student login |
+| `login2.php` | Faculty login |
+| `login3.php` | Admin login |
+| `admin.php` | Admin dashboard |
+| `studentdat.php` | Student dashboard and data page |
+| `facultydat.php` | Faculty dashboard and data page |
+| `db_conn.php` | MySQL database connection |
+| `student*.php` | Student-related pages and modules |
+| `faculty*.php` | Faculty-related pages and modules |
+| `add_*.php` | Pages for adding academic or professional records |
+| `e*.php` | Pages for editing or updating records |
+| `csv*.php` | CSV import/export utilities |
+| `graph*.php` | Reports and graph pages |
+| `images/` | Images and other project assets |
+| `file/`, `uploads/` | Uploaded documents and files |
+
+*The names containing `*` represent groups of related PHP files, not literal filenames. The repository may contain additional module pages.*
 
 ## Requirements
 
