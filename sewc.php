@@ -12,7 +12,6 @@ $stmt = mysqli_prepare($conn, "SELECT * FROM sproject WHERE Roll_Number=? AND Pr
 mysqli_stmt_bind_param($stmt, "ss", $rollno, $original);
 mysqli_stmt_execute($stmt);
 $row = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
-
 if (!$row) {
     die("Record not found, or you don't have permission to edit it.");
 }
