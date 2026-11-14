@@ -37,7 +37,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $filename = $newfile;
         }
     }
-
     $upd = mysqli_prepare($conn, "UPDATE extracircular SET eventname=?, year=?, branch=?, conductingclg=?, orgname=?, dates=?, ie=?, academic_year=?, file=? WHERE rollno=? AND eventname=?");
     mysqli_stmt_bind_param($upd, "sssssssssss", $eventname, $year, $branch, $conductingclg, $orgname, $dates, $ie, $academic_year, $filename, $rollno, $original);
 
