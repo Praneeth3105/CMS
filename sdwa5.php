@@ -6,7 +6,6 @@ if (!$rollno) {
     header('Location: index.php');
     exit;
 }
-
 $name = $_GET['editwn'] ?? ($_POST['name'] ?? '');
 $file = $_GET['edi']    ?? ($_POST['file'] ?? '');
 $error = '';
