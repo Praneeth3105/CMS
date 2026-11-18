@@ -56,8 +56,6 @@ $conorg = $_POST['conorg'] ?? '';
 $dates = $_POST['dates'] ?? '';
 $ie = $_POST['ie'] ?? '';
 $acc = $_POST['acc'] ?? '';
-
-
 $filename = "";
 $tempname = "";
 $folder = "";
