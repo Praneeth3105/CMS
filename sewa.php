@@ -7,7 +7,6 @@ if (!$rollno) {
     header('Location: index.php');
     exit;
 }
-
 $original = $_GET['editwn'] ?? ($_POST['original_name'] ?? '');
 $error = '';
 $stmt = mysqli_prepare($conn, "SELECT * FROM sworkshop WHERE RollNo=? AND WorkShopName=? LIMIT 1");
