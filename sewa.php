@@ -35,7 +35,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $filename = $newfile;
         }
     }
-
     $upd = mysqli_prepare($conn, "UPDATE sworkshop SET WorkShopName=?, OrgName=?, StartDate=?, EndDate=?, Duration=?, Place=?, branch=?, year=?, file=? WHERE RollNo=? AND WorkShopName=?");
     mysqli_stmt_bind_param($upd, "sssssssssss", $workshopname, $orgname, $startdate, $enddate, $duration, $place, $branch, $year, $filename, $rollno, $original);
     if (mysqli_stmt_execute($upd)) {
